@@ -1,4 +1,4 @@
-# XDL_cumt
+# Software_cup
 Django项目
 软件包如下：
 Package            Version
