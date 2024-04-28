@@ -1,0 +1,72 @@
+ /* Add your custom CSS styles here */
+
+    .container-flex {
+      display: flex;
+      flex: 1;
+    }
+
+    .problem-container, .editor-container {
+      flex: 1;
+      overflow: auto;
+      height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    border:2px solid purple;
+    border-radius:10px;}
+
+        .editor-container {
+      position: relative; /* Ensure relative positioning context for children */
+                display: flex; /* 使用 flex 布局 */
+      flex-direction: column; /* 子元素按列排列 */
+      justify-content: space-between; /* 在垂直方向上分配空间 */
+}
+
+#debugger {
+    position: absolute; /* 使用固定定位 */
+    bottom: 0; /* 在视窗的底部 */
+    left: 0; /* 与视窗的左边缘对齐 */
+    right: 2px; /* 与视窗的右边缘对色以确保调试信息可齐，确保它横跨整个屏幕宽度 */
+    background: #fff; /* 添加背景读 */
+    border-top: 2px solid purple; /* 调试器上方的边界线 */
+    z-index: 9999; /* 确保它在其他内容之上 */
+    box-sizing: border-box;
+    padding: 10px; /* 适当的内间距 */
+    max-height: 50vh; /* 制定一个最大高度 */
+    overflow: auto; /* 内容太多时可以滚动查看 */
+}
+/* 创建一个拖动把手 */
+.resize-handle {
+    height: 10px; /* 把手的高度 */
+    background: blue; /* 把手的背景颜色，确保可见性 */
+    cursor: row-resize; /* 显示一个指示可拖动的光标 */
+    position: absolute; /* 绝对定位 */
+    top: 0; /* 顶部对齐，原来的bottom: 0被移除 */
+    left: 0; /* 左侧对齐 */
+    right: 0; /* 右侧对齐 */
+    z-index: 9999; /* 确保把手层级在顶层 */
+}
+
+
+   /* 切换按钮样式 */
+.toggle-buttons {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #ccc; /* 上边框 */
+  padding: 1px;
+  border-radius: 10px 10px 10px 10px; /* 圆角矩形样式，上方左右两个角 */
+  background-color: mediumpurple; /* 按钮背景颜色 */
+}
+
+/* 单个按钮样式 */
+.toggle-buttons button {
+  padding: 2px 10px;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+    border-right: 1px solid #ccc;
+}
+
+/* 按钮激活状态的样式 */
+.toggle-buttons button:focus {
+  background-color: purple; /* 激活状态背景颜色 */
+}

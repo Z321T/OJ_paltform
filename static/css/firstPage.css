@@ -1,0 +1,14 @@
+.btn-default {
+            background-color:#483D8B;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: auto; /* 按钮自身宽度 */
+            margin-top: 1rem; /* 与输入框保持一致的间距 */
+            align-self: center; /* 自身居中对齐 */
+        }
+.btn-default:hover {
+            background-color: #8470FF;
+        }

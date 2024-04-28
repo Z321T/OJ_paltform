@@ -1,0 +1,434 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Required meta tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>编程页面</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="{% static 'student_app/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'student_app/css/vendor.bundle.base.css' %}">
+    <!-- endinject -->
+    <!-- plugin css for this page -->
+    <link rel="stylesheet" href="{% static 'student_app/css/dataTables.bootstrap4.css' %}">
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="{% static 'student_app/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'student_app/css/test.css' %}">
+
+    <!-- endinject -->
+    <link rel="shortcut icon" href="{% static 'student_app/photo/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'student_app/css/coding.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/MDI/@mdi/font/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+    <style type="text/css">/* Chart.js */
+    @keyframes chartjs-render-animation {
+        from {
+            opacity: .99
+        }
+        to {
+            opacity: 1
+        }
+    }
+
+    .chartjs-render-monitor {
+        animation: chartjs-render-animation 1ms
+    }
+
+    .chartjs-size-monitor,
+    .chartjs-size-monitor-expand,
+    .chartjs-size-monitor-shrink {
+        position: absolute;
+        direction: ltr;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        pointer-events: none;
+        visibility: hidden;
+        z-index: -1
+    }
+
+    .chartjs-size-monitor-expand > div {
+        position: absolute;
+        width: 1000000px;
+        height: 1000000px;
+        left: 0;
+        top: 0
+    }
+
+    .chartjs-size-monitor-shrink > div {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        left: 0;
+        top: 0
+    }
+    </style>
+
+</head>
+<!-- 引入Monaco编辑器的静态文件 -->
+<script src="{% static 'node_modules/monaco-editor/min/vs/loader.js' %}"></script>
+
+<body>
+
+<div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="navbar-brand-wrapper d-flex justify-content-center">
+            <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
+                <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+                    <span class="mdi mdi-sort-variant"></span>
+                </button>
+            </div>
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+            <ul class="navbar-nav mr-lg-4 w-100">
+                <li class="nav-item nav-search d-none d-lg-block w-100">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                <span class="input-group-text" id="search">
+                  <i class="mdi mdi-magnify"></i>
+                </span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Search now" aria-label="search"
+                               aria-describedby="search">
+                    </div>
+                </li>
+            </ul>
+            <ul class="navbar-nav navbar-nav-right">
+               <li class="nav-item dropdown mr-4">
+                    <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"
+                       id="notificationDropdown" href="#" data-toggle="dropdown">
+                        <i class="mdi mdi-bell mx-0"></i>
+                        <span class="count">{{ notifications.count }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown"
+                         aria-labelledby="notificationDropdown" style="height: 200px; overflow-y: auto;">
+                        <p class="mb-0 font-weight-normal float-left dropdown-header">通知</p>
+                        {% for notification in notifications %}
+                            <a class="dropdown-item notification-item" data-notification-id="{{ notification.id }}">
+                                <div class="item-thumbnail">
+                                    <div class="item-icon bg-success">
+                                        <i class="mdi mdi-information mx-0"></i>
+                                    </div>
+                                </div>
+                                <div class="item-content">
+                                    <h6 class="font-weight-normal">{{ notification.title|truncatechars:30 }}</h6>
+                                    <p class="font-weight-light small-text mb-0 text-muted">
+                                        {{ notification.date_posted }}
+                                    </p>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </li>
+                <li class="nav-item nav-profile dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
+                        <img src="{% static 'student_app/photo/face5.jpg' %}" alt="profile">
+                        <span class="nav-profile-name">{{ user_id }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
+                        <a class="dropdown-item" href="{% url 'student_app:profile_student' %}">
+                            <i class="mdi mdi-settings text-primary"></i>
+                            设置
+                        </a>
+                        <a class="dropdown-item" href="{% url 'login:log_out' %}">
+                            <i class="mdi mdi-logout text-primary"></i>
+                            退出
+                        </a>
+                    </div>
+                </li>
+            </ul>
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
+                    data-toggle="offcanvas">
+                <span class="mdi mdi-menu"></span>
+            </button>
+        </div>
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+         <nav class="sidebar sidebar-offcanvas" id="sidebar">
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="mdi mdi-list-box menu-icon"></i>
+                        <span class="menu-title">题目列表</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="mdi menu-icon"></i>
+                        <span class="menu-title">——————</span>
+                    </a>
+                </li>
+                {% for question in question_set.questions.all %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);"
+                           onclick="redirectToSpecificQuestion({{ question.id }})">
+                            <i class="mdi mdi-dice-1 menu-icon"></i>
+                            <span class="menu-title">{{ question.title }}</span>
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="nav-item">
+                        <span class="nav-link">暂无题目</span>
+                    </li>
+                {% endfor %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="mdi  menu-icon"></i>
+                        <span class="menu-title">——————</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="redirectToList({{ question_set.id }})">
+                        <i class="mdi mdi-keyboard-return menu-icon"></i>
+                        <span class="menu-title">返回</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="container-flex">
+                <!-- Left side (Problem Info and Submission Record) -->
+                <div class="problem-container">
+                    <!-- Toggle buttons -->
+                    <div class="toggle-buttons">
+                        <button id="infoBtn" onclick="showPanel('problem-info')">题目信息</button>
+                        <button id="recordBtn" onclick="showPanel('submission-record')">提交记录</button>
+                    </div>
+                    <!-- Problem Info Panel -->
+                    <div id="problem-info" class="panel">
+                        <!-- 题目信息内容 -->
+                        <p>题目内容: </p>
+                        <p>{{ question.content }}</p>
+                        <p>内存限制: {{ question.memory_limit }} MB</p>
+                        <p>时间限制: {{ question.time_limit }} 秒</p>
+                    </div>
+                    <!-- Submission Record Panel -->
+                    <div id="submission-record" class="panel" style="display: none;">
+                        <!-- 提交记录内容 -->
+                        <p>提交记录</p>
+                    </div>
+                </div>
+                <!-- Right side (Editor and Debugger) -->
+                <div class="editor-container" id="editor">
+                    <!-- Monaco编辑器将在这里初始化 -->
+                     <!-- 表单 -->
+                    <form id="codeForm" action="{% url 'student_app:run-cpp' %}" method="post">
+                        {% csrf_token %}
+                        <textarea id="codeTextArea" style="display: none;"></textarea> <!-- 隐藏 textarea -->
+                        <input type="hidden" name="code" id="hiddenCodeInput">
+                        <!-- 使用之前按钮的样式和位置，但移除了 onclick 属性 -->
+                        <button class="btn-default" id="runCode" type="submit">提交</button>
+                    </form>
+                   <div id="debugger" class="debugger">
+                        <!-- 调试信息 -->
+                        <p>运行信息</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">通知</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="notificationModalContent">
+                <!-- 通知内容将在这里显示 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- plugins:js -->
+<script type="text/javascript" src="{% static 'student_app/js/vendor.bundle.base.js' %}"></script>
+<!-- endinject -->
+<!-- Plugin js for this page-->
+<script type="text/javascript" src="{% static 'student_app/js/Chart.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/jquery.dataTables.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/dataTables.bootstrap4.js' %}"></script>
+<!-- End plugin js for this page-->
+<!-- inject:js -->
+<script type="text/javascript" src="{% static 'student_app/js/off-canvas.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/hoverable-collapse.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/template.js' %}"></script>
+<!-- endinject -->
+<!-- Custom js for this page-->
+<script type="text/javascript" src="{% static 'student_app/js/dashboard.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/data-table.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/jquery.dataTables(1).js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/dataTables.bootstrap4(1).js' %}"></script>
+<!-- End custom js for this page-->
+<script src="{% static 'student_app/js/jquery.cookie.js' %}" type="text/javascript"></script>
+<script src="{% static 'student_app/js/homework.js' %}"></script>
+<script src="{% static 'student_app/js/current-homework.js' %}"></script>
+<script src="{% static 'student_app/js/editor_setup.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+    // 拖动把手的mousedown事件处理函数
+    function handleMouseDown(e) {
+        e.preventDefault();
+        var startY = e.clientY;
+        var startHeight = $('#debugger').outerHeight();
+        $(document).mousemove(function(e) {
+            var newHeight = startHeight - (e.clientY - startY);
+            $('#debugger').outerHeight(newHeight);
+        });
+        $(document).mouseup(function() {
+            $(document).off("mousemove");
+        });
+    }
+
+    // 为把手绑定事件处理函数的函数
+    function bindResizer() {
+        $('.resize-handle').off('mousedown').on('mousedown', handleMouseDown);
+    }
+
+    // 在页面加载时添加把手，并绑定事件
+    var resizerHTML = '<div class="resize-handle" style="height: 10px; background: purple; cursor: row-resize;"></div>';
+    $('#debugger').prepend(resizerHTML); // 将把手添加到 debugger 的顶部
+    bindResizer(); // 绑定把手的mousedown事件
+
+    // 表单提交事件
+    $('#codeForm').on('submit', function (event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+        var code = editor.getValue(); // 获取代码编辑器中的内容
+        var types = "{{ types }}";
+        var questionId = {{ question.id }};
+        // AJAX请求
+        $.ajax({
+            url: "{% url 'student_app:run-cpp' %}",
+            type: 'POST',
+            data: {
+                'code': code,
+                'types': types,
+                'questionId': questionId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (response) {
+                var existingResizer = $('.resize-handle').detach();
+                $('#debugger').empty().prepend(existingResizer).append(`<p>输出: ${response.output}</p><p>错误: ${response.error}</p>`).show();
+                bindResizer();
+                alert(response.message);
+            },
+            error: function (error) {
+                console.error('Error:', error);
+                var existingResizer = $('.resize-handle').detach();
+                $('#debugger').empty().prepend(existingResizer).append(`<p>出现错误，请查看控制台。</p>`).show();
+                bindResizer();
+            }
+        });
+    });
+});
+</script>
+<script>
+    var editor;  // 定义全局变量以存储编辑器实例
+    require.config({
+        paths: {'vs': '{% static "node_modules/monaco-editor/min/vs" %}'}
+    });
+    require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('editor'), {
+            value: 'cout << "Hello, world!" << endl;',
+            language: 'cpp',
+            theme: 'vs-light'
+        });
+    });
+</script>
+    <script>
+    $(document).ready(function () {
+        $('.notification-item').on('click', function () {
+            var notificationId = $(this).data('notification-id');
+            $.ajax({
+                url: "{% url 'student_app:notification_content' %}",
+                type: 'POST',
+                data: {
+                    'notification_id': notificationId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    // 更新模态框的内容
+                    $('#notificationModalLabel').text(response.title);
+                    $('#notificationModalContent').text(response.content);
+                    // 显示模态框
+                    $('#notificationModal').modal('show');
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    });
+
+</script>
+ <script>
+        function redirectToSpecificQuestion(questionId) {
+            window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+        }
+    </script>
+    <script>
+        var types = "{{ types }}";
+
+        function redirectToSpecificQuestion(questionId) {
+            if (types === 'exercise')
+                window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+            else if (types === 'exam')
+                window.location.href = "{% url 'student_app:coding_exam' '123' %}".replace('123', questionId);
+                else
+                window.location.href = "{% url 'student_app:coding_adminexam' '123' %}".replace('123', questionId);
+        }
+
+        function redirectToList(question_setId) {
+            if (types === 'exercise')
+                window.location.href = "{% url 'student_app:practice_list' '123' %}".replace('123', question_setId);
+            else if (types === 'exam')
+                window.location.href = "{% url 'student_app:teacherexam_list' '123' %}".replace('123', question_setId);
+                else
+                window.location.href = "{% url 'student_app:adminexam_list' '123' %}".replace('123', question_setId);
+        }
+    </script>
+  <script>
+        function redirectToSpecificQuestion(questionId) {
+            window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+        }
+    </script>
+    <script>
+        var types = "{{ types }}";
+
+        function redirectToSpecificQuestion(questionId) {
+            if (types === 'exercise')
+                window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+            else if (types === 'exam')
+                window.location.href = "{% url 'student_app:coding_exam' '123' %}".replace('123', questionId);
+                else
+                window.location.href = "{% url 'student_app:coding_adminexam' '123' %}".replace('123', questionId);
+        }
+
+        function redirectToList(question_setId) {
+            if (types === 'exercise')
+                window.location.href = "{% url 'student_app:practice_list' '123' %}".replace('123', question_setId);
+            else if (types === 'exam')
+                window.location.href = "{% url 'student_app:teacherexam_list' '123' %}".replace('123', question_setId);
+                else
+                window.location.href = "{% url 'student_app:adminexam_list' '123' %}".replace('123', question_setId);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Required meta tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>教师管理</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="{% static 'administrator_app/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'administrator_app/css/vendor.bundle.base.css' %}">
+    <!-- endinject -->
+    <!-- plugin css for this page -->
+    <link rel="stylesheet" href="{% static 'administrator_app/css/dataTables.bootstrap4.css' %}">
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="{% static 'administrator_app/css/style.css' %}">
+    <!-- endinject -->
+    <link rel="shortcut icon" href="{% static 'administrator_app/photo/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/MDI/@mdi/font/css/materialdesignicons.min.css' %}">
+
+    <style type="text/css">/* Chart.js */
+    @keyframes chartjs-render-animation {
+        from {
+            opacity: .99
+        }
+        to {
+            opacity: 1
+        }
+    }
+
+    .chartjs-render-monitor {
+        animation: chartjs-render-animation 1ms
+    }
+
+    .chartjs-size-monitor,
+    .chartjs-size-monitor-expand,
+    .chartjs-size-monitor-shrink {
+        position: absolute;
+        direction: ltr;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        pointer-events: none;
+        visibility: hidden;
+        z-index: -1
+    }
+
+    .chartjs-size-monitor-expand > div {
+        position: absolute;
+        width: 1000000px;
+        height: 1000000px;
+        left: 0;
+        top: 0
+    }
+
+    .chartjs-size-monitor-shrink > div {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        left: 0;
+        top: 0
+    }
+    </style>
+    <script>
+        function redirectToHome() {
+            window.location.href = "{% url 'administrator_app:home_administrator' %}"
+        }
+
+        function redirectToNotice() {
+            window.location.href = "{% url 'administrator_app:notice_administrator' %}"
+        }
+
+        function redirectToRepository() {
+            window.location.href = "{% url 'administrator_app:repository_administrator' %}"
+        }
+
+        function redirectToProfile() {
+            window.location.href = "{% url 'administrator_app:profile_administrator' %}"
+        }
+
+        function redirectToProblems() {
+            window.location.href = "{% url 'administrator_app:problems_administrator' %}"
+        }
+
+        function redirectToInformation() {
+            window.location.href = "{% url 'administrator_app:information_administrator' %}"
+        }
+
+        function redirectToAdminExam() {
+            window.location.href = "{% url 'administrator_app:exam_administrator' %}"
+        }
+    </script>
+    <style>
+        input[type="text"]:not(.form-control),
+        input[type="password"]:not(.form-control),
+        input[type="file"]:not(.form-control),
+        input[type="text"]:hover:not(.form-control),
+        input[type="password"]:hover:not(.form-control),
+        input[type="file"]:hover:not(.form-control) {
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        input[type="text"]:not(.form-control):hover,
+        input[type="password"]:not(.form-control):hover,
+        input[type="file"]:not(.form-control):hover {
+            border-color: #66afe9;
+            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+            -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+            -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+            transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        }
+
+        input[type="file"] {
+            height: auto;
+        }
+
+        .btn-default {
+            background-color: #ffffff; /* White background */
+            color: #333333; /* Dark text */
+            border: 1px solid #cccccc; /* Light gray border */
+            padding: 10px 20px; /* Padding inside the button */
+            font-size: 16px; /* Text size */
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Slight shadow for depth */
+            transition: all 0.3s; /* Smooth transition for hover effects */
+        }
+
+        .btn-default:hover, .btn-default:focus {
+            border-color: #66afe9; /* Blue border on hover/focus */
+            outline: none; /* Remove outline on focus */
+            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6); /* More pronounced shadow on hover/focus */
+        }
+
+        .form-control-file {
+            border: none !important;
+            box-shadow: none /* 如果有的话也移除阴影 */ !important;
+        }
+
+        .navbar {
+            background-color: #f8f8f8;
+            border-color: #e7e7e7;
+        }
+
+        .navbar-brand-wrapper {
+            width: 100%;
+        }
+
+        .navbar-toggler {
+            border: none;
+            background: transparent;
+        }
+
+        .sidebar-offcanvas {
+            background: white;
+            color: #fff;
+        }
+
+        .nav .nav-item .nav-link {
+            color: #fff;
+        }
+
+        .nav .nav-item .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav .nav-item.active .nav-link,
+        .nav .nav-item.active .nav-link:hover {
+            color: #fff;
+            background-color: #495057;
+        }
+
+        .menu-icon {
+            margin-right: 5px;
+        }
+
+        .menu-title {
+            font-size: 16px;
+        }
+
+        .menu-arrow {
+            float: right;
+        }
+
+        .page-body-wrapper {
+            padding-top: 70px; /* 确保顶部导航栏不覆盖内容 */
+        }
+
+        .main-panel {
+            background: #fff;
+            padding: 20px;
+        }
+
+        /* 对响应式布局的支持 */
+        @media (max-width: 768px) {
+            .sidebar-offcanvas {
+                position: absolute;
+                top: 0;
+                right: -250px; /* 根据侧边栏的宽度调整 */
+                width: 250px;
+                height: 100%;
+                transition: all .3s ease;
+            }
+
+            .sidebar-offcanvas.active {
+                right: 0;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="navbar-brand-wrapper d-flex justify-content-center">
+            <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
+                <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+                    <span class="mdi mdi-sort-variant"></span>
+                </button>
+            </div>
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+            <ul class="navbar-nav mr-lg-4 w-100">
+                <li class="nav-item nav-search d-none d-lg-block w-100">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="search">
+                                <i class="mdi mdi-magnify"></i>
+                            </span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Search now" aria-label="search"
+                               aria-describedby="search">
+                    </div>
+                </li>
+            </ul>
+            <ul class="navbar-nav navbar-nav-right">
+                <li class="nav-item nav-profile dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
+                        <img src="{% static 'student_app/photo/face5.jpg' %}" alt="profile">
+                        <span class="nav-profile-name">{{ user_id }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
+                        <a class="dropdown-item" href="{% url 'administrator_app:profile_administrator' %}">
+                            <i class="mdi mdi-settings text-primary"></i>
+                            设置
+                        </a>
+                        <a class="dropdown-item" href="{% url 'login:log_out' %}">
+                            <i class="mdi mdi-logout text-primary"></i>
+                            退出
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="redirectToHome()">
+                        <i class="mdi mdi-home menu-icon"></i>
+                        <span class="menu-title">学情分析</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToRepository()"
+                       aria-expanded="false" aria-controls="auth">
+                        <i class="mdi mdi-source-repository-multiple menu-icon"></i>
+                        <span class="menu-title">GUI题库</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToProblems()"
+                       aria-expanded="false" aria-controls="auth">
+                        <i class="mdi mdi-source-repository menu-icon"></i>
+                        <span class="menu-title">查重管理</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="redirectToAdminExam()">
+                        <i class="mdi mdi-candy-outline menu-icon"></i>
+                        <span class="menu-title">考试</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="redirectToNotice()">
+                        <i class="mdi mdi-bulletin-board menu-icon"></i>
+                        <span class="menu-title">通知</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToInformation()"
+                       aria-expanded="false" aria-controls="auth">
+                        <i class="mdi mdi-information-box menu-icon"></i>
+                        <span class="menu-title">教师管理</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToProfile()"
+                       aria-expanded="false" aria-controls="auth">
+                        <i class="mdi mdi-account menu-icon"></i>
+                        <span class="menu-title">个人中心</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <form action="{% url 'administrator_app:add_teacher' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="initialPasswordInput">初始化密码:</label>
+                        <input type="password" class="form-control" id="initialPasswordInput" name="initialPassword"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="excelFileInput">上传Excel文件:</label>
+                        <input type="file" class="form-control-file" id="excelFileInput" name="excelFile" required>
+                    </div>
+                    <button type="submit" class="btn btn-default">创建</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- plugins:js -->
+<script type="text/javascript" src="{% static 'administrator_app/js/vendor.bundle.base.js' %}"></script>
+<!-- endinject -->
+<!-- Plugin js for this page-->
+<script type="text/javascript" src="{% static 'administrator_app/js/Chart.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'administrator_app/js/jquery.dataTables.js' %}"></script>
+<script type="text/javascript" src="{% static 'administrator_app/js/dataTables.bootstrap4.js' %}"></script>
+<!-- End plugin js for this page-->
+<!-- inject:js -->
+<script type="text/javascript" src="{% static 'administrator_app/js/off-canvas.js' %}"></script>
+<script type="text/javascript" src="{% static 'administrator_app/js/hoverable-collapse.js' %}"></script>
+<script type="text/javascript" src="{% static 'administrator_app/js/template.js' %}"></script>
+<!-- endinject -->
+<!-- Custom js for this page-->
+<script type="text/javascript" src="{% static 'administrator_app/js/dashboard.js' %}"></script>
+<script type="text/javascript" src="{% static 'administrator_app/js/data-table.js' %}"></script>
+<script type="text/javascript" src="{% static 'administrator_app/js/jquery.dataTables(1).js' %}"></script>
+<script type="text/javascript" src="{% static 'administrator_app/js/dataTables.bootstrap4(1).js' %}"></script>
+<!-- End custom js for this page-->
+<script src="{% static 'administrator_app/js/jquery.cookie.js' %}" type="text/javascript"></script>
+</body>
+</html>
