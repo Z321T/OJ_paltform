@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'CUMT.wsgi.application'
 DATABASES = {
       'default': {
           'ENGINE': 'django.db.backends.mysql',
-          'NAME': 'xdl_cumt',  # 数据库名字
+          'NAME': 'cumt_software_cup',  # 数据库名字
           'USER': 'root',
           'PASSWORD': 'root',
           'HOST': '127.0.0.1',  # 那台机器安装了MySQL
