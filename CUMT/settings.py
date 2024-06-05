@@ -10,9 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
 import os
-import student_app.apps, teacher_app.apps, administrator_app
+from pathlib import Path
+
+import administrator_app
+import student_app.apps
+import teacher_app.apps
+import CodeBERT_app.apps
+import login.apps
+import Spark_app.apps
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +50,8 @@ INSTALLED_APPS = [
     'teacher_app.apps.TeacherAppConfig',
     'administrator_app.apps.AdministratorAppConfig',
     "CodeBERT_app.apps.ScoreAppConfig",
-    "login.apps.LoginConfig"
+    "login.apps.LoginConfig",
+    "Spark_app.apps.SparkAppConfig",
 
 
 ]

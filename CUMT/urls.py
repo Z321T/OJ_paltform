@@ -35,7 +35,10 @@ urlpatterns = [
     # 代码查重
     path('codebert/', include('CodeBERT_app.urls')),
 
-    # include('administrator_app.urls')
+    # Django后端管理界面
     path('admin/', admin.site.urls),
+
+    # 讯飞星火智能对话
+    path('Spark/', include('Spark_app.urls')),
 ]
 
