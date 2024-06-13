@@ -16,6 +16,7 @@
     <!-- End plugin css for this page -->
     <!-- inject:css -->
     <link rel="stylesheet" href="{% static 'administrator_app/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'student_app/css/test.css' %}">
     <!-- endinject -->
     <link rel="shortcut icon" href="{% static 'administrator_app/photo/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'node_modules/MDI/@mdi/font/css/materialdesignicons.min.css' %}">
@@ -203,7 +204,15 @@
         <!-- partial -->
         <div class="main-panel">
             <div class="content-wrapper">
-                <div class="stretch-card">
+              <div class="row d-flex" id="proBanner">
+                        <div class="col-md-12 grid-margin">
+                            <div class="card bg-gradient-primary border-0">
+                                <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <div class="col-md-12 stretch-card">
                     <div class="card">
                         <div class="card-body">
                             <p class="card-title">考试列表</p>

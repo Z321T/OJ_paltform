@@ -18,8 +18,10 @@ from urllib.parse import urlencode
 from wsgiref.handlers import format_date_time
 import websocket  # 使用websocket_client
 
-answer = ""
-sid = ''
+# answer = ""
+# sid = ''
+# 全局字典，用于存储sid和answer的映射
+# sid_to_answer = {}
 
 # 以下密钥信息从控制台获取   https://console.xfyun.cn/services/bm35
 appid = "1b890a23"  # 填写控制台中获取的 APPID 信息
@@ -105,31 +107,57 @@ def run(ws, *args):
     ws.send(data)
 
 
-# 收到websocket消息的处理
-def on_message(ws, message):
-    # print(message)
-    # print(time.time())
-    global answer
-    # global print_content  # 用于存储返回的内容
-    # print_content = ""  # 初始化print_content为一个空字符串
-    data = json.loads(message)
-    code = data['header']['code']
-    if code != 0:
-        print(f'请求错误: {code}, {data}')
-        ws.close()
-    else:
-        global sid
-        sid = data["header"]["sid"]
-        choices = data["payload"]["choices"]
-        status = choices["status"]
-        content = choices["text"][0]["content"]
-        print(content, end="")
-        # print_content += content
+# # 收到websocket消息的处理
+# def on_message(ws, message):
+#     # print(message)
+#     # print(time.time())
+#     # global answer
+#     # global sid_to_answer
+#
+#     data = json.loads(message)
+#     code = data['header']['code']
+#     if code != 0:
+#         print(f'请求错误: {code}, {data}')
+#         ws.close()
+#     else:
+#         # global sid
+#         sid = data["header"]["sid"]
+#         choices = data["payload"]["choices"]
+#         status = choices["status"]
+#         content = choices["text"][0]["content"]
+#         print(content, end="")
+#
+#         # answer += content
+#         request.session['answer'] += content
+#         # 使用sid作为键，将answer存储到全局字典中
+#         # if ws.session_id in sid_to_answer:
+#         #     sid_to_answer[ws.session_id]['answer'] += content
+#         # else:
+#         #     sid_to_answer[ws.session_id] = {'answer': content, 'sid': ws.session_id}
+#         # print(1)
+#         if status == 2:
+#             ws.close()
+class ChatConsumer:
+    def __init__(self, request):
+        self.request = request
+        # 初始化 'answer' 键
+        self.request.session['answer'] = ""
 
-        answer += content
-        # print(1)
-        if status == 2:
+    def on_message(self, ws, message):
+        data = json.loads(message)
+        code = data['header']['code']
+        if code != 0:
+            print(f'请求错误: {code}, {data}')
             ws.close()
+        else:
+            sid = data["header"]["sid"]
+            choices = data["payload"]["choices"]
+            status = choices["status"]
+            content = choices["text"][0]["content"]
+            print(content, end="")
+            self.request.session['answer'] = self.request.session.get('answer', "") + content
+            if status == 2:
+                ws.close()
 
 
 def gen_params(appid, domain, question):
@@ -183,15 +211,28 @@ def chat(request):
             wsParam = Ws_Param(appid, api_key, api_secret, Spark_url)
             websocket.enableTrace(False)
             wsUrl = wsParam.create_url()
-            ws = websocket.WebSocketApp(wsUrl, on_message=on_message, on_error=on_error, on_close=on_close, on_open=on_open)
+
+            consumer = ChatConsumer(request)
+
+            ws = websocket.WebSocketApp(wsUrl, on_message=consumer.on_message, on_error=on_error, on_close=on_close, on_open=on_open)
             ws.appid = appid
             ws.question = text
             ws.domain = domain
+            # ws.session_id = request.session.session_key
             ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
 
-            global answer
-            response = answer
-            answer = ""
+            # global sid_to_answer
+            # # 获取session ID
+            # session_id = request.session.session_key
+            # response = sid_to_answer.get(session_id, "")
+            # sid_to_answer[session_id] = ""
+
+            # global answer
+            # response = answer
+            # answer = ""
+            response = request.session.get('answer', "")
+            request.session['answer'] = ""
+
             text.append({"role": "assistant", "content": response})
             request.session['text'] = text
 
@@ -234,57 +275,3 @@ def checklen(text):
         del text[0]
     return text
 
-
-# if __name__ == '__main__':
-#
-#     while (1):
-#         Input = input("\n" + "我:")
-#         question = checklen(getText("user", Input))
-#         SparkApi.answer = ""
-#         print("星火:", end="")
-#         # print(SparkApi.print_content)
-#         SparkApi.main(appid, api_key, api_secret, Spark_url, domain, question)
-#         # print(SparkApi.answer)
-#         getText("assistant", SparkApi.answer)
-
-
-# def chat(request):
-#     if request.method == 'POST':
-#         Input = request.POST.get('question')
-#         if Input:
-#             # 从session中获取text，如果不存在则创建一个新的列表
-#             text = request.session.get('text', [
-#                 {"role": "system",
-#                  "content": "你现在是一个代码学习助手，你会分步骤回答问题；接下来请用代码学习助手的口吻和用户对话。"},
-#                 # {"role": "assistant", "content": " "}
-#             ])
-#
-#             # 将getText和checklen函数内联到这里，因为它们现在需要访问局部变量text
-#             text.append({"role": "user", "content": Input})
-#             while sum(len(content["content"]) for content in text) > 8000:
-#                 del text[0]
-#
-#             # 将更新后的text保存回session
-#             request.session['text'] = text
-#
-#             SparkApi.main(appid, api_key, api_secret, Spark_url, domain, text)
-#             response = SparkApi.print_content
-#             text.append({"role": "assistant", "content": response})
-#             request.session['text'] = text
-#
-#             return JsonResponse({'response': response})
-#         else:
-#             return JsonResponse({'error': 'No question provided'}, status=400)
-#     else:
-#         return JsonResponse({'error': 'Invalid request'}, status=400)
-#
-#
-# def clear_chat(request):
-#     if request.method == 'POST':
-#         if 'text' in request.session:
-#             del request.session['text']
-#             request.session.modified = True
-#         return JsonResponse({'status': 'success'})
-#     else:
-#         return JsonResponse({'error': 'Invalid request'}, status=400)
-#
