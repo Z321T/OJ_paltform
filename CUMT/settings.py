@@ -16,7 +16,7 @@ from pathlib import Path
 import administrator_app
 import student_app.apps
 import teacher_app.apps
-import CodeBERT_app.apps
+import BERT_app.apps
 import login.apps
 import Spark_app.apps
 
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'student_app.apps.StudentConfig',
     'teacher_app.apps.TeacherAppConfig',
     'administrator_app.apps.AdministratorAppConfig',
-    "CodeBERT_app.apps.ScoreAppConfig",
+    "BERT_app.apps.ScoreAppConfig",
     "login.apps.LoginConfig",
     "Spark_app.apps.SparkAppConfig",
 
@@ -91,6 +91,16 @@ WSGI_APPLICATION = 'CUMT.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 
 DATABASES = {
       'default': {
@@ -180,4 +190,12 @@ PASSWORD_HASHERS = [
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-
+# Celery Configuration Options
+CELERY_TIMEZONE = "Asia/Shanghai"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

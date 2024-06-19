@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.hashers import make_password
-from .models import Administrator, AdminNotification, ProgrammingExercise, AdminExam, AdminExamQuestion
+from .models import (Administrator, AdminNotification, ProgrammingExercise,
+                     AdminExam, AdminExamQuestion, AdminExamQuestionTestCase)
 
 
 class AdministratorAdmin(admin.ModelAdmin):
@@ -16,3 +17,4 @@ admin.site.register(AdminNotification)
 admin.site.register(ProgrammingExercise)
 admin.site.register(AdminExam)
 admin.site.register(AdminExamQuestion)
+admin.site.register(AdminExamQuestionTestCase)

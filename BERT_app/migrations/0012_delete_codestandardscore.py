@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CodeBERT_app', '0011_delete_codefeature'),
+        ('BERT_app', '0011_delete_codefeature'),
     ]
 
     operations = [

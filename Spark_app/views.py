@@ -8,6 +8,7 @@ import base64
 import datetime
 import hashlib
 import hmac
+import html
 import json
 import time
 from urllib.parse import urlparse
@@ -107,36 +108,6 @@ def run(ws, *args):
     ws.send(data)
 
 
-# # 收到websocket消息的处理
-# def on_message(ws, message):
-#     # print(message)
-#     # print(time.time())
-#     # global answer
-#     # global sid_to_answer
-#
-#     data = json.loads(message)
-#     code = data['header']['code']
-#     if code != 0:
-#         print(f'请求错误: {code}, {data}')
-#         ws.close()
-#     else:
-#         # global sid
-#         sid = data["header"]["sid"]
-#         choices = data["payload"]["choices"]
-#         status = choices["status"]
-#         content = choices["text"][0]["content"]
-#         print(content, end="")
-#
-#         # answer += content
-#         request.session['answer'] += content
-#         # 使用sid作为键，将answer存储到全局字典中
-#         # if ws.session_id in sid_to_answer:
-#         #     sid_to_answer[ws.session_id]['answer'] += content
-#         # else:
-#         #     sid_to_answer[ws.session_id] = {'answer': content, 'sid': ws.session_id}
-#         # print(1)
-#         if status == 2:
-#             ws.close()
 class ChatConsumer:
     def __init__(self, request):
         self.request = request
@@ -221,20 +192,15 @@ def chat(request):
             # ws.session_id = request.session.session_key
             ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
 
-            # global sid_to_answer
-            # # 获取session ID
-            # session_id = request.session.session_key
-            # response = sid_to_answer.get(session_id, "")
-            # sid_to_answer[session_id] = ""
-
-            # global answer
-            # response = answer
-            # answer = ""
             response = request.session.get('answer', "")
+            response = html.escape(response)
             request.session['answer'] = ""
 
             text.append({"role": "assistant", "content": response})
             request.session['text'] = text
+
+            # 使用 <pre> 标签包裹 response
+            response = '<pre>' + response + '</pre>'
 
             return JsonResponse({'response': response})
         else:

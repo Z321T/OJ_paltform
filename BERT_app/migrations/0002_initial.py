@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('CodeBERT_app', '0001_initial'),
+        ('BERT_app', '0001_initial'),
         ('student_app', '0003_student_teacher'),
         ('teacher_app', '0002_examquestion_exam_exercise_exercisequestion'),
     ]

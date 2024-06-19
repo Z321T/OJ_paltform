@@ -58,6 +58,16 @@ class ExerciseQuestion(models.Model):
         return f"{self.exercise.title} - {self.content}"
 
 
+class ExerciseQuestionTestCase(models.Model):
+    question = models.ForeignKey(ExerciseQuestion, verbose_name="题目", on_delete=models.CASCADE,
+                                 related_name='exercise_testcases')
+    input = models.TextField(verbose_name="测试输入")
+    expected_output = models.TextField(verbose_name="预期输出")
+
+    def __str__(self):
+        return f"{self.question.title} - {self.question.content}"
+
+
 class Exam(models.Model):
     title = models.CharField(verbose_name="考试标题", max_length=255)
     content = models.TextField(verbose_name="考试描述")
@@ -82,6 +92,16 @@ class ExamQuestion(models.Model):
 
     def __str__(self):
         return f"{self.exam.title} - {self.content}"
+
+
+class ExamQuestionTestCase(models.Model):
+    question = models.ForeignKey(ExamQuestion, verbose_name="题目", on_delete=models.CASCADE,
+                                 related_name='exam_testcases')
+    input = models.TextField(verbose_name="测试输入")
+    expected_output = models.TextField(verbose_name="预期输出")
+
+    def __str__(self):
+        return f"{self.question.title} - {self.question.content}"
 
 
 class ReportScore(models.Model):

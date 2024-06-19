@@ -17,9 +17,10 @@ from student_app.models import (Student, Score, ExerciseCompletion, ExerciseQues
                                 ExamCompletion, ExamQuestionCompletion,
                                 AdminExamCompletion, AdminExamQuestionCompletion)
 from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, ExamQuestion, ReportScore
-from CodeBERT_app.views import (analyze_programming_report,
-                                score_report, analyze_programming_code)
+from BERT_app.views import (analyze_programming_report,
+                            score_report, analyze_programming_code)
 from login.views import check_login
+from CUMT.task import test_cpp_code
 
 
 # 学生主页
@@ -554,61 +555,119 @@ def run_cpp_code(request):
         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
 
-        with open('temp.cpp', 'w') as f:
-            f.write(user_code)
+        # 调用 Celery 任务
+        result = test_cpp_code.delay(user_code, types, question_id, student)
 
+        # 获取任务结果
         try:
-            start_time = time.time()  # 记录开始时间
-            result = subprocess.run(
-                ['docker', 'run', '--rm', '-v', f"{os.getcwd()}:/app",
-                 '-w', '/app', '-m', '512m', '--cpus', '1', 'cpp-runner',
-                 'bash', '-c', 'g++ temp.cpp -o temp && ./temp'],
-                capture_output=True, text=True, timeout=30
-            )
-            execution_time = time.time() - start_time  # 计算执行时间
-
-            if result.returncode == 0:  # 如果运行成功
+            result = result.get()
+            if result['status'] == 'success':
+                # 测试用例全部通过的情况
                 if types == 'exercise':
                     question = ExerciseQuestion.objects.get(id=question_id)
+                    mark_exercise_question_as_completed(student, question)
+                    Score.objects.update_or_create(
+                        student=student,
+                        exercise_question=question,
+                        defaults={'score': 10}
+                    )
                 elif types == 'exam':
                     question = ExamQuestion.objects.get(id=question_id)
+                    mark_exam_question_as_completed(student, question)
+                    Score.objects.update_or_create(
+                        student=student,
+                        exam_question=question,
+                        defaults={'score': 10}
+                    )
                 else:
                     question = AdminExamQuestion.objects.get(id=question_id)
-                if question.answer == result.stdout:
-                    if types == 'exercise':
-                        mark_exercise_question_as_completed(student, question)
-                        Score.objects.update_or_create(
-                            student=student,
-                            exercise_question=question,
-                            defaults={'score': 10}
-                        )
-                    elif types == 'exam':
-                        mark_exam_question_as_completed(student, question)
-                        Score.objects.update_or_create(
-                            student=student,
-                            exam_question=question,
-                            defaults={'score': 10}
-                        )
-                    else:
-                        mark_adminexam_question_as_completed(student, question)
-                        Score.objects.update_or_create(
-                            student=student,
-                            adminexam_question=question,
-                            defaults={'score': 10}
-                        )
-                    # 这里仅返回了执行结果和时间，与前端代码对应
-                    return JsonResponse({'status': 'success', 'message': '题目作答正确',
-                                         'output': result.stdout, 'time': execution_time})
-                else:
-                    return JsonResponse({'output': result.stdout, 'error': 'Wrong answer', 'time': execution_time})
-            else:  # 如果编译或运行出错
-                return JsonResponse({'error': result.stderr, 'time': execution_time})
-        except subprocess.TimeoutExpired:  # 如果运行超时
-            return JsonResponse({'error': 'Execution timed out'})
-        except Exception as e:  # 如果发生其他异常
+                    mark_adminexam_question_as_completed(student, question)
+                    Score.objects.update_or_create(
+                        student=student,
+                        adminexam_question=question,
+                        defaults={'score': 10}
+                    )
+                return JsonResponse(result)
+
+            elif result['status'] == 'compile error':
+                # 出现编译错误的情况
+                return JsonResponse({'error': result['error']})
+
+            elif result['status'] == 'failure':
+                # 测试用例未全部通过的情况
+                return JsonResponse(result)
+
+        except Exception as e:
             return JsonResponse({'error': str(e)})
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
+
+# def run_cpp_code(request):
+#     user_id = request.session.get('user_id')
+#     if check_login(user_id):
+#         return redirect('/login/')
+#
+#     student = Student.objects.get(userid=user_id)
+#     if request.method == 'POST':
+#         user_code = request.POST.get('code', '')  # 从表单数据中获取代码
+#         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
+#         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
+#
+#         with open('temp.cpp', 'w') as f:
+#             f.write(user_code)
+#
+#         try:
+#             start_time = time.time()  # 记录开始时间
+#             result = subprocess.run(
+#                 ['docker', 'run', '--rm', '-v', f"{os.getcwd()}:/app",
+#                  '-w', '/app', '-m', '512m', '--cpus', '1', 'cpp-runner',
+#                  'bash', '-c', 'g++ temp.cpp -o temp && ./temp'],
+#                 capture_output=True, text=True, timeout=30
+#             )
+#             execution_time = time.time() - start_time  # 计算执行时间
+#
+#             if result.returncode == 0:  # 如果运行成功
+#                 if types == 'exercise':
+#                     question = ExerciseQuestion.objects.get(id=question_id)
+#                 elif types == 'exam':
+#                     question = ExamQuestion.objects.get(id=question_id)
+#                 else:
+#                     question = AdminExamQuestion.objects.get(id=question_id)
+#                 if question.answer == result.stdout:
+#                     if types == 'exercise':
+#                         mark_exercise_question_as_completed(student, question)
+#                         Score.objects.update_or_create(
+#                             student=student,
+#                             exercise_question=question,
+#                             defaults={'score': 10}
+#                         )
+#                     elif types == 'exam':
+#                         mark_exam_question_as_completed(student, question)
+#                         Score.objects.update_or_create(
+#                             student=student,
+#                             exam_question=question,
+#                             defaults={'score': 10}
+#                         )
+#                     else:
+#                         mark_adminexam_question_as_completed(student, question)
+#                         Score.objects.update_or_create(
+#                             student=student,
+#                             adminexam_question=question,
+#                             defaults={'score': 10}
+#                         )
+#                     # 这里仅返回了执行结果和时间，与前端代码对应
+#                     return JsonResponse({'status': 'success', 'message': '题目作答正确',
+#                                          'output': result.stdout, 'time': execution_time})
+#                 else:
+#                     return JsonResponse({'output': result.stdout, 'error': 'Wrong answer', 'time': execution_time})
+#             else:  # 如果编译或运行出错
+#                 return JsonResponse({'error': result.stderr, 'time': execution_time})
+#         except subprocess.TimeoutExpired:  # 如果运行超时
+#             return JsonResponse({'error': 'Execution timed out'})
+#         except Exception as e:  # 如果发生其他异常
+#             return JsonResponse({'error': str(e)})
+#     else:
+#         return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 

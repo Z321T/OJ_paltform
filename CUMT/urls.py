@@ -33,7 +33,7 @@ urlpatterns = [
     path('administrator/', include('administrator_app.urls')),
 
     # 代码查重
-    path('codebert/', include('CodeBERT_app.urls')),
+    path('codebert/', include('BERT_app.urls')),
 
     # Django后端管理界面
     path('admin/', admin.site.urls),

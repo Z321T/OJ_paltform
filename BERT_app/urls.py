@@ -1,8 +1,8 @@
-# CodeBERT_app/urls.py
+# BERT_app/urls.py
 from django.urls import path
 from django.contrib.staticfiles.views import serve
 
-app_name = 'CodeBERT_app'
+app_name = 'BERT_app'
 
 urlpatterns = [
 

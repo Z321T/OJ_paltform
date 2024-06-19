@@ -7,8 +7,8 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponseNotFound
 from django.contrib.auth.hashers import make_password, check_password
 
-from CodeBERT_app.models import ProgrammingCodeFeature, ProgrammingReportFeature, ReportStandardScore
-from CodeBERT_app.views import compute_cosine_similarity
+from BERT_app.models import ProgrammingCodeFeature, ProgrammingReportFeature, ReportStandardScore
+from BERT_app.views import compute_cosine_similarity
 from administrator_app.models import AdminNotification, ProgrammingExercise, AdminExam, AdminExamQuestion
 from login.views import check_login
 from teacher_app.models import (Teacher, Class, Notification,

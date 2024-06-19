@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CodeBERT_app', '0010_codestandardscore_file_path_and_more'),
+        ('BERT_app', '0010_codestandardscore_file_path_and_more'),
     ]
 
     operations = [

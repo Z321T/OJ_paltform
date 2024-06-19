@@ -9,11 +9,11 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
-from CodeBERT_app.views import analyze_programming_report, analyze_programming_code
+from BERT_app.views import analyze_programming_report, analyze_programming_code
 from administrator_app.models import Administrator, AdminNotification, ProgrammingExercise, AdminExam, AdminExamQuestion
 from teacher_app.models import Teacher, Class
 from student_app.models import Student, Score
-from CodeBERT_app.models import ReportStandardScore, ProgrammingCodeFeature, ProgrammingReportFeature
+from BERT_app.models import ReportStandardScore, ProgrammingCodeFeature, ProgrammingReportFeature
 from login.views import check_login
 
 

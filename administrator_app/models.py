@@ -54,3 +54,13 @@ class AdminExamQuestion(models.Model):
 
     def __str__(self):
         return f"{self.exam.title} - {self.content}"
+
+
+class AdminExamQuestionTestCase(models.Model):
+    question = models.ForeignKey(AdminExamQuestion, verbose_name="题目", on_delete=models.CASCADE,
+                                 related_name='adminexam_testcases')
+    input = models.TextField(verbose_name="测试输入")
+    expected_output = models.TextField(verbose_name="预期输出")
+
+    def __str__(self):
+        return f"{self.question.title} - {self.question.content}"

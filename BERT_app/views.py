@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404
 from transformers import AutoTokenizer, AutoModel
 from torch.nn.functional import cosine_similarity
 
-from CodeBERT_app.models import (ProgrammingCodeFeature, ProgrammingReportFeature,
-                                 ReportStandardScore)
+from BERT_app.models import (ProgrammingCodeFeature, ProgrammingReportFeature,
+                             ReportStandardScore)
 from administrator_app.models import ProgrammingExercise
 from teacher_app.models import ReportScore, Class
 
