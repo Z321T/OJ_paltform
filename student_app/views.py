@@ -556,12 +556,12 @@ def run_cpp_code(request):
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
 
         # 调用 Celery 任务
-        result = test_cpp_code.delay(user_code, types, question_id, student)
+        result = test_cpp_code.delay(user_code, types, question_id)
 
         # 获取任务结果
         try:
             result = result.get()
-            if result['status'] == 'success':
+            if result['status'] == 'pass':
                 # 测试用例全部通过的情况
                 if types == 'exercise':
                     question = ExerciseQuestion.objects.get(id=question_id)
@@ -589,13 +589,41 @@ def run_cpp_code(request):
                     )
                 return JsonResponse(result)
 
+            elif result['status'] == 'fail':
+                # 测试用例未全部通过的情况
+                passed_tests = result['passed_tests']
+                total_tests = len(result['tests_results'])
+                score = round((passed_tests / total_tests) * 10, 3)
+
+                if types == 'exercise':
+                    question = ExerciseQuestion.objects.get(id=question_id)
+                    mark_exercise_question_as_completed(student, question)
+                    Score.objects.update_or_create(
+                        student=student,
+                        exercise_question=question,
+                        defaults={'score': score}
+                    )
+                elif types == 'exam':
+                    question = ExamQuestion.objects.get(id=question_id)
+                    mark_exam_question_as_completed(student, question)
+                    Score.objects.update_or_create(
+                        student=student,
+                        exam_question=question,
+                        defaults={'score': score}
+                    )
+                else:
+                    question = AdminExamQuestion.objects.get(id=question_id)
+                    mark_adminexam_question_as_completed(student, question)
+                    Score.objects.update_or_create(
+                        student=student,
+                        adminexam_question=question,
+                        defaults={'score': score}
+                    )
+                return JsonResponse(result)
+
             elif result['status'] == 'compile error':
                 # 出现编译错误的情况
                 return JsonResponse({'error': result['error']})
-
-            elif result['status'] == 'failure':
-                # 测试用例未全部通过的情况
-                return JsonResponse(result)
 
         except Exception as e:
             return JsonResponse({'error': str(e)})

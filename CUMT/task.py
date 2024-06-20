@@ -1,19 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 import subprocess
-from django.utils import timezone
-from administrator_app.models import AdminExam, AdminExamQuestion, AdminExamQuestionTestCase
-from student_app.models import (Student, Score, ExerciseCompletion, ExerciseQuestionCompletion,
-                                ExamCompletion, ExamQuestionCompletion,
-                                AdminExamCompletion, AdminExamQuestionCompletion)
-from teacher_app.models import (Exercise, Exam, ExerciseQuestion, ExamQuestion,
+from administrator_app.models import AdminExamQuestion, AdminExamQuestionTestCase
+from teacher_app.models import (ExerciseQuestion, ExamQuestion,
                                 ExerciseQuestionTestCase, ExamQuestionTestCase)
 import time
 import os
 
 
 @shared_task
-def test_cpp_code(code, types, question_id, student):
+def test_cpp_code(code, types, question_id):
     # 将C++代码写入一个文件
     with open('temp.cpp', 'w') as file:
         file.write(code)
@@ -31,11 +27,11 @@ def test_cpp_code(code, types, question_id, student):
 
     # 初始化通过的测试用例的计数器
     passed_tests = 0
-    # 创建一个列表来收集失败的测试用例的信息
-    failed_tests = []
+    # 创建一个列表来收集测试用例的信息
+    tests_results = []
 
     # 逐个运行测试用例
-    for testcase in testcases:
+    for i, testcase in enumerate(testcases):
         try:
             start_time = time.time()  # 记录开始时间
             result = subprocess.run(
@@ -49,8 +45,17 @@ def test_cpp_code(code, types, question_id, student):
             if result.returncode == 0:  # 如果运行成功
                 if result.stdout.strip() == testcase.expected_output.strip():
                     passed_tests += 1
+                    tests_results.append({
+                        'testcase': i + 1,
+                        'status': 'success',
+                        'output': result.stdout,
+                        'time': execution_time,
+                        'type': '答案正确'
+                    })
                 else:
-                    failed_tests.append({
+                    tests_results.append({
+                        'testcase': i + 1,
+                        'status': 'failure',
                         'output': result.stdout,
                         'error': 'Wrong answer',
                         'time': execution_time,
@@ -66,30 +71,40 @@ def test_cpp_code(code, types, question_id, student):
                 }
 
         except subprocess.TimeoutExpired:  # 如果运行超时
-            failed_tests.append({
+            tests_results.append({
+                'testcase': i + 1,
+                'status': 'failure',
                 'error': 'Execution timed out',
                 'type': '运行超时'
             })
 
         except Exception as e:  # 如果发生其他异常
-            failed_tests.append({
+            return {
+                'status': 'error',
                 'error': str(e),
                 'type': '其他错误'
-            })
+            }
 
-    # 如果所有测试用例都通过，返回成功状态和通过的测试用例的数量
-    if not failed_tests:
-        return {
-            'status': 'success',
-            'message': '题目作答正确',
-            'time': execution_time,
-            'passed_tests': passed_tests
-        }
-    else:
-        # 如果有测试用例没通过，返回失败的测试用例的信息
-        return {
-            'status': 'failure',
-            'failed_tests': failed_tests,
-            'passed_tests': passed_tests
-        }
+    # 返回所有测试用例的结果
+    return {
+        'status': 'pass' if passed_tests == len(testcases) else 'fail',
+        'tests_results': tests_results,
+        'passed_tests': passed_tests
+    }
+
+    # # 如果所有测试用例都通过，返回成功状态和通过的测试用例的数量
+    # if not failed_tests:
+    #     return {
+    #         'status': 'success',
+    #         'message': '题目作答正确',
+    #         'time': execution_time,
+    #         'passed_tests': passed_tests
+    #     }
+    # else:
+    #     # 如果有测试用例没通过，返回失败的测试用例的信息
+    #     return {
+    #         'status': 'failure',
+    #         'failed_tests': failed_tests,
+    #         'passed_tests': passed_tests
+    #     }
 
