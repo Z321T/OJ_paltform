@@ -84,15 +84,57 @@
                     </div>
                </div>
                 <div>
-                    <textarea class="form-control mb-3 custom-textarea" style="margin-top: 73px" name="answer" placeholder="编辑答案..."></textarea>
-                    <div class="button-container text-center">
-                        <button type="submit" class="btn btn-success">保存</button>
-                    </div>
-                </div>
+
+    <h4>测试用例</h4>
+    <div id="inputRowsContainer" style="overflow-y:auto; max-height:500px;">
+        <!-- 动态添加的input行将出现在这里 -->
+    </div>
+    <button type="button" id="addInputRowBtn">+</button>
+
+    <div class="button-container text-center">
+        <button type="submit" class="btn btn-success">保存</button>
+    </div>
+</div>
             </div>
         </form>
     </div>
 </div>
+
+</body>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    event.preventDefault(); // 防止任何默认行为
+    const inputRowsContainer = document.getElementById('inputRowsContainer'); // 获取存放input行的容器
+    const addInputRowBtn = document.getElementById('addInputRowBtn'); // 获取加号按钮
+
+    addInputRowBtn.addEventListener('click', function () {
+        // 创建一个新的div行容器
+        const rowDiv = document.createElement('div');
+        rowDiv.style.display = 'flex';
+        rowDiv.style.marginBottom = '8px';
+
+        // 创建第一个input框
+        const input1 = document.createElement('input');
+        input1.type = 'text';
+        input1.className = 'form-control';
+        input1.placeholder = '输入...';
+        input1.style.marginRight = '4px'; // 为了在两个输入框之间留出一些空间
+
+        // 创建第二个input框
+        const input2 = document.createElement('input');
+        input2.type = 'text';
+        input2.className = 'form-control';
+        input2.placeholder = '输入...';
+
+        // 将两个输入框添加到div行容器
+        rowDiv.appendChild(input1);
+        rowDiv.appendChild(input2);
+
+        // 将新创建的div行容器添加到input行容器中
+        inputRowsContainer.appendChild(rowDiv);
+    });
+});
+</script>
 <script>
   document.querySelector('form[method="post"]').onsubmit = function(event) {
     // Select form elements by their 'name' attribute and check for their values
@@ -117,6 +159,4 @@
 
   };
 </script>
-</body>
-
 </html>
