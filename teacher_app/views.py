@@ -784,6 +784,17 @@ def create_exam(request, exam_id):
                                 memory_limit=memory_limit, time_limit=time_limit, answer=answer)
         question.save()
 
+        # 遍历提交的测试用例
+        for key in request.POST.keys():
+            if key.startswith('input'):
+                testcase_num = key[5:]  # 获取测试用例的编号
+                input_data = request.POST.get('input' + testcase_num)
+                output_data = request.POST.get('output' + testcase_num)
+
+                # 创建一个新的ExamQuestionTestCase实例
+                testcase = ExamQuestionTestCase(question=question, input=input_data, expected_output=output_data)
+                testcase.save()
+
         return redirect('teacher_app:exam_list', exam_id=exam.id)
     return render(request, 'create_exam.html', {'exam': exam})
 

@@ -56,6 +56,25 @@
             display: flex;
             justify-content: space-between
         }
+
+        .fixed-title {
+            position: static;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .testcase-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .testcase-title button {
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -87,17 +106,18 @@
                     </div>
                 </div>
                 <div>
-                    <div>
-
-                        <h4>测试用例</h4>
-                        <div id="inputRowsContainer" style="overflow-y:auto; max-height:500px;">
-                            <!-- 动态添加的input行将出现在这里 -->
+                    <div class="testcase-title">
+                        <h4 class="fixed-title">测试用例</h4>
+                        <div class="button-container">
+                            <button type="button" id="addInputRowBtn">+</button>
+                            <button type="button" id="removeInputRowBtn">-</button>
                         </div>
-                        <button type="button" id="addInputRowBtn">+</button>
-
-                        <div class="button-container text-center">
-                            <button type="submit" class="btn btn-success">保存</button>
-                        </div>
+                    </div>
+                    <div id="inputRowsContainer" style="overflow-y:auto; max-height:500px;">
+                        <!-- 动态添加的input行将出现在这里 -->
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="btn btn-success">保存</button>
                     </div>
                 </div>
             </div>
@@ -108,11 +128,13 @@
 </body>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        event.preventDefault(); // 防止任何默认行为
         const inputRowsContainer = document.getElementById('inputRowsContainer'); // 获取存放input行的容器
         const addInputRowBtn = document.getElementById('addInputRowBtn'); // 获取加号按钮
+        const removeInputRowBtn = document.getElementById('removeInputRowBtn'); // 获取减号按钮
 
-        addInputRowBtn.addEventListener('click', function () {
+        let testCaseCount = 0; // 添加一个计数器来跟踪测试用例的数量
+
+        function addInputRow() {
             // 创建一个新的div行容器
             const rowDiv = document.createElement('div');
             rowDiv.style.display = 'flex';
@@ -123,13 +145,15 @@
             input1.type = 'text';
             input1.className = 'form-control';
             input1.placeholder = '输入...';
-            input1.style.marginRight = '4px'; // 为了在两个输入框之间留出一些空间
+            input1.style.marginRight = '64px'; // 为了在两个输入框之间留出一些空间
+            input1.name = 'input' + testCaseCount;
 
             // 创建第二个input框
             const input2 = document.createElement('input');
             input2.type = 'text';
             input2.className = 'form-control';
-            input2.placeholder = '输入...';
+            input2.placeholder = '输出...';
+            input2.name = 'output' + testCaseCount;
 
             // 将两个输入框添加到div行容器
             rowDiv.appendChild(input1);
@@ -137,31 +161,65 @@
 
             // 将新创建的div行容器添加到input行容器中
             inputRowsContainer.appendChild(rowDiv);
-        });
+
+            testCaseCount++; // 每次添加一个测试用例时，计数器加1
+        }
+
+        function removeInputRow() {
+            if (inputRowsContainer.childElementCount > 1) {
+                inputRowsContainer.removeChild(inputRowsContainer.lastChild);
+                testCaseCount--; // 每次移除一个测试用例时，计数器减1
+            }
+            else {
+                alert("测试用例不能少于一个");
+            }
+        }
+
+        addInputRowBtn.addEventListener('click', addInputRow);
+        removeInputRowBtn.addEventListener('click', removeInputRow);
+
+        // 初始化三个测试用例
+        for (let i = 0; i < 3; i++) {
+            addInputRow();
+        }
     });
 </script>
 <script>
-    document.querySelector('form[method="post"]').onsubmit = function (event) {
+    window.onload = function() {
+        var form = document.querySelector('form[method="post"]');
+        if (form) {
+            form.onsubmit = function (event) {
+                var title = document.querySelector('input[name="title"]').value.trim();
+                var content = document.querySelector('textarea[name="content"]').value.trim();
+                var memoryLimit = document.querySelector('input[name="memory_limit"]').value.trim();
+                var timeLimit = document.querySelector('input[name="time_limit"]').value.trim();
+                var answer = document.querySelector('textarea[name="answer"]');
 
-        var title = document.querySelector('input[name="title"]').value.trim();
-        var content = document.querySelector('textarea[name="content"]').value.trim();
-        var memoryLimit = document.querySelector('input[name="memory_limit"]').value.trim();
-        var timeLimit = document.querySelector('input[name="time_limit"]').value.trim();
-        var answer = document.querySelector('textarea[name="answer"]').value.trim();
+                var errors = [];
 
-        var errors = [];
+                if (!title) errors.push("标题不能为空。");
+                if (!content) errors.push("题目内容不能为空。");
+                if (!memoryLimit) errors.push("内存限制不能为空。");
+                if (!timeLimit) errors.push("时间限制不能为空。");
+                if (answer && !answer.value.trim()) errors.push("答案不能为空。");
 
-        if (!title) errors.push("标题不能为空。");
-        if (!content) errors.push("题目内容不能为空。");
-        if (!memoryLimit) errors.push("内存限制不能为空。");
-        if (!timeLimit) errors.push("时间限制不能为空。");
-        if (!answer) errors.push("答案不能为空。");
+                var inputRows = document.getElementById('inputRowsContainer').children;
+                for (var i = 0; i < inputRows.length; i++) {
+                    var inputs = inputRows[i].getElementsByTagName('input');
+                    for (var j = 0; j < inputs.length; j++) {
+                        if (inputs[j].value.trim() === '') {
+                            errors.push("测试用例不能为空。");
+                            break;
+                        }
+                    }
+                }
 
-        if (errors.length > 0) {
-            event.preventDefault();
-            alert("请填写所有必填信息:\n" + errors.join("\n"));
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    alert("请填写所有必填信息:\n" + errors.join("\n"));
+                }
+            };
         }
-
     };
 </script>
 </html>
