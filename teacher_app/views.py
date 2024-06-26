@@ -12,7 +12,8 @@ from BERT_app.views import compute_cosine_similarity
 from administrator_app.models import AdminNotification, ProgrammingExercise, AdminExam, AdminExamQuestion
 from login.views import check_login
 from teacher_app.models import (Teacher, Class, Notification,
-                                Exercise, ExerciseQuestion, Exam, ExamQuestion, ReportScore)
+                                Exercise, ExerciseQuestion, Exam, ExamQuestion, ReportScore,
+                                ExerciseQuestionTestCase, ExamQuestionTestCase)
 from student_app.models import (Student, ExerciseCompletion, ExamCompletion, Score,
                                 ExerciseQuestionCompletion, ExamQuestionCompletion,
                                 AdminExamCompletion, AdminExamQuestionCompletion)
@@ -54,7 +55,7 @@ def repeat_report(request, programmingexercise_id):
         'classes': classes,
         'programmingexercise_id': programmingexercise_id
     }
-    return render(request, 'repeat_report.html', context)
+    return render(request, 'similarity_report.html', context)
 
 
 # 教师主页-查看报告-获取文本数据
@@ -110,7 +111,7 @@ def repeat_report_details(request, programmingexercise_id):
         'students': students,
         'student_similarities': student_similarities,
     }
-    return render(request, 'repeat_report_details.html', context)
+    return render(request, 'similarity_report_details.html', context)
 
 
 # 教师主页-查看报告-获取代码数据
@@ -166,7 +167,7 @@ def repeat_code_details(request, programmingexercise_id):
         'students': students,
         'student_similarities': student_similarities,
     }
-    return render(request, 'repeat_code_details.html', context)
+    return render(request, 'similarity_code_details.html', context)
 
 
 # 教师主页-规范性评分
@@ -650,6 +651,17 @@ def create_exercise(request, exercise_id):
         question = ExerciseQuestion(exercise=exercise, title=title, content=content,
                                     memory_limit=memory_limit, time_limit=time_limit, answer=answer)
         question.save()
+
+        # 遍历提交的测试用例
+        for key in request.POST.keys():
+            if key.startswith('input'):
+                testcase_num = key[5:]  # 获取测试用例的编号
+                input_data = request.POST.get('input' + testcase_num)
+                output_data = request.POST.get('output' + testcase_num)
+
+                # 创建一个新的ExerciseQuestionTestCase实例
+                testcase = ExerciseQuestionTestCase(question=question, input=input_data, expected_output=output_data)
+                testcase.save()
 
         return redirect('teacher_app:exercise_list', exercise_id=exercise.id)
     return render(request, 'create_exercise.html', {'exercise': exercise})
