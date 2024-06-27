@@ -92,19 +92,5 @@ def test_cpp_code(code, types, question_id):
         'passed_tests': passed_tests
     }
 
-    # # 如果所有测试用例都通过，返回成功状态和通过的测试用例的数量
-    # if not failed_tests:
-    #     return {
-    #         'status': 'success',
-    #         'message': '题目作答正确',
-    #         'time': execution_time,
-    #         'passed_tests': passed_tests
-    #     }
-    # else:
-    #     # 如果有测试用例没通过，返回失败的测试用例的信息
-    #     return {
-    #         'status': 'failure',
-    #         'failed_tests': failed_tests,
-    #         'passed_tests': passed_tests
-    #     }
+
 

@@ -77,7 +77,7 @@
 
 <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
-     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+    <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div class="navbar-brand-wrapper d-flex justify-content-center">
             <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
                 <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
@@ -100,7 +100,7 @@
                 </li>
             </ul>
             <ul class="navbar-nav navbar-nav-right">
-               <li class="nav-item dropdown mr-4">
+                <li class="nav-item dropdown mr-4">
                     <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"
                        id="notificationDropdown" href="#" data-toggle="dropdown">
                         <i class="mdi mdi-bell mx-0"></i>
@@ -152,7 +152,7 @@
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_sidebar.html -->
-         <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
                 <li class="nav-item">
                     <a class="nav-link" href="#">
@@ -220,7 +220,7 @@
                 <!-- Right side (Editor and Debugger) -->
                 <div class="editor-container" id="editor">
                     <!-- Monaco编辑器将在这里初始化 -->
-                     <!-- 表单 -->
+                    <!-- 表单 -->
                     <form id="codeForm" action="{% url 'student_app:run-cpp' %}" method="post">
                         {% csrf_token %}
                         <textarea id="codeTextArea" style="display: none;"></textarea> <!-- 隐藏 textarea -->
@@ -228,7 +228,7 @@
                         <!-- 使用之前按钮的样式和位置，但移除了 onclick 属性 -->
                         <button class="btn-default" id="runCode" type="submit">提交</button>
                     </form>
-                   <div id="debugger" class="debugger">
+                    <div id="debugger" class="debugger">
                         <!-- 调试信息 -->
                         <p>运行信息</p>
                     </div>
@@ -280,64 +280,71 @@
 <script src="{% static 'student_app/js/homework.js' %}"></script>
 <script src="{% static 'student_app/js/current-homework.js' %}"></script>
 <script src="{% static 'student_app/js/editor_setup.js' %}"></script>
-
 <script>
     $(document).ready(function () {
-    // 拖动把手的mousedown事件处理函数
-    function handleMouseDown(e) {
-        e.preventDefault();
-        var startY = e.clientY;
-        var startHeight = $('#debugger').outerHeight();
-        $(document).mousemove(function(e) {
-            var newHeight = startHeight - (e.clientY - startY);
-            $('#debugger').outerHeight(newHeight);
-        });
-        $(document).mouseup(function() {
-            $(document).off("mousemove");
-        });
-    }
+        // 拖动把手的mousedown事件处理函数
+        function handleMouseDown(e) {
+            e.preventDefault();
+            var startY = e.clientY;
+            var startHeight = $('#debugger').outerHeight();
+            $(document).mousemove(function (e) {
+                var newHeight = startHeight - (e.clientY - startY);
+                $('#debugger').outerHeight(newHeight);
+            });
+            $(document).mouseup(function () {
+                $(document).off("mousemove");
+            });
+        }
 
-    // 为把手绑定事件处理函数的函数
-    function bindResizer() {
-        $('.resize-handle').off('mousedown').on('mousedown', handleMouseDown);
-    }
+        // 为把手绑定事件处理函数的函数
+        function bindResizer() {
+            $('.resize-handle').off('mousedown').on('mousedown', handleMouseDown);
+        }
 
-    // 在页面加载时添加把手，并绑定事件
-    var resizerHTML = '<div class="resize-handle" style="height: 10px; background: purple; cursor: row-resize;"></div>';
-    $('#debugger').prepend(resizerHTML); // 将把手添加到 debugger 的顶部
-    bindResizer(); // 绑定把手的mousedown事件
+        // 在页面加载时添加把手，并绑定事件
+        var resizerHTML = '<div class="resize-handle" style="height: 10px; background: purple; cursor: row-resize;"></div>';
+        $('#debugger').prepend(resizerHTML); // 将把手添加到 debugger 的顶部
+        bindResizer(); // 绑定把手的mousedown事件
 
-    // 表单提交事件
-    $('#codeForm').on('submit', function (event) {
-        event.preventDefault(); // 阻止表单的默认提交行为
-        var code = editor.getValue(); // 获取代码编辑器中的内容
-        var types = "{{ types }}";
-        var questionId = {{ question.id }};
-        // AJAX请求
-        $.ajax({
-            url: "{% url 'student_app:run-cpp' %}",
-            type: 'POST',
-            data: {
-                'code': code,
-                'types': types,
-                'questionId': questionId,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            },
-            success: function (response) {
-                var existingResizer = $('.resize-handle').detach();
-                $('#debugger').empty().prepend(existingResizer).append(`<p>输出: ${response.output}</p><p>错误: ${response.error}</p>`).show();
-                bindResizer();
-                alert(response.message);
-            },
-            error: function (error) {
-                console.error('Error:', error);
-                var existingResizer = $('.resize-handle').detach();
-                $('#debugger').empty().prepend(existingResizer).append(`<p>出现错误，请查看控制台。</p>`).show();
-                bindResizer();
-            }
+        // 表单提交事件
+        $('#codeForm').on('submit', function (event) {
+            event.preventDefault(); // 阻止表单的默认提交行为
+            var code = editor.getValue(); // 获取代码编辑器中的内容
+            var types = "{{ types }}";
+            var questionId = {{ question.id }};
+            // AJAX请求
+            $.ajax({
+                url: "{% url 'student_app:run-cpp' %}",
+                type: 'POST',
+                data: {
+                    'code': code,
+                    'types': types,
+                    'questionId': questionId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    var existingResizer = $('.resize-handle').detach();
+                    if (response.status === 'pass') {
+                        $('#debugger').empty().prepend(existingResizer).append(`<p>所有测试用例通过</p>`).show();
+                    } else if (response.status === 'fail') {
+                        $('#debugger').empty().prepend(existingResizer).append(`<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p><p>总测试用例数量: ${response.tests_results.length}</p>`).show();
+                        response.tests_results.forEach(function(test) {
+                            $('#debugger').append(`<p>测试用例 ${test.testcase} 输出: ${test.output}</p>`);
+                        });
+                    } else if (response.status === 'compile error') {
+                        $('#debugger').empty().prepend(existingResizer).append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
+                    }
+                    bindResizer();
+                },
+                error: function (error) {
+                    console.error('Error:', error);
+                    var existingResizer = $('.resize-handle').detach();
+                    $('#debugger').empty().prepend(existingResizer).append(`<p>出现错误，请查看控制台。</p>`).show();
+                    bindResizer();
+                }
+            });
         });
     });
-});
 </script>
 <script>
     var editor;  // 定义全局变量以存储编辑器实例
@@ -352,7 +359,7 @@
         });
     });
 </script>
-    <script>
+<script>
     $(document).ready(function () {
         $('.notification-item').on('click', function () {
             var notificationId = $(this).data('notification-id');
@@ -378,57 +385,31 @@
     });
 
 </script>
- <script>
-        function redirectToSpecificQuestion(questionId) {
+<script>
+    function redirectToSpecificQuestion(questionId) {
+        window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+    }
+</script>
+<script>
+    var types = "{{ types }}";
+
+    function redirectToSpecificQuestion(questionId) {
+        if (types === 'exercise')
             window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
-        }
-    </script>
-    <script>
-        var types = "{{ types }}";
+        else if (types === 'exam')
+            window.location.href = "{% url 'student_app:coding_exam' '123' %}".replace('123', questionId);
+        else
+            window.location.href = "{% url 'student_app:coding_adminexam' '123' %}".replace('123', questionId);
+    }
 
-        function redirectToSpecificQuestion(questionId) {
-            if (types === 'exercise')
-                window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
-            else if (types === 'exam')
-                window.location.href = "{% url 'student_app:coding_exam' '123' %}".replace('123', questionId);
-                else
-                window.location.href = "{% url 'student_app:coding_adminexam' '123' %}".replace('123', questionId);
-        }
-
-        function redirectToList(question_setId) {
-            if (types === 'exercise')
-                window.location.href = "{% url 'student_app:practice_list' '123' %}".replace('123', question_setId);
-            else if (types === 'exam')
-                window.location.href = "{% url 'student_app:teacherexam_list' '123' %}".replace('123', question_setId);
-                else
-                window.location.href = "{% url 'student_app:adminexam_list' '123' %}".replace('123', question_setId);
-        }
-    </script>
-  <script>
-        function redirectToSpecificQuestion(questionId) {
-            window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
-        }
-    </script>
-    <script>
-        var types = "{{ types }}";
-
-        function redirectToSpecificQuestion(questionId) {
-            if (types === 'exercise')
-                window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
-            else if (types === 'exam')
-                window.location.href = "{% url 'student_app:coding_exam' '123' %}".replace('123', questionId);
-                else
-                window.location.href = "{% url 'student_app:coding_adminexam' '123' %}".replace('123', questionId);
-        }
-
-        function redirectToList(question_setId) {
-            if (types === 'exercise')
-                window.location.href = "{% url 'student_app:practice_list' '123' %}".replace('123', question_setId);
-            else if (types === 'exam')
-                window.location.href = "{% url 'student_app:teacherexam_list' '123' %}".replace('123', question_setId);
-                else
-                window.location.href = "{% url 'student_app:adminexam_list' '123' %}".replace('123', question_setId);
-        }
-    </script>
+    function redirectToList(question_setId) {
+        if (types === 'exercise')
+            window.location.href = "{% url 'student_app:practice_list' '123' %}".replace('123', question_setId);
+        else if (types === 'exam')
+            window.location.href = "{% url 'student_app:teacherexam_list' '123' %}".replace('123', question_setId);
+        else
+            window.location.href = "{% url 'student_app:adminexam_list' '123' %}".replace('123', question_setId);
+    }
+</script>
 </body>
 </html>
