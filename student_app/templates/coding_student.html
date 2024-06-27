@@ -308,6 +308,7 @@
 
         // 表单提交事件
         $('#codeForm').on('submit', function (event) {
+            console.log("提交");
             event.preventDefault(); // 阻止表单的默认提交行为
             var code = editor.getValue(); // 获取代码编辑器中的内容
             var types = "{{ types }}";

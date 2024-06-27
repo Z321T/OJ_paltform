@@ -551,6 +551,7 @@ def run_cpp_code(request):
 
     student = Student.objects.get(userid=user_id)
     if request.method == 'POST':
+        print('后端输出结果')
         user_code = request.POST.get('code', '')  # 从表单数据中获取代码
         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
