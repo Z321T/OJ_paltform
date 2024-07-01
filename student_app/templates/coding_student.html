@@ -74,7 +74,6 @@
 <script src="{% static 'node_modules/monaco-editor/min/vs/loader.js' %}"></script>
 
 <body>
-
 <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -195,6 +194,7 @@
         </nav>
         <!-- partial -->
         <div class="main-panel">
+            <div id="timer" style="color:red"></div>
             <div class="container-flex">
                 <!-- Left side (Problem Info and Submission Record) -->
                 <div class="problem-container">
@@ -361,32 +361,6 @@
     });
 </script>
 <script>
-    $(document).ready(function () {
-        $('.notification-item').on('click', function () {
-            var notificationId = $(this).data('notification-id');
-            $.ajax({
-                url: "{% url 'student_app:notification_content' %}",
-                type: 'POST',
-                data: {
-                    'notification_id': notificationId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    // 更新模态框的内容
-                    $('#notificationModalLabel').text(response.title);
-                    $('#notificationModalContent').text(response.content);
-                    // 显示模态框
-                    $('#notificationModal').modal('show');
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message);
-                }
-            });
-        });
-    });
-
-</script>
-<script>
     function redirectToSpecificQuestion(questionId) {
         window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
     }
@@ -411,6 +385,54 @@
         else
             window.location.href = "{% url 'student_app:adminexam_list' '123' %}".replace('123', question_setId);
     }
+</script>
+{#时钟#}
+<script type="text/javascript">
+            var oBox= document.getElementById('timer');
+            var maxtime = {{ maxtime }} * 60;  // 使用{{ 变量名 }}获取后端传入的maxtime值
+            function CountDown() {
+                if (maxtime >= 0) {
+                    minutes = Math.floor(maxtime / 60);
+                    seconds = Math.floor(maxtime % 60);
+                    msg = "距离结束还有" + minutes + "分" + seconds + "秒";
+                    oBox.innerHTML = msg;
+                    if (maxtime == 5 * 60)alert("还剩5分钟");
+                                --maxtime;
+                    } else{
+                            clearInterval(timer);
+                            alert("时间到，结束!");
+                        }
+                    }
+                    timer = setInterval("CountDown()", 1000);
+</script>
+<script>
+    $(document).ready(function () {
+        $('.notification-item').on('click', function (event) {
+
+            var notificationId = $(this).data('notification-id');
+            $.ajax({
+                url: "{% url 'student_app:notification_content' %}",
+                type: 'POST',
+                data: {
+                    'notification_id': notificationId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    // 更新模态框的内容
+                    $('#notificationModalLabel').text(response.title);
+                    $('#notificationModalContent').text(response.content);
+                    // 显示模态框
+                    $('#notificationModal').modal('show');
+                    
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+
+                }
+            });
+        });
+    });
+
 </script>
 </body>
 </html>

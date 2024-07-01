@@ -340,6 +340,7 @@
 <script>
     $(document).ready(function () {
         $('.notification-item').on('click', function () {
+            console.log("点击！");
             var notificationId = $(this).data('notification-id');
             $.ajax({
                 url: "{% url 'student_app:notification_content' %}",
