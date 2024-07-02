@@ -33,7 +33,7 @@ SECRET_KEY = 'django-insecure-3*w5h@h=x*4=i911d!!-r+ok=2ndr&7&ejbc@my6g-mz6rz7ow
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*',]
 
 
 # Application definition
@@ -87,6 +87,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'CUMT.wsgi.application'
+
+CSRF_COOKIE_DOMAIN = None
 
 
 # Database
@@ -199,3 +201,4 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+

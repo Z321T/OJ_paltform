@@ -1,6 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 import os
+import eventlet
 from celery import Celery
+
+# 运行eventlet.monkey_patch()
+eventlet.monkey_patch()
 
 # 设置Django项目的settings模块
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CUMT.settings')

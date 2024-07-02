@@ -1,8 +1,6 @@
 import os
-import time
 import docx
 import requests
-import subprocess
 import tempfile
 from io import BytesIO
 
@@ -21,6 +19,7 @@ from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
 from login.views import check_login
 from CUMT.task import test_cpp_code
+from celery.result import AsyncResult
 
 
 # 学生主页
@@ -557,11 +556,18 @@ def run_cpp_code(request):
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
 
         # 调用 Celery 任务
-        result = test_cpp_code.delay(user_code, types, question_id)
+        # task = test_cpp_code.delay(user_code, types, question_id)
+        result = test_cpp_code(user_code, types, question_id)
+
+        # 获取任务的UUID
+        # task_id = task.id
+
+        # 创建一个AsyncResult对象
+        # result = AsyncResult(task_id)
 
         # 获取任务结果
         try:
-            result = result.get()
+            # result = result.get()
             if result['status'] == 'pass':
                 # 测试用例全部通过的情况
                 if types == 'exercise':
