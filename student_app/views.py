@@ -19,7 +19,7 @@ from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
 from login.views import check_login
 from CUMT.task import test_cpp_code
-from celery.result import AsyncResult
+# from celery.result import AsyncResult
 
 
 # 学生主页
@@ -567,7 +567,7 @@ def run_cpp_code(request):
 
         # 获取任务结果
         try:
-            # result = result.get()
+            result = result.get()
             if result['status'] == 'pass':
                 # 测试用例全部通过的情况
                 if types == 'exercise':

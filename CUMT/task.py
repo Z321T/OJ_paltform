@@ -1,5 +1,5 @@
 from __future__ import absolute_import, unicode_literals
-from celery import shared_task
+# from celery import shared_task
 import subprocess
 from administrator_app.models import AdminExamQuestion, AdminExamQuestionTestCase
 from teacher_app.models import (ExerciseQuestion, ExamQuestion,
