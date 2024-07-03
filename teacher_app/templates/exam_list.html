@@ -305,8 +305,13 @@
                         <input id="content" name="content" placeholder="请输入考试题描述">
                     </div>
                     <div class="input-group">
-                        <label for="deadline">截止时间：</label>
+                        <label for="deadline">考试开始时间：</label>
                         <input type="datetime-local" id="deadline" name="deadline" placeholder="请输入截止时间">
+                    </div>
+{#                倒计时#}
+                    <div class="input-group">
+                        <label for="maxtime">考试限时：</label>
+                        <input type="text" id="maxtime" name="maxtime" placeholder="...分钟">
                     </div>
                     <input type="hidden" name="exam_id" value="{{ exam.id }}">
                     <div class="row">
