@@ -69,6 +69,83 @@
     }
     </style>
 
+    <style>
+         /* Add your custom CSS styles here */
+
+    .container-flex {
+      display: flex;
+      flex: 1;
+    }
+
+     .problem-container, .editor-container {
+      flex: 1;
+      overflow: auto;
+      height: 100vh;
+      padding: 20px;
+        border-width: 0 2px 0 0;
+      box-sizing: border-box;
+      {#border: lightslategray;#}
+      border-radius:10px;
+    }
+
+        .editor-container {
+      position: relative; /* Ensure relative positioning context for children */
+                display: flex; /* 使用 flex 布局 */
+      flex-direction: column; /* 子元素按列排列 */
+      justify-content: space-between; /* 在垂直方向上分配空间 */
+}
+
+#debugger {
+    position: absolute; /* 使用固定定位 */
+    bottom: 0; /* 在视窗的底部 */
+    left: 0; /* 与视窗的左边缘对齐 */
+    right: 2px; /* 与视窗的右边缘对色以确保调试信息可齐，确保它横跨整个屏幕宽度 */
+    background: #fff; /* 添加背景读 */
+    border-top: 1px solid royalblue; /* 调试器上方的边界线 */
+    z-index: 9999; /* 确保它在其他内容之上 */
+    box-sizing: border-box;
+    padding: 10px; /* 适当的内间距 */
+    max-height: 50vh; /* 制定一个最大高度 */
+    overflow: auto; /* 内容太多时可以滚动查看 */
+}
+/* 创建一个拖动把手 */
+.resize-handle {
+    height: 1px; /* 把手的高度 */
+    background: royalblue; /* 把手的背景颜色，确保可见性 */
+    cursor: row-resize; /* 显示一个指示可拖动的光标 */
+    position: absolute; /* 绝对定位 */
+    top: 0; /* 顶部对齐，原来的bottom: 0被移除 */
+    left: 0; /* 左侧对齐 */
+    right: 0; /* 右侧对齐 */
+    z-index: 9999; /* 确保把手层级在顶层 */
+}
+
+
+   /* 切换按钮样式 */
+.toggle-buttons {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #ccc; /* 上边框 */
+  padding: 1px;
+  border-radius: 10px 10px 10px 10px; /* 圆角矩形样式，上方左右两个角 */
+  background-color: whitesmoke; /* 按钮背景颜色 */
+}
+
+/* 单个按钮样式 */
+.toggle-buttons button {
+  padding: 2px 10px;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+    border-right: 1px solid #ccc;
+}
+
+/* 按钮激活状态的样式 */
+.toggle-buttons button:focus {
+  background-color: floralwhite; /* 激活状态背景颜色 */
+}
+
+    </style>
 </head>
 <!-- 引入Monaco编辑器的静态文件 -->
 <script src="{% static 'node_modules/monaco-editor/min/vs/loader.js' %}"></script>
@@ -98,50 +175,50 @@
                     </div>
                 </li>
             </ul>
-            <ul class="navbar-nav navbar-nav-right">
-                <li class="nav-item dropdown mr-4">
-                    <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"
-                       id="notificationDropdown" href="#" data-toggle="dropdown">
-                        <i class="mdi mdi-bell mx-0"></i>
-                        <span class="count">{{ notifications.count }}</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown"
-                         aria-labelledby="notificationDropdown" style="height: 200px; overflow-y: auto;">
-                        <p class="mb-0 font-weight-normal float-left dropdown-header">通知</p>
-                        {% for notification in notifications %}
-                            <a class="dropdown-item notification-item" data-notification-id="{{ notification.id }}">
-                                <div class="item-thumbnail">
-                                    <div class="item-icon bg-success">
-                                        <i class="mdi mdi-information mx-0"></i>
-                                    </div>
-                                </div>
-                                <div class="item-content">
-                                    <h6 class="font-weight-normal">{{ notification.title|truncatechars:30 }}</h6>
-                                    <p class="font-weight-light small-text mb-0 text-muted">
-                                        {{ notification.date_posted }}
-                                    </p>
-                                </div>
-                            </a>
-                        {% endfor %}
-                    </div>
-                </li>
-                <li class="nav-item nav-profile dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-                        <img src="{% static 'student_app/photo/face5.jpg' %}" alt="profile">
-                        <span class="nav-profile-name">{{ user_id }}</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
-                        <a class="dropdown-item" href="{% url 'student_app:profile_student' %}">
-                            <i class="mdi mdi-settings text-primary"></i>
-                            设置
-                        </a>
-                        <a class="dropdown-item" href="{% url 'login:log_out' %}">
-                            <i class="mdi mdi-logout text-primary"></i>
-                            退出
-                        </a>
-                    </div>
-                </li>
-            </ul>
+{#            <ul class="navbar-nav navbar-nav-right">#}
+{#                <li class="nav-item dropdown mr-4">#}
+{#                    <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"#}
+{#                       id="notificationDropdown" href="#" data-toggle="dropdown">#}
+{#                        <i class="mdi mdi-bell mx-0"></i>#}
+{#                        <span class="count">{{ notifications.count }}</span>#}
+{#                    </a>#}
+{#                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown"#}
+{#                         aria-labelledby="notificationDropdown" style="height: 200px; overflow-y: auto;">#}
+{#                        <p class="mb-0 font-weight-normal float-left dropdown-header">通知</p>#}
+{#                        {% for notification in notifications %}#}
+{#                            <a class="dropdown-item notification-item" data-notification-id="{{ notification.id }}">#}
+{#                                <div class="item-thumbnail">#}
+{#                                    <div class="item-icon bg-success">#}
+{#                                        <i class="mdi mdi-information mx-0"></i>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="item-content">#}
+{#                                    <h6 class="font-weight-normal">{{ notification.title|truncatechars:30 }}</h6>#}
+{#                                    <p class="font-weight-light small-text mb-0 text-muted">#}
+{#                                        {{ notification.date_posted }}#}
+{#                                    </p>#}
+{#                                </div>#}
+{#                            </a>#}
+{#                        {% endfor %}#}
+{#                    </div>#}
+{#                </li>#}
+{#                <li class="nav-item nav-profile dropdown">#}
+{#                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">#}
+{#                        <img src="{% static 'student_app/photo/face5.jpg' %}" alt="profile">#}
+{#                        <span class="nav-profile-name">{{ user_id }}</span>#}
+{#                    </a>#}
+{#                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">#}
+{#                        <a class="dropdown-item" href="{% url 'student_app:profile_student' %}">#}
+{#                            <i class="mdi mdi-settings text-primary"></i>#}
+{#                            设置#}
+{#                        </a>#}
+{#                        <a class="dropdown-item" href="{% url 'login:log_out' %}">#}
+{#                            <i class="mdi mdi-logout text-primary"></i>#}
+{#                            退出#}
+{#                        </a>#}
+{#                    </div>#}
+{#                </li>#}
+{#            </ul>#}
             <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
                     data-toggle="offcanvas">
                 <span class="mdi mdi-menu"></span>
@@ -153,18 +230,8 @@
         <!-- partial:partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="mdi mdi-list-box menu-icon"></i>
-                        <span class="menu-title">题目列表</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="mdi menu-icon"></i>
-                        <span class="menu-title">——————</span>
-                    </a>
-                </li>
+
+
                 {% for question in question_set.questions.all %}
                     <li class="nav-item">
                         <a class="nav-link" href="javascript:void(0);"
@@ -178,12 +245,7 @@
                         <span class="nav-link">暂无题目</span>
                     </li>
                 {% endfor %}
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="mdi  menu-icon"></i>
-                        <span class="menu-title">——————</span>
-                    </a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="#" onclick="redirectToList({{ question_set.id }})">
                         <i class="mdi mdi-keyboard-return menu-icon"></i>
@@ -194,6 +256,7 @@
         </nav>
         <!-- partial -->
         <div class="main-panel">
+{#            时间#}
             <div id="timer" style="color:red"></div>
             <div class="container-flex">
                 <!-- Left side (Problem Info and Submission Record) -->
@@ -215,6 +278,7 @@
                     <div id="submission-record" class="panel" style="display: none;">
                         <!-- 提交记录内容 -->
                         <p>提交记录</p>
+
                     </div>
                 </div>
                 <!-- Right side (Editor and Debugger) -->
@@ -229,7 +293,9 @@
                         <button class="btn-default" id="runCode" type="submit">提交</button>
                     </form>
                     <div id="debugger" class="debugger">
+
                         <!-- 调试信息 -->
+                         <div class="resize-handle"></div> <!-- 添加把手 -->
                         <p>运行信息</p>
                     </div>
                 </div>
@@ -285,10 +351,10 @@
         // 拖动把手的mousedown事件处理函数
         function handleMouseDown(e) {
             e.preventDefault();
-            var startY = e.clientY;
+            var startY = e.pageY; // 使用 e.pageY 获取鼠标位置的纵坐标
             var startHeight = $('#debugger').outerHeight();
             $(document).mousemove(function (e) {
-                var newHeight = startHeight - (e.clientY - startY);
+                var newHeight = startHeight - (e.pageY - startY); // 使用 e.pageY
                 $('#debugger').outerHeight(newHeight);
             });
             $(document).mouseup(function () {
@@ -302,9 +368,11 @@
         }
 
         // 在页面加载时添加把手，并绑定事件
-        var resizerHTML = '<div class="resize-handle" style="height: 10px; background: purple; cursor: row-resize;"></div>';
+        var resizerHTML = '<div class="resize-handle" style="height: 1px; background: dodgerblue; cursor: row-resize;"></div>';
         $('#debugger').prepend(resizerHTML); // 将把手添加到 debugger 的顶部
-        bindResizer(); // 绑定把手的mousedown事件
+
+        // 绑定把手的mousedown事件
+        bindResizer();
 
         // 表单提交事件
         $('#codeForm').on('submit', function (event) {
@@ -324,6 +392,7 @@
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function (response) {
+                     // 先移除把手元素
                     var existingResizer = $('.resize-handle').detach();
                     if (response.status === 'pass') {
                         $('#debugger').empty().prepend(existingResizer).append(`<p>所有测试用例通过</p>`).show();
@@ -335,13 +404,15 @@
                     } else if (response.status === 'compile error') {
                         $('#debugger').empty().prepend(existingResizer).append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
                     }
-                    bindResizer();
+                    // 将把手元素添加回去
+            $('#debugger').prepend(existingResizer);
+            bindResizer();
                 },
                 error: function (error) {
                     console.error('Error:', error);
                     var existingResizer = $('.resize-handle').detach();
-                    $('#debugger').empty().prepend(existingResizer).append(`<p>出现错误，请查看控制台。</p>`).show();
-                    bindResizer();
+                     $('#debugger').empty().prepend(existingResizer).append(`<p>出现错误，请查看控制台。</p>`).show();
+            bindResizer();
                 }
             });
         });
