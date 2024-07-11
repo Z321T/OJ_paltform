@@ -559,10 +559,10 @@ def run_cpp_code(request):
         # task = test_cpp_code.delay(user_code, types, question_id)
         result = test_cpp_code(user_code, types, question_id)
 
-        # 获取任务的UUID
+        # # 获取任务的UUID
         # task_id = task.id
 
-        # 创建一个AsyncResult对象
+        # # 创建一个AsyncResult对象
         # result = AsyncResult(task_id)
 
         # 获取任务结果

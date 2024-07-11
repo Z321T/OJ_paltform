@@ -49,9 +49,9 @@ INSTALLED_APPS = [
     'student_app.apps.StudentConfig',
     'teacher_app.apps.TeacherAppConfig',
     'administrator_app.apps.AdministratorAppConfig',
-    "BERT_app.apps.ScoreAppConfig",
-    "login.apps.LoginConfig",
-    "Spark_app.apps.SparkAppConfig",
+    'BERT_app.apps.ScoreAppConfig',
+    'login.apps.LoginConfig',
+    'Spark_app.apps.SparkAppConfig',
 
 
 ]
@@ -201,4 +201,5 @@ MEDIA_URL = '/media/'
 # CELERY_ACCEPT_CONTENT = ['application/json']
 # CELERY_TASK_SERIALIZER = 'json'
 # CELERY_RESULT_SERIALIZER = 'json'
+
 
