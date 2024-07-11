@@ -65,10 +65,15 @@
         top: 0
     }
 
-     {#侧边栏字体大小调整#}
-       .sidebar .nav .nav-item .nav-link .menu-title  {
-       font-size:20px; /* 调整为需要的大小 */
+
+   .sidebar .nav .nav-item .nav-link .menu-title  {
+       font-size:16px; /* 调整为需要的大小 */
    }
+
+       .modal-custom {
+            max-width: 950px;  /* 设置模态框的最大宽度 */
+            height: 1000px;    /* 设置模态框的高度 */
+        }
     </style>
     <script>
         function redirectToHome() {
@@ -127,7 +132,7 @@
                 </span>
                         </div>
                         <input type="text" class="form-control" placeholder="Search now" aria-label="search"
-                               aria-describedby="search">
+                               aria-describedby="search" onclick="$('#aiModal').modal('show');">
                     </div>
                 </li>
             </ul>
@@ -373,6 +378,43 @@
         </div>
     </div>
 </div>
+<!-- AI对话模态框 -->
+<div class="modal fade" id="aiModal" tabindex="-1" role="dialog" aria-labelledby="aiModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-custom" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="aiModalLabel">讯飞星火小助手</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- 添加一个滚动区域来显示对话历史 -->
+        <div id="chatHistory" style="height: 400px; width: 930px; overflow-y: scroll; margin-bottom: 20px;">
+          <!-- 使用Django模板语言来显示对话历史 -->
+          {% for chat in chat_history %}
+          <div class="chat">
+            <p><strong>{{ chat.user }}:</strong> {{ chat.message }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        <form id="aiForm">
+          <div class="form-group">
+            <label for="question">问题</label>
+            <input type="text" class="form-control" id="question" placeholder="请输入你的问题">
+          </div>
+          <div class="form-group d-flex justify-content-center">
+            <button type="submit" class="btn btn-primary">提交</button>
+            <button type="button" id="clearChat" class="btn btn-secondary">清空</button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div id="aiResponse"></div>
+      </div>
+    </div>
+  </div>
+</div>
     <!-- plugins:js -->
     <script type="text/javascript" src="{% static 'teacher_app/js/vendor.bundle.base.js' %}"></script>
     <!-- endinject -->
@@ -523,6 +565,62 @@ $(document).ready(function(){
             });
         });
     });
+</script>
+<script>
+$(document).ready(function() {
+  $('#aiForm').on('submit', function(e) {
+    e.preventDefault();
+    var question = $('#question').val();
+
+    // 创建一个新的<div>元素来显示用户的问题
+    var userChat = $('<div class="chat"><p><strong>我:</strong> ' + question + '</p></div>');
+    // 添加到对话历史区域
+    $('#chatHistory').append(userChat);
+
+    $.ajax({
+      url: "{% url 'Spark_app:chat' %}",  // 替换为chat函数的URL
+      type: 'POST',
+      data: {
+        'question': question,
+        'csrfmiddlewaretoken': '{{ csrf_token }}'
+      },
+      success: function(response) {
+        // 创建一个新的<div>元素来显示AI的回答
+        var aiChat = $('<div class="chat"><p><strong>讯飞星火:</strong></p></div>');
+        aiChat.append($(response.response));
+        // 添加到对话历史区域
+        $('#chatHistory').append(aiChat);
+
+        // 清空输入框
+        $('#question').val('');
+
+        // 滚动到对话历史区域的底部，以便最新的对话可见
+        $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+      },
+      error: function(response) {
+        $('#aiResponse').text('出错了，请重试。');
+      }
+    });
+  });
+
+  // 为清空按钮添加点击事件
+  $('#clearChat').on('click', function() {
+    $.ajax({
+        url: "{% url 'Spark_app:clear_chat' %}",  // 替换为clear_chat函数的URL
+        type: 'POST',
+        data: {
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function(response) {
+            $('#chatHistory').empty(); // 清空对话历史区域的内容
+        },
+        error: function(response) {
+            $('#aiResponse').text('出错了，请重试。');
+        }
+    });
+  });
+
+});
 </script>
 </body>
 </html>

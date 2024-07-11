@@ -550,7 +550,7 @@ def run_cpp_code(request):
 
     student = Student.objects.get(userid=user_id)
     if request.method == 'POST':
-        print('后端输出结果')
+        print('后端收到代码')
         user_code = request.POST.get('code', '')  # 从表单数据中获取代码
         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
@@ -558,7 +558,7 @@ def run_cpp_code(request):
         # 调用 Celery 任务
         # task = test_cpp_code.delay(user_code, types, question_id)
         result = test_cpp_code(user_code, types, question_id)
-
+        print('运行结果', result)
         # # 获取任务的UUID
         # task_id = task.id
 
@@ -594,6 +594,7 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': 10}
                     )
+                print('返回结果-通过')
                 return JsonResponse(result)
 
             elif result['status'] == 'fail':
@@ -626,10 +627,12 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': score}
                     )
+                print('返回结果-未通过')
                 return JsonResponse(result)
 
             elif result['status'] == 'compile error':
                 # 出现编译错误的情况
+                print('返回结果-编译错误')
                 return JsonResponse({'error': result['error']})
 
         except Exception as e:
