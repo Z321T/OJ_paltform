@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- Required meta tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>我的练习</title>
+    <title>我的练习-练习详情</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="{% static 'student_app/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'student_app/css/vendor.bundle.base.css' %}">
@@ -410,14 +410,37 @@
         });
     });
 </script>
-<script>
-    $(document).ready(function () {
-        $('.doing-question').on('click', function () {
-            var questionId = $(this).data('question-id');
+{#<script>#}
+{#    $(document).ready(function () {#}
+{#        $('.doing-question').on('click', function () {#}
+{#            var questionId = $(this).data('question-id');#}
             {#var url = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);#}
-            window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+{#            window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);#}
+{#        });#}
+{#    });#}
+{#</script>#}
+<script>
+$(document).ready(function () {
+    $('.doing-question').on('click', function () {
+        var questionId = $(this).data('question-id');
+        var url = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function(response) {
+                if (response.status === 'error') {
+                    alert(response.message);
+                } else {
+                    window.location.href = url;
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
         });
     });
+});
 </script>
 <script>
 $(document).ready(function() {

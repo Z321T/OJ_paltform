@@ -5,9 +5,10 @@ import tempfile
 from io import BytesIO
 
 from django.utils import timezone
+from django.contrib import messages
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib.auth.hashers import make_password, check_password
 
 from administrator_app.models import ProgrammingExercise, AdminExam, AdminExamQuestion
@@ -428,6 +429,11 @@ def coding_exercise(request, exercisequestion_id):
     if request.method == 'GET':
         question = get_object_or_404(ExerciseQuestion, id=exercisequestion_id)
         question_set = question.exercise
+
+        # 检查截止时间
+        if timezone.now() > question_set.deadline:
+            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
+
         types = 'exercise'
         return render(request, 'coding_student.html',
                       {'question_set': question_set, 'question': question, 'types': types})
@@ -442,6 +448,11 @@ def coding_exam(request, examquestion_id):
     if request.method == 'GET':
         question = get_object_or_404(ExamQuestion, id=examquestion_id)
         question_set = question.exam
+
+        # 检查截止时间
+        if timezone.now() > question_set.deadline:
+            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
+
         types = 'exam'
         return render(request, 'coding_student.html',
                       {'question_set': question_set, 'question': question, 'types': types})
@@ -464,6 +475,11 @@ def coding_adminexam(request, examquestion_id):
     if request.method == 'GET':
         question = get_object_or_404(AdminExamQuestion, id=examquestion_id)
         question_set = question.exam
+
+        # 检查截止时间
+        if timezone.now() > question_set.deadline:
+            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
+        
         types = 'adminexam'
 
         context = {
@@ -478,9 +494,9 @@ def coding_adminexam(request, examquestion_id):
     return render(request, 'coding_student.html', context)
 
 
-def call_node_api(request):
-    response = requests.get('http://localhost:3000/api')  # Node.js服务器的地址
-    return HttpResponse(response.json())
+# def call_node_api(request):
+#     response = requests.get('http://localhost:3000/api')  # Node.js服务器的地址
+#     return HttpResponse(response.json())
 
 
 # 标记完成的题目
