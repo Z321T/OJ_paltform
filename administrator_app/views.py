@@ -10,7 +10,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from BERT_app.views import analyze_programming_report, analyze_programming_code
-from administrator_app.models import Administrator, AdminNotification, ProgrammingExercise, AdminExam, AdminExamQuestion
+from administrator_app.models import (Administrator, AdminNotification, ProgrammingExercise,
+                                      AdminExam, AdminExamQuestion, AdminExamQuestionTestCase)
 from teacher_app.models import Teacher, Class
 from student_app.models import Student, Score
 from BERT_app.models import ReportStandardScore, ProgrammingCodeFeature, ProgrammingReportFeature
@@ -329,6 +330,17 @@ def create_adminexam(request, exam_id):
         question = AdminExamQuestion(exam=exam, title=title, content=content,
                                      memory_limit=memory_limit, time_limit=time_limit, answer=answer)
         question.save()
+
+        # 遍历提交的测试用例
+        for key in request.POST.keys():
+            if key.startswith('input'):
+                testcase_num = key[5:]  # 获取测试用例的编号
+                input_data = request.POST.get('input' + testcase_num)
+                output_data = request.POST.get('output' + testcase_num)
+
+                # 创建一个新的AdminExamQuestionTestCase实例
+                testcase = AdminExamQuestionTestCase(question=question, input=input_data, expected_output=output_data)
+                testcase.save()
 
         return redirect('administrator_app:admin_examlist', exam_id=exam.id)
     return render(request, 'create_adminexam.html', {'exam': exam})

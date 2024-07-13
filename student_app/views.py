@@ -479,9 +479,8 @@ def coding_adminexam(request, examquestion_id):
         # 检查截止时间
         if timezone.now() > question_set.deadline:
             return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
-        
-        types = 'adminexam'
 
+        types = 'adminexam'
         context = {
             'user_id': user_id,
             'notifications': notifications,
