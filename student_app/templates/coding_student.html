@@ -297,14 +297,15 @@
                         <!-- 使用之前按钮的样式和位置，但移除了 onclick 属性 -->
                         <button class="btn-default" id="runCode" type="submit">提交</button>
                     </form>
-                    <div id="debugger" class="debugger">
-
-                        <!-- 调试信息 -->
-                         <div class="resize-handle"></div> <!-- 添加把手 -->
-                        <p>运行信息</p>
-                    </div>
+                     <div id="debugger" class="debugger">
+                            <!-- 调试信息 -->
+                             <div class="resize-handle"></div> <!-- 添加把手 -->
+                             <p>运行信息</p>
+                             </div>
+                     </div>
                 </div>
-            </div>
+
+
         </div>
     </div>
 </div>
@@ -390,7 +391,7 @@
 <script src="{% static 'student_app/js/editor_setup.js' %}"></script>
 <script>
     $(document).ready(function () {
-        // 拖动把手的mousedown事件处理函数
+        // 拖动理把手的mousedown事件处函数
         function handleMouseDown(e) {
             e.preventDefault();
             var startY = e.pageY; // 使用 e.pageY 获取鼠标位置的纵坐标
@@ -418,8 +419,6 @@
 
         // 表单提交事件
         $('#codeForm').on('submit', function (event) {
-            console.log("提交");
-            event.preventDefault(); // 阻止表单的默认提交行为
             var code = editor.getValue(); // 获取代码编辑器中的内容
             var types = "{{ types }}";
             var questionId = {{ question.id }};
@@ -435,15 +434,19 @@
                 },
                 success: function (response) {
                      // 先移除把手元素
+                    console.log("运行成功!");
                     var existingResizer = $('.resize-handle').detach();
-                    if (response.status === 'pass') {
+                    if (response.status ==='pass') {
+                        console.log("测试用例通过！");
                         $('#debugger').empty().prepend(existingResizer).append(`<p>所有测试用例通过</p>`).show();
                     } else if (response.status === 'fail') {
+                        console.log("测试用例部分通过！");
                         $('#debugger').empty().prepend(existingResizer).append(`<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p><p>总测试用例数量: ${response.tests_results.length}</p>`).show();
                         response.tests_results.forEach(function(test) {
                             $('#debugger').append(`<p>测试用例 ${test.testcase} 输出: ${test.output}</p>`);
                         });
                     } else if (response.status === 'compile error') {
+                        console.log("编译错误!");
                         $('#debugger').empty().prepend(existingResizer).append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
                     }
                     // 将把手元素添加回去
@@ -457,8 +460,57 @@
             bindResizer();
                 }
             });
+             event.preventDefault(); // 阻止表单的默认提交行为放到AJAX请求的成功回调函数中
         });
     });
+</script>
+{#表单提交#}
+<script>
+    // 表单提交事件
+$('#codeForm').on('submit', function (event) {
+    var form = $(this); // 保存表单元素的引用
+    var code = editor.getValue(); // 获取代码编辑器中的内容
+    var types = "{{ types }}";
+    var questionId = {{ question.id }};
+
+    // AJAX请求
+    $.ajax({
+        url: "{% url 'student_app:run-cpp' %}",
+        type: 'POST',
+        data: {
+            'code': code,
+            'types': types,
+            'questionId': questionId,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function (response) {
+            // 先移除把手元素
+            var existingResizer = $('.resize-handle').detach();
+            if (response.status === 'pass') {
+                $('#debugger').empty().prepend(existingResizer).append(`<p>所有测试用例通过</p>`).show();
+            } else if (response.status === 'fail') {
+                $('#debugger').empty().prepend(existingResizer).append(`<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p><p>总测试用例数量: ${response.tests_results.length}</p>`).show();
+                response.tests_results.forEach(function(test) {
+                    $('#debugger').append(`<p>测试用例 ${test.testcase} 输出: ${test.output}</p>`);
+                });
+            } else if (response.status === 'compile error') {
+                $('#debugger').empty().prepend(existingResizer).append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
+            }
+            // 将把手元素添加回去
+            $('#debugger').prepend(existingResizer);
+            bindResizer();
+             {#event.preventDefault(); // 阻止表单的默认提交行为放到AJAX请求的成功回调函数中#}
+        },
+        error: function (error) {
+            console.error('Error:', error);
+            var existingResizer = $('.resize-handle').detach();
+            $('#debugger').empty().prepend(existingResizer).append(`<p>出现错误，请查看控制台。</p>`).show();
+            bindResizer();
+        }
+    });
+
+
+});
 </script>
 <script>
     var editor;  // 定义全局变量以存储编辑器实例
@@ -518,34 +570,7 @@
                     }
                     timer = setInterval("CountDown()", 1000);
 </script>
-{#<script>#}
-{#    $(document).ready(function () {#}
-{#        $('.notification-item').on('click', function (event) {#}
-{##}
-{#            var notificationId = $(this).data('notification-id');#}
-{#            $.ajax({#}
-{#                url: "{% url 'student_app:notification_content' %}",#}
-{#                type: 'POST',#}
-{#                data: {#}
-{#                    'notification_id': notificationId,#}
-{#                    'csrfmiddlewaretoken': '{{ csrf_token }}'#}
-{#                },#}
-{#                success: function (response) {#}
-{#                    // 更新模态框的内容#}
-{#                    $('#notificationModalLabel').text(response.title);#}
-{#                    $('#notificationModalContent').text(response.content);#}
-{#                    // 显示模态框#}
-{#                    $('#notificationModal').modal('show');#}
-{#                    #}
-{#                },#}
-{#                error: function (response) {#}
-{#                    alert(response.responseJSON.message);#}
-{##}
-{#                }#}
-{#            });#}
-{#        });#}
-{#    });#}
-{#</script>#}
+{#AI#}
 <script>
 $(document).ready(function() {
   $('#aiForm').on('submit', function(e) {
