@@ -93,3 +93,36 @@ class AdminExamQuestionCompletion(models.Model):
     def __str__(self):
         return f"{self.student.name} - {self.adminexam_question} - 完成: {bool(self.completed_at)}"
 
+
+class StudentCode(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="学生",
+                                related_name='student_codes')
+    code = models.TextField(verbose_name="代码")
+    question_type = models.CharField(verbose_name="题目类型", max_length=255, null=True, blank=True)
+    question_id = models.CharField(verbose_name="题目id", max_length=255, null=True, blank=True)
+    created_at = models.DateTimeField(verbose_name="提交时间", auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.student.name} - {self.question_type} - {self.question_id} - {self.created_at}"
+
+
+class TestResult(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="学生",
+                                related_name='test_results')
+    question_type = models.CharField(verbose_name="题目类型", max_length=255, null=True, blank=True)
+    question_id = models.CharField(verbose_name="题目id", max_length=255, null=True, blank=True)
+
+    status = models.CharField(max_length=20, null=True, blank=True)
+    type = models.CharField(max_length=20, null=True, blank=True)
+    error = models.TextField(null=True, blank=True)
+    passed_tests = models.IntegerField(null=True, blank=True)
+
+
+class Testcase(models.Model):
+    testcase = models.IntegerField()
+    status = models.CharField(max_length=20)
+    type = models.CharField(max_length=20)
+    error = models.TextField(null=True, blank=True)
+    execution_time = models.FloatField(null=True, blank=True)
+    testresult = models.ForeignKey(TestResult, on_delete=models.CASCADE, related_name='testcase_results')
+

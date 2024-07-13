@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import (Student, Score, ExerciseCompletion, ExerciseQuestionCompletion,
+from .models import (Student, Score, ExerciseCompletion, ExerciseQuestionCompletion, StudentCode,
                      ExamCompletion, ExamQuestionCompletion, AdminExamCompletion, AdminExamQuestionCompletion,)
 
 # Register your models here.
@@ -11,3 +11,4 @@ admin.site.register(ExamCompletion)
 admin.site.register(ExamQuestionCompletion)
 admin.site.register(AdminExamCompletion)
 admin.site.register(AdminExamQuestionCompletion)
+admin.site.register(StudentCode)

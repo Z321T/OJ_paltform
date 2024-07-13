@@ -1,19 +1,59 @@
 from __future__ import absolute_import, unicode_literals
-# from celery import shared_task
 import subprocess
-from administrator_app.models import AdminExamQuestion, AdminExamQuestionTestCase
-from teacher_app.models import (ExerciseQuestion, ExamQuestion,
-                                ExerciseQuestionTestCase, ExamQuestionTestCase)
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from django.core.exceptions import ObjectDoesNotExist
+
 import time
 import os
 
 
-# @shared_task
-def test_cpp_code(code, types, question_id):
+def scan_and_run():
+    from student_app.models import StudentCode
+
+    while True:
+        try:
+            student_code = StudentCode.objects.first()
+            if student_code:
+                # 运行函数
+                test_cpp_code(student_code.student, student_code.code,
+                              student_code.question_type, student_code.question_id)
+                # 删除已处理的实例
+                student_code.delete()
+            else:
+                break
+        except ObjectDoesNotExist:
+            break
+
+
+def start():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(scan_and_run, 'interval', seconds=10)
+    scheduler.start()
+
+
+def test_cpp_code(student, code, types, question_id):
+    from student_app.models import TestResult, Testcase
+    from administrator_app.models import AdminExamQuestion, AdminExamQuestionTestCase
+    from teacher_app.models import (ExerciseQuestion, ExamQuestion,
+                                    ExerciseQuestionTestCase, ExamQuestionTestCase)
     print('Running test_cpp_code')
     # 将C++代码写入一个文件
     with open('temp.cpp', 'w') as file:
         file.write(code)
+
+    # 创建一个新的TestResult实例
+    test_result = TestResult.objects.update_or_create(
+        student=student,
+        question_type=types,
+        question_id=question_id,
+        defaults={
+            'status': None,
+            'type': None,
+            'error': None,
+            'passed_tests': None,
+        },
+    )
 
     # 获取与题目相关的测试用例
     if types == 'exercise':
@@ -28,8 +68,6 @@ def test_cpp_code(code, types, question_id):
 
     # 初始化通过的测试用例的计数器
     passed_tests = 0
-    # 创建一个列表来收集测试用例的信息
-    tests_results = []
 
     # 逐个运行测试用例
     for i, testcase in enumerate(testcases):
@@ -47,52 +85,90 @@ def test_cpp_code(code, types, question_id):
             if result.returncode == 0:  # 如果运行成功
                 if result.stdout.strip() == testcase.expected_output.strip():
                     passed_tests += 1
-                    tests_results.append({
-                        'testcase': i + 1,
-                        'status': 'success',
-                        'output': result.stdout,
-                        'time': execution_time,
-                        'type': '答案正确'
-                    })
-                else:
-                    tests_results.append({
-                        'testcase': i + 1,
-                        'status': 'failure',
-                        'output': result.stdout,
-                        'error': 'Wrong answer',
-                        'time': execution_time,
-                        'type': '答案错误'
-                    })
+                    Testcase.objects.update_or_create(
+                        testcase=i + 1,
+                        defaults={
+                            'status': 'success',
+                            'type': '答案正确',
+                            'error': None,
+                            'execution_time': execution_time,
+                            'testresult': test_result,
+                        },
+                    )
 
-            else:  # 如果编译或运行出错,直接返回错误信息
-                return {
-                    'status': 'compile error',
-                    'error': result.stderr,
-                    'time': execution_time,
-                    'type': '编译错误'
-                }
+                else:
+                    Testcase.objects.update_or_create(
+                        testcase=i + 1,
+                        defaults={
+                            'status': 'failure',
+                            'type': '答案错误',
+                            'error': result.stdout,
+                            'execution_time': execution_time,
+                            'testresult': test_result,
+                        },
+                    )
+
+            else:  # 如果编译或运行出错
+                test_result = TestResult.objects.update_or_create(
+                    student=student,
+                    question_type=types,
+                    question_id=question_id,
+                    defaults={
+                        'status': 'compile error',
+                        'type': '编译错误',
+                        'error': result.stderr,
+                        'passed_tests': None,
+                    },
+                )
 
         except subprocess.TimeoutExpired:  # 如果运行超时
-            tests_results.append({
-                'testcase': i + 1,
-                'status': 'failure',
-                'error': 'Execution timed out',
-                'type': '运行超时'
-            })
+            Testcase.objects.update_or_create(
+                testcase=i + 1,
+                defaults={
+                    'status': 'failure',
+                    'type': '运行超时',
+                    'error': '运行超时',
+                    'execution_time': execution_time,
+                    'testresult': test_result,
+                },
+            )
 
         except Exception as e:  # 如果发生其他异常
-            return {
-                'status': 'error',
-                'error': str(e),
-                'type': '其他错误'
-            }
+            test_result = TestResult.objects.update_or_create(
+                student=student,
+                question_type=types,
+                question_id=question_id,
+                defaults={
+                    'status': 'error',
+                    'type': '其他错误',
+                    'error': str(e),
+                    'passed_tests': None,
+                },
+            )
 
-    # 返回所有测试用例的结果
-    return {
-        'status': 'pass' if passed_tests == len(testcases) else 'fail',
-        'tests_results': tests_results,
-        'passed_tests': passed_tests
-    }
-
+    if passed_tests == len(testcases):
+        test_result = TestResult.objects.update_or_create(
+            student=student,
+            question_type=types,
+            question_id=question_id,
+            defaults={
+                'status': 'pass',
+                'type': '全部通过',
+                'error': None,
+                'passed_tests': passed_tests,
+            },
+        )
+    else:
+        test_result = TestResult.objects.update_or_create(
+            student=student,
+            question_type=types,
+            question_id=question_id,
+            defaults={
+                'status': 'fail',
+                'type': '部分通过',
+                'error': None,
+                'passed_tests': passed_tests,
+            },
+        )
 
 
