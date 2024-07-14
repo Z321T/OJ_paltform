@@ -1,26 +1,26 @@
 import os
 import docx
-import requests
+import time
 import tempfile
 from io import BytesIO
 
 from django.utils import timezone
-from django.contrib import messages
 from django.db.models import Sum
+from django.forms.models import model_to_dict
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password, check_password
 
 from administrator_app.models import ProgrammingExercise, AdminExam, AdminExamQuestion
 from student_app.models import (Student, Score, ExerciseCompletion, ExerciseQuestionCompletion,
+                                StudentCode, TestResult, Testcase,
                                 ExamCompletion, ExamQuestionCompletion,
                                 AdminExamCompletion, AdminExamQuestionCompletion)
 from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, ExamQuestion, ReportScore
 from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
 from login.views import check_login
-from CUMT.task import test_cpp_code
-# from celery.result import AsyncResult
 
 
 # 学生主页
@@ -50,6 +50,7 @@ def report_student(request, programmingexercise_id):
 
     student = Student.objects.get(userid=user_id)
     programming_exercise = get_object_or_404(ProgrammingExercise, id=programmingexercise_id)
+
     if request.method == 'GET':
         notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
@@ -59,6 +60,10 @@ def report_student(request, programmingexercise_id):
             'programming_exercise': programming_exercise,
         }
         return render(request, 'report_student.html', context)
+
+    # 检查截止时间
+    if timezone.now() > programming_exercise.deadline:
+        return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交报告'})
 
     if request.method == 'POST':
         reportstandards = ReportScore.objects.filter(teacher=student.class_assigned.teacher)
@@ -493,11 +498,6 @@ def coding_adminexam(request, examquestion_id):
     return render(request, 'coding_student.html', context)
 
 
-# def call_node_api(request):
-#     response = requests.get('http://localhost:3000/api')  # Node.js服务器的地址
-#     return HttpResponse(response.json())
-
-
 # 标记完成的题目
 def mark_exercise_question_as_completed(student, exercise_question):
     ExerciseQuestionCompletion.objects.create(
@@ -570,20 +570,33 @@ def run_cpp_code(request):
         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
 
-        # 调用 Celery 任务
-        # task = test_cpp_code.delay(user_code, types, question_id)
-        result = test_cpp_code(user_code, types, question_id)
-        print('运行结果', result)
-        # # 获取任务的UUID
-        # task_id = task.id
+        StudentCode.objects.update_or_create(
+            student=student,
+            question_type=types,
+            question_id=question_id,
+            defaults={'code': user_code},
+        )
 
-        # # 创建一个AsyncResult对象
-        # result = AsyncResult(task_id)
+        result = None
+        for _ in range(50):
+            try:
+                result = TestResult.objects.get(student=student, question_type=types, question_id=question_id)
+                if result.status is not None:
+                    print('得到运行结果', result.status)
+                    testcases = result.testcase_results.all()
+                    # 将对象转换为字典
+                    result_dict = model_to_dict(result)
+                    testcases_dict_list = [model_to_dict(testcase) for testcase in testcases]
+                    result_dict['testcases'] = testcases_dict_list
+                    break
+            except ObjectDoesNotExist:
+                time.sleep(5)
+        if result is None:
+            return JsonResponse({'error': '测试出现错误，请重新提交'}, status=400)
 
         # 获取任务结果
         try:
-            result = result.get()
-            if result['status'] == 'pass':
+            if result.status == 'pass':
                 # 测试用例全部通过的情况
                 if types == 'exercise':
                     question = ExerciseQuestion.objects.get(id=question_id)
@@ -610,12 +623,12 @@ def run_cpp_code(request):
                         defaults={'score': 10}
                     )
                 print('返回结果-通过')
-                return JsonResponse(result)
+                return JsonResponse(result_dict)
 
-            elif result['status'] == 'fail':
+            elif result.status == 'fail':
                 # 测试用例未全部通过的情况
-                passed_tests = result['passed_tests']
-                total_tests = len(result['tests_results'])
+                passed_tests = result.passed_tests
+                total_tests = len(testcases)
                 score = round((passed_tests / total_tests) * 10, 3)
 
                 if types == 'exercise':
@@ -642,85 +655,20 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': score}
                     )
-                print('返回结果-未通过')
-                return JsonResponse(result)
+                print('返回结果-未全部通过')
+                return JsonResponse(result_dict)
 
-            elif result['status'] == 'compile error':
+            elif result.status == 'compile error':
                 # 出现编译错误的情况
                 print('返回结果-编译错误')
-                return JsonResponse({'error': result['error']})
+                return JsonResponse({'error': result.error})
 
         except Exception as e:
             return JsonResponse({'error': str(e)})
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
-# def run_cpp_code(request):
-#     user_id = request.session.get('user_id')
-#     if check_login(user_id):
-#         return redirect('/login/')
-#
-#     student = Student.objects.get(userid=user_id)
-#     if request.method == 'POST':
-#         user_code = request.POST.get('code', '')  # 从表单数据中获取代码
-#         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
-#         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
-#
-#         with open('temp.cpp', 'w') as f:
-#             f.write(user_code)
-#
-#         try:
-#             start_time = time.time()  # 记录开始时间
-#             result = subprocess.run(
-#                 ['docker', 'run', '--rm', '-v', f"{os.getcwd()}:/app",
-#                  '-w', '/app', '-m', '512m', '--cpus', '1', 'cpp-runner',
-#                  'bash', '-c', 'g++ temp.cpp -o temp && ./temp'],
-#                 capture_output=True, text=True, timeout=30
-#             )
-#             execution_time = time.time() - start_time  # 计算执行时间
-#
-#             if result.returncode == 0:  # 如果运行成功
-#                 if types == 'exercise':
-#                     question = ExerciseQuestion.objects.get(id=question_id)
-#                 elif types == 'exam':
-#                     question = ExamQuestion.objects.get(id=question_id)
-#                 else:
-#                     question = AdminExamQuestion.objects.get(id=question_id)
-#                 if question.answer == result.stdout:
-#                     if types == 'exercise':
-#                         mark_exercise_question_as_completed(student, question)
-#                         Score.objects.update_or_create(
-#                             student=student,
-#                             exercise_question=question,
-#                             defaults={'score': 10}
-#                         )
-#                     elif types == 'exam':
-#                         mark_exam_question_as_completed(student, question)
-#                         Score.objects.update_or_create(
-#                             student=student,
-#                             exam_question=question,
-#                             defaults={'score': 10}
-#                         )
-#                     else:
-#                         mark_adminexam_question_as_completed(student, question)
-#                         Score.objects.update_or_create(
-#                             student=student,
-#                             adminexam_question=question,
-#                             defaults={'score': 10}
-#                         )
-#                     # 这里仅返回了执行结果和时间，与前端代码对应
-#                     return JsonResponse({'status': 'success', 'message': '题目作答正确',
-#                                          'output': result.stdout, 'time': execution_time})
-#                 else:
-#                     return JsonResponse({'output': result.stdout, 'error': 'Wrong answer', 'time': execution_time})
-#             else:  # 如果编译或运行出错
-#                 return JsonResponse({'error': result.stderr, 'time': execution_time})
-#         except subprocess.TimeoutExpired:  # 如果运行超时
-#             return JsonResponse({'error': 'Execution timed out'})
-#         except Exception as e:  # 如果发生其他异常
-#             return JsonResponse({'error': str(e)})
-#     else:
-#         return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 
 

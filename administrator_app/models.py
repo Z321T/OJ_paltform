@@ -50,7 +50,6 @@ class AdminExamQuestion(models.Model):
     content = models.TextField(verbose_name="题目内容")
     memory_limit = models.IntegerField(verbose_name="内存限制", default=0)
     time_limit = models.IntegerField(verbose_name="时间限制", default=0)
-    answer = models.TextField(verbose_name="答案", null=True, blank=True)
 
     def __str__(self):
         return f"{self.exam.title} - {self.content}"
