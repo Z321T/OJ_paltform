@@ -30,25 +30,6 @@
         }
     }
 
-    .chartjs-render-monitor {
-        animation: chartjs-render-animation 1ms
-    }
-
-    .chartjs-size-monitor,
-    .chartjs-size-monitor-expand,
-    .chartjs-size-monitor-shrink {
-        position: absolute;
-        direction: ltr;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        overflow: hidden;
-        pointer-events: none;
-        visibility: hidden;
-        z-index: -1
-    }
-
     .chartjs-size-monitor-expand > div {
         position: absolute;
         width: 1000000px;
@@ -99,12 +80,6 @@
     <style>
         table tbody tr:hover {
             background-color: #f2f2f2;
-        }
-
-        .card-item.card-title:hover {
-            background-color: #f2f2f2;
-            cursor: pointer;
-
         }
 
         .modal-custom {

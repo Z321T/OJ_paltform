@@ -22,41 +22,11 @@
     <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
 
     <style>
-        .recipient-container {
-            display: flex; /* 使用 Flexbox 实现横向排列 */
-            flex-wrap: wrap; /* 允许卡片换行 */
-            gap: 10px; /* 卡片之间的间隔 */
-        }
-
-        .class-tag {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            background-color: #f0f0f0; /* 卡片背景色 */
-            border: 1px solid #ccc; /* 卡片边框 */
-            border-radius: 5px; /* 边框圆角 */
-        }
-
-        .remove-class {
-            margin-left: 10px;
-            cursor: pointer;
-        }
-
         .container {
             display: flex;
             height: 100vh;
         }
-
-        .class-list {
-            width: 20%;
-            background-color: #f0f0f0; /* 灰白色背景 */
-            padding: 20px;
-            overflow-y: auto;
-            box-sizing: border-box;
-            border: 2px solid #ccc; /* 灰色边框 */
-            border-radius: 10px;
-        }
-
+        
         .class-list h3 {
             margin-top: 0;
         }
@@ -113,13 +83,6 @@
             border-radius: 5px;
         }
 
-        #my-table {
-            width: 100%; /* 或者你可以指定一个固定的宽度，如 500px */
-            height: 500px; /* 表格的高度 */
-            border-collapse: collapse; /* 使边框合并为单一边框 */
-            border: 2px solid #cccccc; /* 表格外边框 */
-        }
-
         #my-table td {
             border-bottom: 1px solid black; /* 单元格横线 */
         }
@@ -151,25 +114,6 @@
         to {
             opacity: 1
         }
-    }
-
-    .chartjs-render-monitor {
-        animation: chartjs-render-animation 1ms
-    }
-
-    .chartjs-size-monitor,
-    .chartjs-size-monitor-expand,
-    .chartjs-size-monitor-shrink {
-        position: absolute;
-        direction: ltr;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        overflow: hidden;
-        pointer-events: none;
-        visibility: hidden;
-        z-index: -1
     }
 
     .chartjs-size-monitor-expand > div {

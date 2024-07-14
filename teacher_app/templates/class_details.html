@@ -31,33 +31,6 @@
         }
     }
 
-    .chartjs-render-monitor {
-        animation: chartjs-render-animation 1ms
-    }
-
-    .chartjs-size-monitor,
-    .chartjs-size-monitor-expand,
-    .chartjs-size-monitor-shrink {
-        position: absolute;
-        direction: ltr;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        overflow: hidden;
-        pointer-events: none;
-
-        #eventList li {
-            padding: 10px;
-            border-bottom: 1px solid #ccc; /* 添加分割线 */
-        }
-
-        #eventList li:last-child {
-            border-bottom: none; /* 最后一个列表项不需要分割线 */
-        }        visibility: hidden;
-        z-index: -1
-    }
-
     .chartjs-size-monitor-expand > div {
         position: absolute;
         width: 1000000px;
@@ -106,31 +79,6 @@
 
     </script>
     <style>
-        .content-container {
-            position: relative; /* 设置相对定位 */
-            left: 250px;
-            width: 60%; /* 固定宽度 */
-            height: 800px; /* 固定高度 */
-            border: 2px solid purple; /* 边框，以便内容窗口可见 */
-            border-radius: 10px;
-        }
-
-        .content-window {
-            display: flex; /* 使用Flexbox布局 */
-            align-items: start; /* 使表格和控制按钮顶部对齐 */
-            width: 90%;
-            height: 90%; /* 充满容器 */
-            max-height: 1200px; /* 设置表格的最大高度 */
-            overflow-y: auto; /* 如果内容超出，显示滚动条 */
-        }
-
-        .table-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-
-        }
 
         .table-container table {
             width: 100%; /* 表格宽度充满容器 */
