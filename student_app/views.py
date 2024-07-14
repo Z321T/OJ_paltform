@@ -14,7 +14,7 @@ from django.contrib.auth.hashers import make_password, check_password
 
 from administrator_app.models import ProgrammingExercise, AdminExam, AdminExamQuestion
 from student_app.models import (Student, Score, ExerciseCompletion, ExerciseQuestionCompletion,
-                                StudentCode, TestResult, Testcase,
+                                StudentCode, TestResult,
                                 ExamCompletion, ExamQuestionCompletion,
                                 AdminExamCompletion, AdminExamQuestionCompletion)
 from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, ExamQuestion, ReportScore
