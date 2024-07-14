@@ -1,5 +1,6 @@
 import json
 
+from functools import wraps
 from django.contrib.auth import login, logout
 from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ObjectDoesNotExist
@@ -75,3 +76,14 @@ def check_login(user_id):
         except ObjectDoesNotExist:
             continue
     return True
+
+
+# 装饰器，检测用户是否登录
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        user_id = request.session.get('user_id')
+        if check_login(user_id):
+            return redirect('/login/')
+        return view_func(request, *args, **kwargs)
+    return wrapper

@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from BERT_app.models import ProgrammingCodeFeature, ProgrammingReportFeature, ReportStandardScore
 from BERT_app.views import compute_cosine_similarity
 from administrator_app.models import AdminNotification, ProgrammingExercise, AdminExam, AdminExamQuestion
-from login.views import check_login
+from login.views import login_required
 from teacher_app.models import (Teacher, Class, Notification,
                                 Exercise, ExerciseQuestion, Exam, ExamQuestion, ReportScore,
                                 ExerciseQuestionTestCase, ExamQuestionTestCase)
@@ -19,13 +19,11 @@ from student_app.models import (Student, ExerciseCompletion, ExamCompletion, Sco
                                 AdminExamCompletion, AdminExamQuestionCompletion)
 
 
-# Create your views here.
 # 教师主页
+@login_required
 def home_teacher(request):
     # 获取用户id，若没有登录则返回登录页面
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     programing_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
@@ -40,10 +38,9 @@ def home_teacher(request):
 
 
 # 教师主页-查看报告
+@login_required
 def repeat_report(request, programmingexercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=request.session.get('user_id'))
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
@@ -59,10 +56,9 @@ def repeat_report(request, programmingexercise_id):
 
 
 # 教师主页-查看报告-获取文本数据
+@login_required
 def repeat_report_details(request, programmingexercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     class_id = request.GET.get('class_id')
     students = Student.objects.filter(class_assigned=class_id)
@@ -115,10 +111,9 @@ def repeat_report_details(request, programmingexercise_id):
 
 
 # 教师主页-查看报告-获取代码数据
+@login_required
 def repeat_code_details(request, programmingexercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     class_id = request.GET.get('class_id')
     students = Student.objects.filter(class_assigned=class_id)
@@ -171,10 +166,9 @@ def repeat_code_details(request, programmingexercise_id):
 
 
 # 教师主页-规范性评分
+@login_required
 def standard_report(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
@@ -219,10 +213,10 @@ def standard_report(request):
 
 
 # 教师主页-查看报告-得分详情
+@login_required
 def scores_details(request, programmingexercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
+
     # 获取特定编程题目，班级所有学生的代码规范性得分
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
@@ -251,10 +245,9 @@ def scores_details(request, programmingexercise_id):
 
 
 # 作业情况
+@login_required
 def coursework_exercise(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     Exercise.objects.filter(title="默认标题").delete()
 
@@ -273,10 +266,9 @@ def coursework_exercise(request):
     return render(request, 'coursework_exercise.html', context)
 
 
+@login_required
 def coursework_exam(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     Exam.objects.filter(title="默认标题").delete()
 
@@ -295,10 +287,9 @@ def coursework_exam(request):
     return render(request, 'coursework_exam.html', context)
 
 
+@login_required
 def coursework_adminexam(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     AdminExam.objects.filter(title="默认标题").delete()
 
@@ -318,10 +309,9 @@ def coursework_adminexam(request):
 
 
 # 作业情况：获取数据
+@login_required
 def coursework_data(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
 
@@ -372,10 +362,9 @@ def coursework_data(request):
 
 
 # 作业情况：练习详情
+@login_required
 def coursework_exercise_details(request, class_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
@@ -395,10 +384,9 @@ def coursework_exercise_details(request, class_id):
 
 
 # 作业情况：考试详情
+@login_required
 def coursework_exam_details(request, class_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
@@ -418,10 +406,9 @@ def coursework_exam_details(request, class_id):
 
 
 # 作业情况：年级考试详情
+@login_required
 def coursework_adminexam_details(request, class_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
@@ -440,10 +427,9 @@ def coursework_adminexam_details(request, class_id):
 
 
 # 作业情况-详情界面：获取数据
+@login_required
 def coursework_details_data(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         data_type = request.POST.get('type')
@@ -567,10 +553,9 @@ def coursework_details_data(request):
 
 
 # 题库管理
+@login_required
 def repository_teacher(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
@@ -590,10 +575,9 @@ def repository_teacher(request):
 
 
 # 题库管理：练习列表
+@login_required
 def exercise_list_default(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
@@ -609,10 +593,9 @@ def exercise_list_default(request):
                   {'classes': classes, 'exercise': exercise})
 
 
+@login_required
 def exercise_list(request, exercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
@@ -635,10 +618,9 @@ def exercise_list(request, exercise_id):
 
 
 # 题库管理：练习列表-创建练习
+@login_required
 def create_exercise(request, exercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     exercise = get_object_or_404(Exercise, id=exercise_id)
     if request.method == 'POST':
@@ -668,10 +650,9 @@ def create_exercise(request, exercise_id):
 
 
 # 题库管理：练习列表-修改练习题
+@login_required
 def exercise_edit(request, exercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
@@ -684,10 +665,9 @@ def exercise_edit(request, exercise_id):
 
 
 # 题库管理：练习列表-删除练习
+@login_required
 def exercise_delete(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         exercise_id = request.POST.get('exercise_id')
@@ -704,10 +684,9 @@ def exercise_delete(request):
 
 
 # 题库管理：练习列表-删除练习题
+@login_required
 def exercisequestion_delete(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         question_id = request.POST.get('question_id')
@@ -722,10 +701,9 @@ def exercisequestion_delete(request):
 
 
 # 题库管理：考试列表
+@login_required
 def exam_list_default(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
@@ -741,10 +719,9 @@ def exam_list_default(request):
                   {'classes': classes, 'exam': exam})
 
 
+@login_required
 def exam_list(request, exam_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
@@ -767,10 +744,9 @@ def exam_list(request, exam_id):
 
 
 # 题库管理：考试列表-创建考试
+@login_required
 def create_exam(request, exam_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     exam = get_object_or_404(Exam, id=exam_id)
     if request.method == 'POST':
@@ -800,10 +776,9 @@ def create_exam(request, exam_id):
 
 
 # 题库管理：考试列表-修改考试题
+@login_required
 def exam_edit(request, exam_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
@@ -816,10 +791,9 @@ def exam_edit(request, exam_id):
 
 
 # 题库管理：考试列表-删除考试
+@login_required
 def exam_delete(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         exam_id = request.POST.get('exam_id')
@@ -836,10 +810,9 @@ def exam_delete(request):
 
 
 # 题库管理：考试列表-删除考试题
+@login_required
 def examquestion_delete(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         question_id = request.POST.get('question_id')
@@ -854,10 +827,9 @@ def examquestion_delete(request):
 
 
 # 通知界面
+@login_required
 def notice_teacher(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
@@ -873,10 +845,9 @@ def notice_teacher(request):
 
 
 # 发布通知
+@login_required
 def create_notice(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
@@ -897,10 +868,9 @@ def create_notice(request):
 
 
 # 删除通知
+@login_required
 def delete_notice(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
@@ -915,10 +885,9 @@ def delete_notice(request):
 
 
 # 通知详情
+@login_required
 def notification_content(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
@@ -929,10 +898,9 @@ def notification_content(request):
 
 
 # 班级管理
+@login_required
 def class_teacher(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     teacher = Teacher.objects.get(userid=user_id)
@@ -947,10 +915,9 @@ def class_teacher(request):
 
 
 # 班级管理：创建班级
+@login_required
 def create_class(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     context = {
@@ -980,10 +947,9 @@ def create_class(request):
 
 
 # 班级管理：删除班级
+@login_required
 def delete_class(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         class_id = request.POST.get('class_id')
@@ -997,10 +963,9 @@ def delete_class(request):
 
 
 # 班级管理：班级详情
+@login_required
 def class_details(request, class_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
@@ -1020,10 +985,9 @@ def class_details(request, class_id):
 
 
 # 班级管理：删除学生
+@login_required
 def delete_student(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
@@ -1040,10 +1004,9 @@ def delete_student(request):
 
 
 # 班级管理：初始化密码
+@login_required
 def reset_password(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         student = Student.objects.get(id=request.POST.get('student_id'))
@@ -1060,10 +1023,9 @@ def reset_password(request):
 
 
 # 教师个人中心
+@login_required
 def profile_teacher(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=request.session.get('user_id'))
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
@@ -1077,10 +1039,9 @@ def profile_teacher(request):
 
 
 # 教师个人中心-编辑
+@login_required
 def profile_teacher_edit(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
@@ -1103,10 +1064,9 @@ def profile_teacher_edit(request):
 
 
 # 教师个人中心-修改密码
+@login_required
 def profile_teacher_password(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     teacher = Teacher.objects.get(userid=user_id)
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')

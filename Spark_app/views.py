@@ -1,8 +1,6 @@
 # coding: utf-8
 from django.http import JsonResponse
 
-# from Spark_app import spark_api as SparkApi
-
 import _thread as thread
 import base64
 import datetime
@@ -10,7 +8,7 @@ import hashlib
 import hmac
 import html
 import json
-import time
+
 from urllib.parse import urlparse
 import ssl
 from datetime import datetime

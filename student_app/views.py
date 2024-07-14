@@ -20,14 +20,13 @@ from student_app.models import (Student, Score, ExerciseCompletion, ExerciseQues
 from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, ExamQuestion, ReportScore
 from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
-from login.views import check_login
+from login.views import login_required
 
 
 # 学生主页
+@login_required
 def home_student(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -43,10 +42,9 @@ def home_student(request):
 
 
 # 学生主页：提交报告
+@login_required
 def report_student(request, programmingexercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     programming_exercise = get_object_or_404(ProgrammingExercise, id=programmingexercise_id)
@@ -103,10 +101,9 @@ def report_student(request, programmingexercise_id):
 
 
 # 我的练习
+@login_required
 def practice_student(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -122,10 +119,9 @@ def practice_student(request):
 
 
 # 我的练习：练习详情
+@login_required
 def practice_list(request, exercise_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -141,10 +137,9 @@ def practice_list(request, exercise_id):
 
 
 # 我的考试
+@login_required
 def exam_student(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -163,10 +158,9 @@ def exam_student(request):
 
 
 # 我的考试：教师考试详情
+@login_required
 def teacherexam_list(request, exam_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -182,10 +176,9 @@ def teacherexam_list(request, exam_id):
 
 
 # 我的考试：管理员考试详情
+@login_required
 def adminexam_list(request, exam_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -201,10 +194,9 @@ def adminexam_list(request, exam_id):
 
 
 # 学情分析
+@login_required
 def analyse_exercise(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -218,10 +210,9 @@ def analyse_exercise(request):
     return render(request, 'analyse_exercise.html', context)
 
 
+@login_required
 def analyse_exam(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -235,10 +226,9 @@ def analyse_exam(request):
     return render(request, 'analyse_exam.html', context)
 
 
+@login_required
 def analyse_data(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     class_assigned = student.class_assigned
@@ -338,10 +328,9 @@ def analyse_data(request):
 
 
 # 学生个人中心
+@login_required
 def profile_student(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -356,10 +345,9 @@ def profile_student(request):
 
 
 # 学生个人中心-编辑
+@login_required
 def profile_student_edit(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -380,10 +368,9 @@ def profile_student_edit(request):
 
 
 # 学生个人中心-修改密码
+@login_required
 def profile_student_password(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -412,10 +399,9 @@ def profile_student_password(request):
 
 
 # 通知内容
+@login_required
 def notification_content(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
@@ -426,10 +412,9 @@ def notification_content(request):
 
 
 # 答题界面
+@login_required
 def coding_exercise(request, exercisequestion_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'GET':
         question = get_object_or_404(ExerciseQuestion, id=exercisequestion_id)
@@ -445,10 +430,9 @@ def coding_exercise(request, exercisequestion_id):
     return render(request, 'coding_student.html')
 
 
+@login_required
 def coding_exam(request, examquestion_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     if request.method == 'GET':
         question = get_object_or_404(ExamQuestion, id=examquestion_id)
@@ -464,10 +448,9 @@ def coding_exam(request, examquestion_id):
     return render(request, 'coding_student.html')
 
 
+@login_required
 def coding_adminexam(request, examquestion_id):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
@@ -558,10 +541,9 @@ def mark_adminexam_question_as_completed(student, adminexam_question):
 
 
 # 运行C++代码
+@login_required
 def run_cpp_code(request):
     user_id = request.session.get('user_id')
-    if check_login(user_id):
-        return redirect('/login/')
 
     student = Student.objects.get(userid=user_id)
     if request.method == 'POST':

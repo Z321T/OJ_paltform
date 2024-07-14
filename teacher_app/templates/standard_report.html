@@ -30,25 +30,6 @@
         }
     }
 
-    .chartjs-render-monitor {
-        animation: chartjs-render-animation 1ms
-    }
-
-    .chartjs-size-monitor,
-    .chartjs-size-monitor-expand,
-    .chartjs-size-monitor-shrink {
-        position: absolute;
-        direction: ltr;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        overflow: hidden;
-        pointer-events: none;
-        visibility: hidden;
-        z-index: -1
-    }
-
     .chartjs-size-monitor-expand > div {
         position: absolute;
         width: 1000000px;
@@ -102,14 +83,19 @@
 
     </script>
     <style>
-            .title-container {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 20px;
-            }
+    .title-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
-        </style>
+    .center-button {
+        display: flex;
+        justify-content: center;
+    }
+
+    </style>
 
     <!-- 引入Echarts -->
     <script src="{% static 'node_modules/echarts/dist/echarts.min.js' %}"></script>
@@ -309,7 +295,9 @@
                                                         </tr>
                                                         </tbody>
                                                     </table>
-                                                    <input type="submit" class="btn-default" value="提交">
+                                                    <div class="center-button">
+                                                        <input type="submit" class="btn-default" value="提交">
+                                                    </div>
                                                 </form>
                                             </div>
                                         </div>
