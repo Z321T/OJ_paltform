@@ -13,6 +13,9 @@ from teacher_app.models import ReportScore, Class
 # 加载 CodeBERT 模型和分词器
 tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
 model = AutoModel.from_pretrained("microsoft/codebert-base")
+# 加载 Sentence-BERT 模型和分词器
+sbert_tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+sbert_model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
 
 
 # 分析程序设计题代码
@@ -53,13 +56,13 @@ def analyze_programming_code(student, code, question_id):
 # 分析程序设计题报告
 def analyze_programming_report(student, report, question_id):
     # 报告分词
-    tokenized_report = tokenizer.tokenize(report)
+    tokenized_report = sbert_tokenizer.tokenize(report)
     features = []
     for i in range(0, len(tokenized_report), 512):
-        inputs = tokenizer(tokenized_report[i:i+512], return_tensors="pt", padding=True, truncation=True, max_length=512)
+        inputs = sbert_tokenizer(tokenized_report[i:i+512], return_tensors="pt", padding=True, truncation=True, max_length=512)
         # 获取特征值
         with torch.no_grad():
-            feature = model(**inputs).last_hidden_state.mean(dim=1)
+            feature = sbert_model.encode(inputs.input_ids.tolist(), convert_to_tensor=True)
             features.append(feature)
     # 连接所有特征值
     concatenated_features = torch.cat(features, dim=0)
@@ -192,24 +195,3 @@ def score_report(student, document, programmingexercise_id):
         defaults={'standard_score': total_score}
     )
 
-# 分析练习与考试代码
-# def analyze_code(student, code, types, question_id=None):
-#     # 分词
-#     tokenized_code = tokenizer.tokenize(code)
-#     features = []
-#     for i in range(0, len(tokenized_code), 512):
-#         inputs = tokenizer(tokenized_code[i:i+512], return_tensors="pt", padding=True, truncation=True, max_length=512)
-#         # 获取特征值
-#         with torch.no_grad():
-#             feature = model(**inputs).last_hidden_state.mean(dim=1)
-#             features.append(feature)
-#     # 连接所有特征值
-#     concatenated_features = torch.cat(features, dim=0)
-#     feature_as_json = json.dumps(concatenated_features.tolist())
-#
-#     if types == 'exercise':
-#         question = ExerciseQuestion.objects.get(id=question_id)
-#         CodeFeature.objects.create(student=student, exercise_question=question, feature=feature_as_json)
-#     elif types == 'exam':
-#         question = ExamQuestion.objects.get(id=question_id)
-#         CodeFeature.objects.create(student=student, exam_question=question, feature=feature_as_json)

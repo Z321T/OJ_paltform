@@ -37,7 +37,6 @@ def test_cpp_code(student, code, types, question_id):
     from administrator_app.models import AdminExamQuestion, AdminExamQuestionTestCase
     from teacher_app.models import (ExerciseQuestion, ExamQuestion,
                                     ExerciseQuestionTestCase, ExamQuestionTestCase)
-    print('Running test_cpp_code')
     # 将C++代码写入一个文件
     with open('temp.cpp', 'w') as file:
         file.write(code)
@@ -80,7 +79,6 @@ def test_cpp_code(student, code, types, question_id):
                 capture_output=True, text=True, timeout=30
             )
             execution_time = time.time() - start_time  # 计算执行时间
-            print('执行完成')
 
             if result.returncode == 0:  # 如果运行成功
                 if result.stdout.strip() == testcase.expected_output.strip():

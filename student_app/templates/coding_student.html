@@ -33,25 +33,6 @@
         }
     }
 
-    .chartjs-render-monitor {
-        animation: chartjs-render-animation 1ms
-    }
-
-    .chartjs-size-monitor,
-    .chartjs-size-monitor-expand,
-    .chartjs-size-monitor-shrink {
-        position: absolute;
-        direction: ltr;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        overflow: hidden;
-        pointer-events: none;
-        visibility: hidden;
-        z-index: -1
-    }
-
     .chartjs-size-monitor-expand > div {
         position: absolute;
         width: 1000000px;
@@ -75,7 +56,6 @@
     </style>
 
     <style>
-         /* Add your custom CSS styles here */
 
     .container-flex {
       display: flex;
@@ -110,7 +90,7 @@
     z-index: 9999; /* 确保它在其他内容之上 */
     box-sizing: border-box;
     padding: 10px; /* 适当的内间距 */
-    max-height: 50vh; /* 制定一个最大高度 */
+    height: 300px; /* 固定高度 */
     overflow: auto; /* 内容太多时可以滚动查看 */
 }
 /* 创建一个拖动把手 */
@@ -180,50 +160,6 @@
                     </div>
                 </li>
             </ul>
-{#            <ul class="navbar-nav navbar-nav-right">#}
-{#                <li class="nav-item dropdown mr-4">#}
-{#                    <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"#}
-{#                       id="notificationDropdown" href="#" data-toggle="dropdown">#}
-{#                        <i class="mdi mdi-bell mx-0"></i>#}
-{#                        <span class="count">{{ notifications.count }}</span>#}
-{#                    </a>#}
-{#                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown"#}
-{#                         aria-labelledby="notificationDropdown" style="height: 200px; overflow-y: auto;">#}
-{#                        <p class="mb-0 font-weight-normal float-left dropdown-header">通知</p>#}
-{#                        {% for notification in notifications %}#}
-{#                            <a class="dropdown-item notification-item" data-notification-id="{{ notification.id }}">#}
-{#                                <div class="item-thumbnail">#}
-{#                                    <div class="item-icon bg-success">#}
-{#                                        <i class="mdi mdi-information mx-0"></i>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                                <div class="item-content">#}
-{#                                    <h6 class="font-weight-normal">{{ notification.title|truncatechars:30 }}</h6>#}
-{#                                    <p class="font-weight-light small-text mb-0 text-muted">#}
-{#                                        {{ notification.date_posted }}#}
-{#                                    </p>#}
-{#                                </div>#}
-{#                            </a>#}
-{#                        {% endfor %}#}
-{#                    </div>#}
-{#                </li>#}
-{#                <li class="nav-item nav-profile dropdown">#}
-{#                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">#}
-{#                        <img src="{% static 'student_app/photo/face5.jpg' %}" alt="profile">#}
-{#                        <span class="nav-profile-name">{{ user_id }}</span>#}
-{#                    </a>#}
-{#                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">#}
-{#                        <a class="dropdown-item" href="{% url 'student_app:profile_student' %}">#}
-{#                            <i class="mdi mdi-settings text-primary"></i>#}
-{#                            设置#}
-{#                        </a>#}
-{#                        <a class="dropdown-item" href="{% url 'login:log_out' %}">#}
-{#                            <i class="mdi mdi-logout text-primary"></i>#}
-{#                            退出#}
-{#                        </a>#}
-{#                    </div>#}
-{#                </li>#}
-{#            </ul>#}
             <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
                     data-toggle="offcanvas">
                 <span class="mdi mdi-menu"></span>
@@ -308,26 +244,6 @@
         </div>
     </div>
 </div>
-{#<!-- Modal -->#}
-{#<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel"#}
-{#     aria-hidden="true">#}
-{#    <div class="modal-dialog" role="document">#}
-{#        <div class="modal-content">#}
-{#            <div class="modal-header">#}
-{#                <h5 class="modal-title" id="notificationModalLabel">通知</h5>#}
-{#                <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
-{#                    <span aria-hidden="true">&times;</span>#}
-{#                </button>#}
-{#            </div>#}
-{#            <div class="modal-body" id="notificationModalContent">#}
-{#                <!-- 通知内容将在这里显示 -->#}
-{#            </div>#}
-{#            <div class="modal-footer">#}
-{#                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-{#</div>#}
 <!-- AI对话模态框 -->
 <div class="modal fade" id="aiModal" tabindex="-1" role="dialog" aria-labelledby="aiModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-custom" role="document">
@@ -390,32 +306,6 @@
 <script src="{% static 'student_app/js/editor_setup.js' %}"></script>
 <script>
     $(document).ready(function () {
-        // 拖动把手的mousedown事件处理函数
-        function handleMouseDown(e) {
-            e.preventDefault();
-            var startY = e.pageY; // 使用 e.pageY 获取鼠标位置的纵坐标
-            var startHeight = $('#debugger').outerHeight();
-            $(document).mousemove(function (e) {
-                var newHeight = startHeight - (e.pageY - startY); // 使用 e.pageY
-                $('#debugger').outerHeight(newHeight);
-            });
-            $(document).mouseup(function () {
-                $(document).off("mousemove");
-            });
-        }
-
-        // 为把手绑定事件处理函数的函数
-        function bindResizer() {
-            $('.resize-handle').off('mousedown').on('mousedown', handleMouseDown);
-        }
-
-        // 在页面加载时添加把手，并绑定事件
-        var resizerHTML = '<div class="resize-handle" style="height: 1px; background: dodgerblue; cursor: row-resize;"></div>';
-        $('#debugger').prepend(resizerHTML); // 将把手添加到 debugger 的顶部
-
-        // 绑定把手的mousedown事件
-        bindResizer();
-
         // 表单提交事件
         $('#codeForm').on('submit', function (event) {
             console.log("提交");
@@ -434,27 +324,21 @@
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function (response) {
-                     // 先移除把手元素
-                    var existingResizer = $('.resize-handle').detach();
                     if (response.status === 'pass') {
-                        $('#debugger').empty().prepend(existingResizer).append(`<p>所有测试用例通过</p>`).show();
-                    } else if (response.status === 'fail') {
-                        $('#debugger').empty().prepend(existingResizer).append(`<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p><p>总测试用例数量: ${response.tests_results.length}</p>`).show();
-                        response.tests_results.forEach(function(test) {
-                            $('#debugger').append(`<p>测试用例 ${test.testcase} 输出: ${test.output}</p>`);
-                        });
-                    } else if (response.status === 'compile error') {
-                        $('#debugger').empty().prepend(existingResizer).append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
+                        $('#debugger').empty().append(`<p>所有测试用例通过</p>`).show();
                     }
-                    // 将把手元素添加回去
-            $('#debugger').prepend(existingResizer);
-            bindResizer();
+                    else if (response.status === 'fail') {
+                        $('#debugger').empty().append(`<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p><p>总测试用例数量: ${response.testcases.length}</p>`).show();
+                        $.each(response.testcases, function(index, testcase) {
+                            $('#debugger').append(`<p>测试用例 ${testcase.testcase} 输出: ${testcase.error}</p>`);
+                        });
+                    }
+                    else if (response.status === 'compile error') {
+                        $('#debugger').empty().append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
+                    }
                 },
                 error: function (error) {
-                    console.error('Error:', error);
-                    var existingResizer = $('.resize-handle').detach();
-                     $('#debugger').empty().prepend(existingResizer).append(`<p>出现错误，请查看控制台。</p>`).show();
-            bindResizer();
+                    $('#debugger').empty().append(`<p>出现错误</p><p>错误信息: ${error.responseJSON.error}</p>`).show();
                 }
             });
         });
@@ -518,34 +402,6 @@
                     }
                     timer = setInterval("CountDown()", 1000);
 </script>
-{#<script>#}
-{#    $(document).ready(function () {#}
-{#        $('.notification-item').on('click', function (event) {#}
-{##}
-{#            var notificationId = $(this).data('notification-id');#}
-{#            $.ajax({#}
-{#                url: "{% url 'student_app:notification_content' %}",#}
-{#                type: 'POST',#}
-{#                data: {#}
-{#                    'notification_id': notificationId,#}
-{#                    'csrfmiddlewaretoken': '{{ csrf_token }}'#}
-{#                },#}
-{#                success: function (response) {#}
-{#                    // 更新模态框的内容#}
-{#                    $('#notificationModalLabel').text(response.title);#}
-{#                    $('#notificationModalContent').text(response.content);#}
-{#                    // 显示模态框#}
-{#                    $('#notificationModal').modal('show');#}
-{#                    #}
-{#                },#}
-{#                error: function (response) {#}
-{#                    alert(response.responseJSON.message);#}
-{##}
-{#                }#}
-{#            });#}
-{#        });#}
-{#    });#}
-{#</script>#}
 <script>
 $(document).ready(function() {
   $('#aiForm').on('submit', function(e) {

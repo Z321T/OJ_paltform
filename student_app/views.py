@@ -6,6 +6,7 @@ from io import BytesIO
 
 from django.utils import timezone
 from django.db.models import Sum
+from django.forms.models import model_to_dict
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
@@ -20,7 +21,6 @@ from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, E
 from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
 from login.views import check_login
-from CUMT.task import test_cpp_code
 
 
 # 学生主页
@@ -50,6 +50,7 @@ def report_student(request, programmingexercise_id):
 
     student = Student.objects.get(userid=user_id)
     programming_exercise = get_object_or_404(ProgrammingExercise, id=programmingexercise_id)
+
     if request.method == 'GET':
         notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
@@ -59,6 +60,10 @@ def report_student(request, programmingexercise_id):
             'programming_exercise': programming_exercise,
         }
         return render(request, 'report_student.html', context)
+
+    # 检查截止时间
+    if timezone.now() > programming_exercise.deadline:
+        return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交报告'})
 
     if request.method == 'POST':
         reportstandards = ReportScore.objects.filter(teacher=student.class_assigned.teacher)
@@ -579,11 +584,15 @@ def run_cpp_code(request):
                 if result.status is not None:
                     print('得到运行结果', result.status)
                     testcases = result.testcase_results.all()
-                break
+                    # 将对象转换为字典
+                    result_dict = model_to_dict(result)
+                    testcases_dict_list = [model_to_dict(testcase) for testcase in testcases]
+                    result_dict['testcases'] = testcases_dict_list
+                    break
             except ObjectDoesNotExist:
                 time.sleep(5)
         if result is None:
-            return JsonResponse({'error': 'No test results found'}, status=400)
+            return JsonResponse({'error': '测试出现错误，请重新提交'}, status=400)
 
         # 获取任务结果
         try:
@@ -614,7 +623,7 @@ def run_cpp_code(request):
                         defaults={'score': 10}
                     )
                 print('返回结果-通过')
-                return JsonResponse(result)
+                return JsonResponse(result_dict)
 
             elif result.status == 'fail':
                 # 测试用例未全部通过的情况
@@ -647,7 +656,7 @@ def run_cpp_code(request):
                         defaults={'score': score}
                     )
                 print('返回结果-未全部通过')
-                return JsonResponse(result)
+                return JsonResponse(result_dict)
 
             elif result.status == 'compile error':
                 # 出现编译错误的情况
