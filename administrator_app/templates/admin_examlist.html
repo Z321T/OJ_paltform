@@ -248,6 +248,10 @@
                         <input id="content" name="content" placeholder="请输入考试题描述">
                     </div>
                     <div class="input-group">
+                        <label for="starttime">开始时间：</label>
+                        <input type="datetime-local" id="starttime" name="starttime" placeholder="请输入开始时间">
+                    </div>
+                    <div class="input-group">
                         <label for="deadline">截止时间：</label>
                         <input type="datetime-local" id="deadline" name="deadline" placeholder="请输入截止时间">
                     </div>
@@ -264,8 +268,8 @@
                                             <thead>
                                             <tr role="row">
                                                 <th>题目</th>
-                                                <th>发布时间</th>
-                                                <th>截止时间</th>
+                                                <th>内存限制</th>
+                                                <th>时间限制</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -273,15 +277,13 @@
                                                 {% for question in exam.questions.all %}
                                                     <tr role="row"
                                                         class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
-                                                        <td>
-                                                            {{ question.title }}
-                                                        </td>
-                                                        <td>{{ exam.published_at }}</td>
-                                                        <td>{{ exam.deadline }}</td>
+                                                        <td>{{ question.title }}</td>
+                                                        <td>{{ question.memory_limit }}</td>
+                                                        <td>{{ question.time_limit }}</td>
                                                     </tr>
                                                 {% empty %}
                                                     <tr>
-                                                        <td colspan="4" style="text-align: center;">没有考试内容</td>
+                                                        <td colspan="3" style="text-align: center;">没有考试内容</td>
                                                     </tr>
                                                 {% endfor %}
                                             {% endwith %}
@@ -333,6 +335,7 @@
     document.getElementById('examFrom').onsubmit = function (event) {
         var title = document.getElementById('title').value.trim();
         var content = document.getElementById('content').value.trim();
+        var starttime = document.getElementById('starttime').value.trim();
         var deadline = document.getElementById('deadline').value.trim();
         var hasQuestions = document.getElementById('has-questions').value === '1'; // 检查隐藏字段的值
 
@@ -340,6 +343,7 @@
 
         if (!title) errorMessages.push('“考试标题”为必填项。');
         if (!content) errorMessages.push('“考试题描述”为必填项。');
+        if (!starttime) errorMessages.push('“开始时间”为必填项。');
         if (!deadline) errorMessages.push('“截止时间”为必填项。');
         // 修改为检查隐藏字段以确定表格是否为空
         if (!hasQuestions) errorMessages.push('“考试列表”不能为空，请添加至少一个考试题目。');

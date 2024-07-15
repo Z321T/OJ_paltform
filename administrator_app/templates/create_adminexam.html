@@ -177,16 +177,14 @@
                 var content = document.querySelector('textarea[name="content"]').value.trim();
                 var memoryLimit = document.querySelector('input[name="memory_limit"]').value.trim();
                 var timeLimit = document.querySelector('input[name="time_limit"]').value.trim();
-                var answer = document.querySelector('textarea[name="answer"]');
-
+                
                 var errors = [];
 
                 if (!title) errors.push("标题不能为空。");
                 if (!content) errors.push("题目内容不能为空。");
                 if (!memoryLimit) errors.push("内存限制不能为空。");
                 if (!timeLimit) errors.push("时间限制不能为空。");
-                if (answer && !answer.value.trim()) errors.push("答案不能为空。");
-
+                
                 var inputRows = document.getElementById('inputRowsContainer').children;
                 for (var i = 0; i < inputRows.length; i++) {
                     var inputs = inputRows[i].getElementsByTagName('input');

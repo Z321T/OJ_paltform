@@ -252,7 +252,7 @@ def exam_administrator(request):
     user_id = request.session.get('user_id')
 
     AdminExam.objects.filter(title="默认标题").delete()
-    exams = AdminExam.objects.all().order_by('-published_at')
+    exams = AdminExam.objects.all().order_by('-starttime')
 
     context = {
         'user_id': user_id,
@@ -270,6 +270,7 @@ def admin_examlist_default(request):
     exam = AdminExam.objects.create(
         title="默认标题",
         content="默认内容",
+        starttime=datetime.now(),
         deadline=datetime.now() + timedelta(days=7),
         teacher=admin
     )
@@ -288,7 +289,7 @@ def admin_examlist(request, exam_id):
     if request.method == 'POST':
         exam.title = request.POST.get('title')
         exam.content = request.POST.get('content')
-        exam.published_at = datetime.now()
+        exam.starttime = request.POST.get('starttime')
         exam.deadline = request.POST.get('deadline')
 
         recipient_class = Class.objects.all()
@@ -311,10 +312,9 @@ def create_adminexam(request, exam_id):
         content = request.POST.get('content')
         memory_limit = request.POST.get('memory_limit')
         time_limit = request.POST.get('time_limit')
-        answer = request.POST.get('answer')
 
         question = AdminExamQuestion(exam=exam, title=title, content=content,
-                                     memory_limit=memory_limit, time_limit=time_limit, answer=answer)
+                                     memory_limit=memory_limit, time_limit=time_limit)
         question.save()
 
         # 遍历提交的测试用例

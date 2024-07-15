@@ -628,10 +628,9 @@ def create_exercise(request, exercise_id):
         content = request.POST.get('content')
         memory_limit = request.POST.get('memory_limit')
         time_limit = request.POST.get('time_limit')
-        answer = request.POST.get('answer')
 
         question = ExerciseQuestion(exercise=exercise, title=title, content=content,
-                                    memory_limit=memory_limit, time_limit=time_limit, answer=answer)
+                                    memory_limit=memory_limit, time_limit=time_limit)
         question.save()
 
         # 遍历提交的测试用例
@@ -754,10 +753,9 @@ def create_exam(request, exam_id):
         content = request.POST.get('content')
         memory_limit = request.POST.get('memory_limit')
         time_limit = request.POST.get('time_limit')
-        answer = request.POST.get('answer')
 
         question = ExamQuestion(exam=exam, title=title, content=content,
-                                memory_limit=memory_limit, time_limit=time_limit, answer=answer)
+                                memory_limit=memory_limit, time_limit=time_limit)
         question.save()
 
         # 遍历提交的测试用例
