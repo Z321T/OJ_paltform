@@ -70,7 +70,7 @@ class ExerciseQuestionTestCase(models.Model):
 class Exam(models.Model):
     title = models.CharField(verbose_name="考试标题", max_length=255)
     content = models.TextField(verbose_name="考试描述")
-    published_at = models.DateTimeField(verbose_name="发布时间", auto_now_add=True)
+    starttime = models.DateTimeField(verbose_name="开始时间")
     deadline = models.DateTimeField(verbose_name="截止时间")
 
     teacher = models.ForeignKey(Teacher, verbose_name="发布教师", on_delete=models.SET_NULL, null=True)

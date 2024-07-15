@@ -33,9 +33,9 @@
             transform: scale(1.2);
         }
  
-   .sidebar .nav .nav-item .nav-link .menu-title  {
-       font-size:16px; /* 调整为需要的大小 */
-   }
+       .sidebar .nav .nav-item .nav-link .menu-title  {
+           font-size:16px; /* 调整为需要的大小 */
+       }
     </style>
     <style>
         .container {
@@ -106,25 +106,6 @@
         }
     }
 
-    .chartjs-render-monitor {
-        animation: chartjs-render-animation 1ms
-    }
-
-    .chartjs-size-monitor,
-    .chartjs-size-monitor-expand,
-    .chartjs-size-monitor-shrink {
-        position: absolute;
-        direction: ltr;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        overflow: hidden;
-        pointer-events: none;
-        visibility: hidden;
-        z-index: -1
-    }
-
     .chartjs-size-monitor-expand > div {
         position: absolute;
         width: 1000000px;
@@ -144,7 +125,11 @@
     .modal-custom {
             max-width: 950px;  /* 设置模态框的最大宽度 */
             height: 1000px;    /* 设置模态框的高度 */
-        }
+    }
+    
+    .submit-button {
+        float: right;
+    }
     
     </style>
     <script>
@@ -297,7 +282,7 @@
                                         <label for="message">消息内容:</label>
                                         <textarea id="message" name="message" placeholder="请输入您的消息"></textarea>
                                     </div>
-                                    <button type="submit" class="btn-default">发送</button>
+                                    <button type="submit" class="btn-default submit-button">发送</button>
                                 </form>
                             </div>
                         </div>

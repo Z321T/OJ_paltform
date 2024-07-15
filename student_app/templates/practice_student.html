@@ -230,12 +230,12 @@
                                                     <th class="sorting" tabindex="0" aria-controls="exam-listing"
                                                         rowspan="1" colspan="1"
                                                         aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">发布教师
+                                                        style="width: 72.575px;">截止时间
                                                     </th>
                                                     <th class="sorting" tabindex="0" aria-controls="exam-listing"
                                                         rowspan="1" colspan="1"
                                                         aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">截止时间
+                                                        style="width: 72.575px;">发布教师
                                                     </th>
                                                     <th class="sorting" tabindex="0" aria-controls="exam-listing"
                                                         rowspan="1" colspan="1"
@@ -250,8 +250,8 @@
                                                         class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
                                                         <td class="sorting_1">{{ exercise.title }}</td>
                                                         <td>{{ exercise.published_at }}</td>
-                                                        <td>{{ exercise.teacher.name }}</td>
                                                         <td>{{ exercise.deadline }}</td>
+                                                        <td>{{ exercise.teacher.name }}</td>
                                                         <td>
                                                             <button class="button-class doing-exercise btn-default"
                                                                     data-exercise-id="{{ exercise.id }}">查看练习

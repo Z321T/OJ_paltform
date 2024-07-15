@@ -263,14 +263,14 @@
                                                         <thead>
                                                         <tr>
                                                             <th scope="col">名称</th>
-                                                            <th scope="col">发布时间</th>
+                                                            <th scope="col">开始时间</th>
                                                         </tr>
                                                         </thead>
                                                         <tbody>
                                                         {% for question in coursework %}
                                                         <tr data-id="{{ question.id }}">
                                                             <td>{{ question.title }}</td>
-                                                            <td>{{ question.published_at }}</td>
+                                                            <td>{{ question.starttime }}</td>
                                                         </tr>
                                                         {% endfor %}
                                                         </tbody>

@@ -145,8 +145,8 @@ def exam_student(request):
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     class_assigned = student.class_assigned
 
-    th_exams = Exam.objects.filter(classes=class_assigned).order_by('-published_at')
-    admin_exams = AdminExam.objects.filter(classes=class_assigned).order_by('-published_at')
+    th_exams = Exam.objects.filter(classes=class_assigned).order_by('-starttime')
+    admin_exams = AdminExam.objects.filter(classes=class_assigned).order_by('-starttime')
 
     context = {
         'user_id': user_id,
@@ -216,7 +216,7 @@ def analyse_exam(request):
 
     student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
-    exams = Exam.objects.filter(classes=student.class_assigned).order_by('-published_at')
+    exams = Exam.objects.filter(classes=student.class_assigned).order_by('-starttime')
 
     context = {
         'user_id': user_id,
@@ -438,8 +438,10 @@ def coding_exam(request, examquestion_id):
         question = get_object_or_404(ExamQuestion, id=examquestion_id)
         question_set = question.exam
 
-        # 检查截止时间
-        if timezone.now() > question_set.deadline:
+        # 检查开始、截止时间
+        if timezone.now() < question_set.starttime:
+            return JsonResponse({'status': 'error', 'message': '考试尚未开始，不能作答'})
+        elif timezone.now() > question_set.deadline:
             return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
 
         types = 'exam'
@@ -464,8 +466,10 @@ def coding_adminexam(request, examquestion_id):
         question = get_object_or_404(AdminExamQuestion, id=examquestion_id)
         question_set = question.exam
 
-        # 检查截止时间
-        if timezone.now() > question_set.deadline:
+        # 检查开始、截止时间
+        if timezone.now() < question_set.starttime:
+            return JsonResponse({'status': 'error', 'message': '考试尚未开始，不能作答'})
+        elif timezone.now() > question_set.deadline:
             return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
 
         types = 'adminexam'
@@ -551,6 +555,25 @@ def run_cpp_code(request):
         user_code = request.POST.get('code', '')  # 从表单数据中获取代码
         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
+
+        # 检查是否在截止时间之前提交代码
+        if types == 'exercise':
+            question = ExerciseQuestion.objects.get(id=question_id)
+            exercise = question.exercise
+            if timezone.now() > exercise.deadline:
+                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'})
+
+        elif types == 'exam':
+            question = ExamQuestion.objects.get(id=question_id)
+            exam = question.exam
+            if timezone.now() > exam.deadline:
+                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'})
+
+        elif types == 'adminexam':
+            question = AdminExamQuestion.objects.get(id=question_id)
+            exam = question.exam
+            if timezone.now() > exam.deadline:
+                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'})
 
         StudentCode.objects.update_or_create(
             student=student,

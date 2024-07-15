@@ -274,7 +274,7 @@ def coursework_exam(request):
 
     teacher = Teacher.objects.get(userid=user_id)
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
-    exams = Exam.objects.filter(teacher=teacher).order_by('-published_at')
+    exams = Exam.objects.filter(teacher=teacher).order_by('-starttime')
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
@@ -295,7 +295,7 @@ def coursework_adminexam(request):
 
     teacher = Teacher.objects.get(userid=user_id)
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
-    exams = AdminExam.objects.all().order_by('-published_at')
+    exams = AdminExam.objects.all().order_by('-starttime')
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
@@ -392,7 +392,7 @@ def coursework_exam_details(request, class_id):
     if request.method == 'GET':
         try:
             class_item = Class.objects.get(id=class_id)
-            exams = Exam.objects.filter(classes=class_item).order_by('-published_at')
+            exams = Exam.objects.filter(classes=class_item).order_by('-starttime')
 
             context = {
                 'user_id': user_id,
@@ -413,7 +413,7 @@ def coursework_adminexam_details(request, class_id):
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
         try:
-            adminexams = AdminExam.objects.all().order_by('-published_at')
+            adminexams = AdminExam.objects.all().order_by('-starttime')
 
             context = {
                 'user_id': user_id,
@@ -563,7 +563,7 @@ def repository_teacher(request):
     Exercise.objects.filter(title="默认标题").delete()
     Exam.objects.filter(title="默认标题").delete()
     exercises = Exercise.objects.filter(teacher=teacher).order_by('-published_at')
-    exams = Exam.objects.filter(teacher=teacher).order_by('-published_at')
+    exams = Exam.objects.filter(teacher=teacher).order_by('-starttime')
 
     context = {
         'user_id': user_id,
@@ -710,6 +710,7 @@ def exam_list_default(request):
     exam = Exam.objects.create(
         title="默认标题",
         content="默认内容",
+        starttime=datetime.now(),
         deadline=datetime.now() + timedelta(days=7),
         teacher=teacher
     )
@@ -729,7 +730,7 @@ def exam_list(request, exam_id):
     if request.method == 'POST':
         exam.title = request.POST.get('title')
         exam.content = request.POST.get('content')
-        exam.published_at = datetime.now()
+        exam.starttime = request.POST.get('starttime')
         exam.deadline = request.POST.get('deadline')
 
         recipient_ids = request.POST.get('recipients').split(',')

@@ -227,17 +227,17 @@
                                                     <th class="sorting" tabindex="0" aria-controls="exam-listing"
                                                         rowspan="1" colspan="1"
                                                         aria-label="Office: activate to sort column ascending"
-                                                        style="width: 155.6px;">发布时间
-                                                    </th>
-                                                    <th class="sorting" tabindex="0" aria-controls="exam-listing"
-                                                        rowspan="1" colspan="1"
-                                                        aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">发布教师
+                                                        style="width: 155.6px;">开始时间
                                                     </th>
                                                     <th class="sorting" tabindex="0" aria-controls="exam-listing"
                                                         rowspan="1" colspan="1"
                                                         aria-label="Price: activate to sort column ascending"
                                                         style="width: 72.575px;">截止时间
+                                                    </th>
+                                                    <th class="sorting" tabindex="0" aria-controls="exam-listing"
+                                                        rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">发布教师
                                                     </th>
                                                     <th class="sorting" tabindex="0" aria-controls="exam-listing"
                                                         rowspan="1" colspan="1"
@@ -252,9 +252,9 @@
                                                         class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
                                                         <td class="sorting_1" id="question{{ question.id }}"> {{ question.title }}
                                                         </td>
-                                                        <td>{{ exam.published_at }}</td>
-                                                        <td>{{ exam.teacher.name }}</td>
+                                                        <td>{{ exam.starttime }}</td>
                                                         <td>{{ exam.deadline }}</td>
+                                                        <td>{{ exam.teacher.name }}</td>
                                                         <td>
                                                             <button class="button-class doing-question btn-default"
                                                                     data-question-id="{{ question.id }}">开始作答
@@ -392,14 +392,6 @@
         });
     });
 </script>
-{#<script>#}
-{#    $(document).ready(function () {#}
-{#        $('.doing-question').on('click', function () {#}
-{#            var questionId = $(this).data('question-id');#}
-{#            window.location.href = "{% url 'student_app:coding_exam' '123' %}".replace('123', questionId);#}
-{#        });#}
-{#    });#}
-{#</script>#}
 <script>
 $(document).ready(function () {
     $('.doing-question').on('click', function () {

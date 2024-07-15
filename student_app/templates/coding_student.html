@@ -172,7 +172,6 @@
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
 
-
                 {% for question in question_set.questions.all %}
                     <li class="nav-item">
                         <a class="nav-link" href="javascript:void(0);"
@@ -236,7 +235,6 @@
                     <div id="debugger" class="debugger">
 
                         <!-- 调试信息 -->
-                         <div class="resize-handle"></div> <!-- 添加把手 -->
                         <p>运行信息</p>
                     </div>
                 </div>
@@ -308,7 +306,6 @@
     $(document).ready(function () {
         // 表单提交事件
         $('#codeForm').on('submit', function (event) {
-            console.log("提交");
             event.preventDefault(); // 阻止表单的默认提交行为
             var code = editor.getValue(); // 获取代码编辑器中的内容
             var types = "{{ types }}";
@@ -336,9 +333,13 @@
                     else if (response.status === 'compile error') {
                         $('#debugger').empty().append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
                     }
+                    else if (response.status === 'error') {
+                        alert(response.message);
+                    }
                 },
                 error: function (error) {
-                    $('#debugger').empty().append(`<p>出现错误</p><p>错误信息: ${error.responseJSON.error}</p>`).show();
+                    {#$('#debugger').empty().append(`<p>出现错误</p><p>错误信息: ${error.responseJSON.error}</p>`).show();#}
+                    alert(error.responseJSON.message);
                 }
             });
         });
@@ -382,25 +383,6 @@
         else
             window.location.href = "{% url 'student_app:adminexam_list' '123' %}".replace('123', question_setId);
     }
-</script>
-{#时钟#}
-<script type="text/javascript">
-            var oBox= document.getElementById('timer');
-            var maxtime = {{ maxtime }} * 60;  // 使用{{ 变量名 }}获取后端传入的maxtime值
-            function CountDown() {
-                if (maxtime >= 0) {
-                    minutes = Math.floor(maxtime / 60);
-                    seconds = Math.floor(maxtime % 60);
-                    msg = "距离结束还有" + minutes + "分" + seconds + "秒";
-                    oBox.innerHTML = msg;
-                    if (maxtime == 5 * 60)alert("还剩5分钟");
-                                --maxtime;
-                    } else{
-                            clearInterval(timer);
-                            alert("时间到，结束!");
-                        }
-                    }
-                    timer = setInterval("CountDown()", 1000);
 </script>
 <script>
 $(document).ready(function() {
