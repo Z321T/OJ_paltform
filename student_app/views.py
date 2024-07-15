@@ -551,7 +551,6 @@ def run_cpp_code(request):
 
     student = Student.objects.get(userid=user_id)
     if request.method == 'POST':
-        print('后端收到代码')
         user_code = request.POST.get('code', '')  # 从表单数据中获取代码
         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
@@ -587,7 +586,6 @@ def run_cpp_code(request):
             try:
                 result = TestResult.objects.get(student=student, question_type=types, question_id=question_id)
                 if result.status is not None:
-                    print('得到运行结果', result.status)
                     testcases = result.testcase_results.all()
                     # 将对象转换为字典
                     result_dict = model_to_dict(result)
@@ -627,7 +625,6 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': 10}
                     )
-                print('返回结果-通过')
                 return JsonResponse(result_dict)
 
             elif result.status == 'fail':
@@ -660,12 +657,10 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': score}
                     )
-                print('返回结果-未全部通过')
                 return JsonResponse(result_dict)
 
             elif result.status == 'compile error':
                 # 出现编译错误的情况
-                print('返回结果-编译错误')
                 return JsonResponse({'error': result.error})
 
         except Exception as e:
