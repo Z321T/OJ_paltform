@@ -2,7 +2,7 @@ import torch
 import json
 from sklearn.decomposition import PCA
 from django.shortcuts import get_object_or_404
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModel
 from torch.nn.functional import cosine_similarity
 
 from BERT_app.models import (ProgrammingCodeFeature, ProgrammingReportFeature,
@@ -15,7 +15,7 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
 model = AutoModel.from_pretrained("microsoft/codebert-base")
 # 加载 Sentence-BERT 模型和分词器
 sbert_tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
-sbert_model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+sbert_model = AutoModelForSequenceClassification.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
 
 
 # 分析程序设计题代码
@@ -62,7 +62,7 @@ def analyze_programming_report(student, report, question_id):
         inputs = sbert_tokenizer(tokenized_report[i:i+512], return_tensors="pt", padding=True, truncation=True, max_length=512)
         # 获取特征值
         with torch.no_grad():
-            feature = sbert_model.encode(inputs.input_ids.tolist(), convert_to_tensor=True)
+            feature = model(**inputs).last_hidden_state.mean(dim=1)
             features.append(feature)
     # 连接所有特征值
     concatenated_features = torch.cat(features, dim=0)
