@@ -18,7 +18,7 @@
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11 (Software_cup)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-  </component>
+    </component>
   <component name="PackageRequirementsSettings">
     <option name="versionSpecifier" value="强相等 (==x.y.z)" />
   </component>
