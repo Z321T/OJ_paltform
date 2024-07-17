@@ -116,13 +116,5 @@ class TestResult(models.Model):
     type = models.CharField(max_length=20, null=True, blank=True)
     error = models.TextField(null=True, blank=True)
     passed_tests = models.IntegerField(null=True, blank=True)
-
-
-class Testcase(models.Model):
-    testcase = models.IntegerField()
-    status = models.CharField(max_length=20)
-    type = models.CharField(max_length=20)
-    error = models.TextField(null=True, blank=True)
-    execution_time = models.FloatField(null=True, blank=True)
-    testresult = models.ForeignKey(TestResult, on_delete=models.CASCADE, related_name='testcase_results')
+    testcases = models.IntegerField(default=0, null=True, blank=True)
 

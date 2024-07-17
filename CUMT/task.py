@@ -33,26 +33,13 @@ def start():
 
 
 def test_cpp_code(student, code, types, question_id):
-    from student_app.models import TestResult, Testcase
+    from student_app.models import TestResult
     from administrator_app.models import AdminExamQuestion, AdminExamQuestionTestCase
     from teacher_app.models import (ExerciseQuestion, ExamQuestion,
                                     ExerciseQuestionTestCase, ExamQuestionTestCase)
     # 将C++代码写入一个文件
     with open('temp.cpp', 'w') as file:
         file.write(code)
-
-    # 创建一个新的TestResult实例
-    test_result = TestResult.objects.update_or_create(
-        student=student,
-        question_type=types,
-        question_id=question_id,
-        defaults={
-            'status': None,
-            'type': None,
-            'error': None,
-            'passed_tests': None,
-        },
-    )
 
     # 获取与题目相关的测试用例
     if types == 'exercise':
@@ -64,6 +51,20 @@ def test_cpp_code(student, code, types, question_id):
     else:
         question = AdminExamQuestion.objects.get(id=question_id)
         testcases = AdminExamQuestionTestCase.objects.filter(question=question)
+
+    # 创建一个新的TestResult实例
+    test_result = TestResult.objects.update_or_create(
+        student=student,
+        question_type=types,
+        question_id=question_id,
+        testcases=len(testcases),
+        defaults={
+            'status': None,
+            'type': None,
+            'error': None,
+            'passed_tests': 0,
+        },
+    )
 
     # 初始化通过的测试用例的计数器
     passed_tests = 0
@@ -79,32 +80,12 @@ def test_cpp_code(student, code, types, question_id):
                 capture_output=True, text=True, timeout=30
             )
             execution_time = time.time() - start_time  # 计算执行时间
-
+            print('代码运行完毕')
             if result.returncode == 0:  # 如果运行成功
                 if result.stdout.strip() == testcase.expected_output.strip():
                     passed_tests += 1
-                    Testcase.objects.update_or_create(
-                        testcase=i + 1,
-                        defaults={
-                            'status': 'success',
-                            'type': '答案正确',
-                            'error': None,
-                            'execution_time': execution_time,
-                            'testresult': test_result,
-                        },
-                    )
-
                 else:
-                    Testcase.objects.update_or_create(
-                        testcase=i + 1,
-                        defaults={
-                            'status': 'failure',
-                            'type': '答案错误',
-                            'error': result.stdout,
-                            'execution_time': execution_time,
-                            'testresult': test_result,
-                        },
-                    )
+                    passed_tests += 0
 
             else:  # 如果编译或运行出错
                 test_result = TestResult.objects.update_or_create(
@@ -115,21 +96,9 @@ def test_cpp_code(student, code, types, question_id):
                         'status': 'compile error',
                         'type': '编译错误',
                         'error': result.stderr,
-                        'passed_tests': None,
+                        'passed_tests': passed_tests,
                     },
                 )
-
-        except subprocess.TimeoutExpired:  # 如果运行超时
-            Testcase.objects.update_or_create(
-                testcase=i + 1,
-                defaults={
-                    'status': 'failure',
-                    'type': '运行超时',
-                    'error': '运行超时',
-                    'execution_time': execution_time,
-                    'testresult': test_result,
-                },
-            )
 
         except Exception as e:  # 如果发生其他异常
             test_result = TestResult.objects.update_or_create(
@@ -140,7 +109,7 @@ def test_cpp_code(student, code, types, question_id):
                     'status': 'error',
                     'type': '其他错误',
                     'error': str(e),
-                    'passed_tests': None,
+                    'passed_tests': passed_tests,
                 },
             )
 

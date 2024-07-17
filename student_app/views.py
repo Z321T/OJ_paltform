@@ -586,11 +586,8 @@ def run_cpp_code(request):
             try:
                 result = TestResult.objects.get(student=student, question_type=types, question_id=question_id)
                 if result.status is not None:
-                    testcases = result.testcase_results.all()
                     # 将对象转换为字典
                     result_dict = model_to_dict(result)
-                    testcases_dict_list = [model_to_dict(testcase) for testcase in testcases]
-                    result_dict['testcases'] = testcases_dict_list
                     break
             except ObjectDoesNotExist:
                 time.sleep(5)
@@ -600,6 +597,7 @@ def run_cpp_code(request):
         # 获取任务结果
         try:
             if result.status == 'pass':
+
                 # 测试用例全部通过的情况
                 if types == 'exercise':
                     question = ExerciseQuestion.objects.get(id=question_id)
@@ -625,12 +623,14 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': 10}
                     )
+                result.delete()
                 return JsonResponse(result_dict)
 
             elif result.status == 'fail':
+
                 # 测试用例未全部通过的情况
                 passed_tests = result.passed_tests
-                total_tests = len(testcases)
+                total_tests = result.testcases
                 score = round((passed_tests / total_tests) * 10, 3)
 
                 if types == 'exercise':
@@ -657,11 +657,14 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': score}
                     )
+                result.delete()
                 return JsonResponse(result_dict)
 
             elif result.status == 'compile error':
+                error = result.error
+                result.delete()
                 # 出现编译错误的情况
-                return JsonResponse({'error': result.error})
+                return JsonResponse({'error': error})
 
         except Exception as e:
             return JsonResponse({'error': str(e)})

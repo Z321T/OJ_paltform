@@ -269,10 +269,9 @@
                         $('#debugger').empty().append(`<p>所有测试用例通过</p>`).show();
                     }
                     else if (response.status === 'fail') {
-                        $('#debugger').empty().append(`<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p><p>总测试用例数量: ${response.testcases.length}</p>`).show();
-                        $.each(response.testcases, function(index, testcase) {
-                            $('#debugger').append(`<p>测试用例 ${testcase.testcase} 输出: ${testcase.error}</p>`);
-                        });
+                        $('#debugger').empty().append(
+                            `<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p>
+                             <p>总测试用例数量: ${response.testcases}</p>`).show();
                     }
                     else if (response.status === 'compile error') {
                         $('#debugger').empty().append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
