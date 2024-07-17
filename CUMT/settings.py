@@ -35,7 +35,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '*',
-    '072b-120-242-184-117.ngrok-free.app',
+    'nachtohne.v7.idcfengye.com',
 ]
 
 
@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'CUMT.wsgi.application'
 
 # CSRF_COOKIE_DOMAIN = None
 CSRF_TRUSTED_ORIGINS = [
-    'https://072b-120-242-184-117.ngrok-free.app',
+    'http://nachtohne.v7.idcfengye.com',
 ]
 
 # Database
