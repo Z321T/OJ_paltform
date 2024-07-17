@@ -144,27 +144,27 @@
     </style>
     <script>
         function redirectToHome() {
-            window.location.href = "/teacher/home/"
+            window.location.href = "{% url 'teacher_app:home_teacher' %}"
         }
 
         function redirectToNotice() {
-            window.location.href = "/teacher/notice/";
+            window.location.href = "{% url 'teacher_app:notice_teacher' %}";
         }
 
         function redirectToTest() {
-            window.location.href = "/teacher/test/";
+            window.location.href = "{% url 'teacher_app:coursework_exercise' %}";
         }
 
         function redirectToProfile() {
-            window.location.href = "/teacher/profile/"
+            window.location.href = "{% url 'teacher_app:profile_teacher' %}"
         }
 
         function redirectToRepository() {
-            window.location.href = "/teacher/repository/"
+            window.location.href = "{% url 'teacher_app:repository_teacher' %}"
         }
 
         function redirectToClass() {
-            window.location.href = "/teacher/class/"
+            window.location.href = "{% url 'teacher_app:class_teacher' %}"
         }
 
     </script>

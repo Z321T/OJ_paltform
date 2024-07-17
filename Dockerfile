@@ -9,20 +9,20 @@ CMD ["bash"]
 
 
 
-#打包
-FROM python:3.11
-
-# 设置 python 环境变量
-ENV PYTHONUNBUFFERED 1
-
-# 创建 django2dockerapp 文件夹并将其设置为工作目录
-#RUN mkdir /Software_cup
-WORKDIR /code
-
-COPY requirements.txt /code/
-RUN pip install -r requirements.txt
-
-COPY . /code/
+##打包
+#FROM python:3.11
+#
+## 设置 python 环境变量
+#ENV PYTHONUNBUFFERED 1
+#
+## 创建 django2dockerapp 文件夹并将其设置为工作目录
+##RUN mkdir /Software_cup
+#WORKDIR /code
+#
+#COPY requirements.txt /code/
+#RUN pip install -r requirements.txt
+#
+#COPY . /code/
 
 #更新pip
 #RUN pip install pip -U
