@@ -22,7 +22,6 @@ from student_app.models import (Student, ExerciseCompletion, ExamCompletion, Sco
 # 教师主页
 @login_required
 def home_teacher(request):
-    # 获取用户id，若没有登录则返回登录页面
     user_id = request.session.get('user_id')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')

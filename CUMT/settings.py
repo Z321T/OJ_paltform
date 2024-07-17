@@ -33,7 +33,10 @@ SECRET_KEY = 'django-insecure-3*w5h@h=x*4=i911d!!-r+ok=2ndr&7&ejbc@my6g-mz6rz7ow
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*',]
+ALLOWED_HOSTS = [
+    '*',
+    '072b-120-242-184-117.ngrok-free.app',
+]
 
 
 # Application definition
@@ -88,8 +91,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'CUMT.wsgi.application'
 
-CSRF_COOKIE_DOMAIN = None
-
+# CSRF_COOKIE_DOMAIN = None
+CSRF_TRUSTED_ORIGINS = [
+    'https://072b-120-242-184-117.ngrok-free.app',
+]
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

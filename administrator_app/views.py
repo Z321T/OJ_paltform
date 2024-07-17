@@ -226,7 +226,7 @@ def reportdata_delete(request):
     programmingexercise_id = request.POST.get('exerciseId')
     if programmingexercise_id:
         # 查询对应题目所有student为null的ProgrammingCodeFeature实例
-        programmingexercise = ProgrammingExercise.objects.filter(id=programmingexercise_id)
+        programmingexercise = ProgrammingExercise.objects.get(id=programmingexercise_id)
 
         codefeatures_to_delete = ProgrammingCodeFeature.objects.filter(
             programming_question=programmingexercise,

@@ -282,7 +282,6 @@
                     }
                 },
                 error: function (error) {
-                    {#$('#debugger').empty().append(`<p>出现错误</p><p>错误信息: ${error.responseJSON.error}</p>`).show();#}
                     alert(error.responseJSON.message);
                 }
             });

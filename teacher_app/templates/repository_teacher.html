@@ -364,7 +364,7 @@
                                                         class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
                                                         <td class="sorting_1" id="question{{ question.id }}"> {{ exam.title }}
                                                         </td>
-                                                        <td>{{ exam.published_at }}</td>
+                                                        <td>{{ exam.starttime }}</td>
                                                         <td>{{ exam.deadline }}</td>
                                                         <td>{{ exam.teacher.name }}</td>
                                                         <td>
