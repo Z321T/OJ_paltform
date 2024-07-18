@@ -329,7 +329,7 @@ def coursework_data(request):
             adminexam = get_object_or_404(AdminExam, id=item_id)
             related_classes = Class.objects.filter(teacher=teacher)
         else:
-            return JsonResponse({'status': 'error', 'message': 'Invalid data type'}, status=400)
+            return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
         for class_group in related_classes:
             students = class_group.students.all()
@@ -355,9 +355,9 @@ def coursework_data(request):
                     'completion_rate': 0
                 })
 
-        return JsonResponse({'data': response_data})
+        return JsonResponse({'data': response_data}, status=200)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 作业情况：练习详情
@@ -428,7 +428,6 @@ def coursework_adminexam_details(request, class_id):
 # 作业情况-详情界面：获取数据
 @login_required
 def coursework_details_data(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         data_type = request.POST.get('type')
@@ -446,7 +445,9 @@ def coursework_details_data(request):
 
             for question in questions:
                 question_completed_count = ExerciseQuestionCompletion.objects.filter(
-                    exercise_question=question, student_id__in=student_ids).count()
+                    exercise=exercise,
+                    exercise_question=question,
+                    student_id__in=student_ids).count()
                 question_completion_rate = (question_completed_count / total_students) \
                     if total_students > 0 else 0
                 exercisequestion_data.append({
@@ -456,7 +457,8 @@ def coursework_details_data(request):
 
             # 一次性查询出所有学生的总分数据
             students_scores = Score.objects.filter(
-                exercise_question__exercise=exercise,
+                exercise=exercise,
+                # exercise_question__exercise=exercise,
                 student__in=students
             ).values('student').annotate(total_score=Sum('score'))
             # 转换查询结果为字典，通过学生ID索引总分
@@ -483,7 +485,9 @@ def coursework_details_data(request):
 
             for question in questions:
                 question_completed_count = ExamQuestionCompletion.objects.filter(
-                    exam_question=question, student_id__in=student_ids).count()
+                    exam=exam,
+                    exam_question=question,
+                    student_id__in=student_ids).count()
                 question_completion_rate = (question_completed_count / total_students) \
                     if total_students > 0 else 0
                 examquestion_data.append({
@@ -493,7 +497,8 @@ def coursework_details_data(request):
 
             # 一次性查询出所有学生的总分数据
             students_scores = Score.objects.filter(
-                exam_question__exam=exam,
+                exam=exam,
+                # exam_question__exam=exam,
                 student__in=students
             ).values('student').annotate(total_score=Sum('score'))
             # 转换查询结果为字典，通过学生ID索引总分
@@ -520,7 +525,9 @@ def coursework_details_data(request):
 
             for question in questions:
                 question_completed_count = AdminExamQuestionCompletion.objects.filter(
-                    adminexam_question=question, student_id__in=student_ids).count()
+                    adminexam=adminexam,
+                    adminexam_question=question,
+                    student_id__in=student_ids).count()
                 question_completion_rate = (question_completed_count / total_students) \
                     if total_students > 0 else 0
                 adminexamquestion_data.append({
@@ -530,7 +537,8 @@ def coursework_details_data(request):
 
             # 一次性查询出所有学生的总分数据
             students_scores = Score.objects.filter(
-                adminexam_question__exam=adminexam,
+                adminexam=adminexam,
+                # adminexam_question__exam=adminexam,
                 student__in=students
             ).values('student').annotate(total_score=Sum('score'))
             # 转换查询结果为字典，通过学生ID索引总分
@@ -619,7 +627,6 @@ def exercise_list(request, exercise_id):
 # 题库管理：练习列表-创建练习
 @login_required
 def create_exercise(request, exercise_id):
-    user_id = request.session.get('user_id')
 
     exercise = get_object_or_404(Exercise, id=exercise_id)
     if request.method == 'POST':
@@ -650,7 +657,6 @@ def create_exercise(request, exercise_id):
 # 题库管理：练习列表-修改练习题
 @login_required
 def exercise_edit(request, exercise_id):
-    user_id = request.session.get('user_id')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
@@ -665,7 +671,6 @@ def exercise_edit(request, exercise_id):
 # 题库管理：练习列表-删除练习
 @login_required
 def exercise_delete(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         exercise_id = request.POST.get('exercise_id')
@@ -684,7 +689,6 @@ def exercise_delete(request):
 # 题库管理：练习列表-删除练习题
 @login_required
 def exercisequestion_delete(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         question_id = request.POST.get('question_id')
@@ -745,7 +749,6 @@ def exam_list(request, exam_id):
 # 题库管理：考试列表-创建考试
 @login_required
 def create_exam(request, exam_id):
-    user_id = request.session.get('user_id')
 
     exam = get_object_or_404(Exam, id=exam_id)
     if request.method == 'POST':
@@ -776,7 +779,6 @@ def create_exam(request, exam_id):
 # 题库管理：考试列表-修改考试题
 @login_required
 def exam_edit(request, exam_id):
-    user_id = request.session.get('user_id')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
@@ -791,7 +793,6 @@ def exam_edit(request, exam_id):
 # 题库管理：考试列表-删除考试
 @login_required
 def exam_delete(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         exam_id = request.POST.get('exam_id')
@@ -810,7 +811,6 @@ def exam_delete(request):
 # 题库管理：考试列表-删除考试题
 @login_required
 def examquestion_delete(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         question_id = request.POST.get('question_id')
@@ -868,7 +868,6 @@ def create_notice(request):
 # 删除通知
 @login_required
 def delete_notice(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
@@ -885,14 +884,13 @@ def delete_notice(request):
 # 通知详情
 @login_required
 def notification_content(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
         notification = Notification.objects.get(id=notification_id)
         return JsonResponse({'title': notification.title, 'content': notification.content})
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 班级管理
@@ -947,7 +945,6 @@ def create_class(request):
 # 班级管理：删除班级
 @login_required
 def delete_class(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         class_id = request.POST.get('class_id')
@@ -957,7 +954,7 @@ def delete_class(request):
             return JsonResponse({'status': 'success', 'message': '班级删除成功'}, status=200)
         return JsonResponse({'status': 'error', 'message': '班级未找到'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 班级管理：班级详情
@@ -978,14 +975,13 @@ def class_details(request, class_id):
         except Class.DoesNotExist:
             return redirect('teacher_app:class_teacher')
     else:
-        messages.error(request, 'Invalid request method.')
+        messages.error(request, '无效的请求方法')
         return redirect('teacher_app:class_teacher')
 
 
 # 班级管理：删除学生
 @login_required
 def delete_student(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
@@ -998,13 +994,12 @@ def delete_student(request):
         except Student.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': '学生用户不存在'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 班级管理：初始化密码
 @login_required
 def reset_password(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         student = Student.objects.get(id=request.POST.get('student_id'))
@@ -1017,7 +1012,7 @@ def reset_password(request):
         except Student.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': '初始化密码失败'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 教师个人中心

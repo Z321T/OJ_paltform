@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- Required meta tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>作业情况</title>
+    <title>作业情况-班级练习</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="{% static 'teacher_app/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'teacher_app/css/vendor.bundle.base.css' %}">
@@ -48,14 +48,14 @@
     }
 
 
-   .sidebar .nav .nav-item .nav-link .menu-title  {
-       font-size:16px; /* 调整为需要的大小 */
-   }
+    .sidebar .nav .nav-item .nav-link .menu-title {
+        font-size: 16px; /* 调整为需要的大小 */
+    }
 
-       .modal-custom {
-            max-width: 950px;  /* 设置模态框的最大宽度 */
-            height: 1000px;    /* 设置模态框的高度 */
-        }
+    .modal-custom {
+        max-width: 950px; /* 设置模态框的最大宽度 */
+        height: 1000px; /* 设置模态框的高度 */
+    }
     </style>
     <script>
         function redirectToHome() {
@@ -124,15 +124,16 @@
             <ul class="navbar-nav navbar-nav-right">
                 <li class="nav-item dropdown mr-4">
                     <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"
-                        id="notificationDropdown" href="#" data-toggle="dropdown">
+                       id="notificationDropdown" href="#" data-toggle="dropdown">
                         <i class="mdi mdi-bell mx-0"></i>
                         <span class="count">{{ adminnotifications.count }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown"
-                        aria-labelledby="notificationDropdown" style="height: 200px; overflow-y: auto;">
+                         aria-labelledby="notificationDropdown" style="height: 200px; overflow-y: auto;">
                         <p class="mb-0 font-weight-normal float-left dropdown-header">公告</p>
                         {% for adminnotification in adminnotifications %}
-                            <a class="dropdown-item adminnotification-item" data-adminnotification-id="{{ adminnotification.id }}">
+                            <a class="dropdown-item adminnotification-item"
+                               data-adminnotification-id="{{ adminnotification.id }}">
                                 <div class="item-thumbnail">
                                     <div class="item-icon bg-success">
                                         <i class="mdi mdi-information mx-0"></i>
@@ -220,96 +221,99 @@
         </nav>
         <!-- partial -->
         <div class="main-panel">
-          <div class="content-wrapper">
-            <div class="row">
-                <div class="col-md-12 grid-margin stretch-card">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-md-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body dashboard-tabs p-0">
+                                <div class="tab-content py-0 px-0">
+                                    <!--班级完成情况-->
+                                    <div class="row">
+                                        <div class="col-md-7 grid-margin stretch-card">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <p class="card-title">班级完成情况</p>
+                                                    <div id="cash-deposits-chart-legend"
+                                                         class="d-flex justify-content-center pt-3"></div>
+                                                    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                                                    <div id="cash-deposits-chart"
+                                                         style="width: 600px;height:400px;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--练习考试切换-->
+                                        <div class="col-md-5 grid-margin stretch-card">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <!-- 添加切换按钮 -->
+                                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-type="exercise">学生练习
+                                                        </button>
+                                                        <button type="button" class="btn btn-secondary exam-button"
+                                                                data-type="exam">班级考试
+                                                        </button>
+                                                        <button type="button" class="btn btn-secondary adminexam-button"
+                                                                data-type="adminexam">年级考试
+                                                        </button>
+                                                    </div>
+                                                    <div class="table-responsive"
+                                                         style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                                        <div class="row">
+                                                            <table class="table">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th scope="col">名称</th>
+                                                                    <th scope="col">发布时间</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                {% for question in coursework %}
+                                                                    <tr data-id="{{ question.id }}">
+                                                                        <td>{{ question.title }}</td>
+                                                                        <td>{{ question.published_at }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class=" stretch-card">
                     <div class="card">
-                        <div class="card-body dashboard-tabs p-0">
-                            <div class="tab-content py-0 px-0">
-                                <!--班级完成情况-->
-                                <div class="row">
-                                    <div class="col-md-7 grid-margin stretch-card">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <p class="card-title">班级完成情况</p>
-                                                <div id="cash-deposits-chart-legend"
-                                                     class="d-flex justify-content-center pt-3"></div>
-                                                <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-                                                <div id="cash-deposits-chart" style="width: 600px;height:400px;"></div>
+                        <div class="card-body">
+                            <p class="card-title">班级列表</p>
+                            <div class="table-responsive"
+                                 style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                <div class="table-responsive">
+                                    <div class="card-container">
+                                        {% for class in classes %}
+                                            <div class="card class-id" data-class-id="{{ class.id }}">
+                                                <div class="card-item card-title">{{ class.name }}</div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <!--练习考试切换-->
-                                    <div class="col-md-5 grid-margin stretch-card">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <!-- 添加切换按钮 -->
-                                                <div class="btn-group" role="group" aria-label="Basic example">
-                                                    <button type="button" class="btn btn-secondary"
-                                                            data-type="exercise">学生练习
-                                                    </button>
-                                                    <button type="button" class="btn btn-secondary exam-button"
-                                                            data-type="exam">班级考试
-                                                    </button>
-                                                    <button type="button" class="btn btn-secondary adminexam-button"
-                                                            data-type="adminexam">年级考试
-                                                    </button>
-                                                </div>
-                                              <div class="table-responsive" style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
-                                                <div class="row">
-                                                    <table class="table">
-                                                        <thead>
-                                                        <tr>
-                                                            <th scope="col">名称</th>
-                                                            <th scope="col">发布时间</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        {% for question in coursework %}
-                                                            <tr data-id="{{ question.id }}">
-                                                                <td>{{ question.title }}</td>
-                                                                <td>{{ question.published_at }}</td>
-                                                            </tr>
-                                                        {% endfor %}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                              </div>
-                                            </div>
-                                        </div>
+                                        {% endfor %}
                                     </div>
                                 </div>
+                                <!-- partial -->
                             </div>
+                            <!-- main-panel ends -->
                         </div>
+                        <!-- page-body-wrapper ends -->
                     </div>
+                    <!-- container-scroller -->
                 </div>
             </div>
-            <div class=" stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-title">班级列表</p>
-                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
-                            <div class="table-responsive">
-                                <div class="card-container">
-                                    {% for class in classes %}
-                                        <div class="card class-id" data-class-id="{{ class.id }}">
-                                            <div class="card-item card-title">{{ class.name }}</div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            <!-- partial -->
-                        </div>
-                        <!-- main-panel ends -->
-                    </div>
-                    <!-- page-body-wrapper ends -->
-                </div>
-                <!-- container-scroller -->
-            </div>
-          </div>
-         </div>
         </div>
     </div>
+</div>
 <!-- Modal -->
 <div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel"
      aria-hidden="true">
@@ -332,40 +336,40 @@
 </div>
 <!-- AI对话模态框 -->
 <div class="modal fade" id="aiModal" tabindex="-1" role="dialog" aria-labelledby="aiModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-custom" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="aiModalLabel">讯飞星火小助手</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- 添加一个滚动区域来显示对话历史 -->
-        <div id="chatHistory" style="height: 400px; width: 930px; overflow-y: scroll; margin-bottom: 20px;">
-          <!-- 使用Django模板语言来显示对话历史 -->
-          {% for chat in chat_history %}
-          <div class="chat">
-            <p><strong>{{ chat.user }}:</strong> {{ chat.message }}</p>
-          </div>
-          {% endfor %}
+    <div class="modal-dialog modal-custom" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aiModalLabel">讯飞星火小助手</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- 添加一个滚动区域来显示对话历史 -->
+                <div id="chatHistory" style="height: 400px; width: 930px; overflow-y: scroll; margin-bottom: 20px;">
+                    <!-- 使用Django模板语言来显示对话历史 -->
+                    {% for chat in chat_history %}
+                        <div class="chat">
+                            <p><strong>{{ chat.user }}:</strong> {{ chat.message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <form id="aiForm">
+                    <div class="form-group">
+                        <label for="question">问题</label>
+                        <input type="text" class="form-control" id="question" placeholder="请输入你的问题">
+                    </div>
+                    <div class="form-group d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">提交</button>
+                        <button type="button" id="clearChat" class="btn btn-secondary">清空</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div id="aiResponse"></div>
+            </div>
         </div>
-        <form id="aiForm">
-          <div class="form-group">
-            <label for="question">问题</label>
-            <input type="text" class="form-control" id="question" placeholder="请输入你的问题">
-          </div>
-          <div class="form-group d-flex justify-content-center">
-            <button type="submit" class="btn btn-primary">提交</button>
-            <button type="button" id="clearChat" class="btn btn-secondary">清空</button>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <div id="aiResponse"></div>
-      </div>
     </div>
-  </div>
 </div>
 <!-- plugins:js -->
 <script type="text/javascript" src="{% static 'teacher_app/js/vendor.bundle.base.js' %}"></script>
@@ -461,23 +465,24 @@
                 min: 0,
                 max: 1,
                 axisLabel: {
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return (value * 100) + "%";
                     }
-                }},
+                }
+            },
             series: [{
                 name: '完成情况',
                 type: 'bar',
                 data: completionRates,
-                 barWidth: '55'
+                barWidth: '55'
             }]
         };
         myChart.setOption(option);
     }
 </script>
 <script>
-    $(document).ready(function(){
-        $("table tbody tr").click(function(){
+    $(document).ready(function () {
+        $("table tbody tr").click(function () {
             $("table tbody tr").css("background-color", ""); // 添加这行，恢复所有行原本的背景颜色
             $(this).css("background-color", "#f2f2f2"); // 让点击的那一行变为灰色
         });
@@ -485,7 +490,7 @@
 </script>
 <script>
     $(document).ready(function () {
-         $('.class-id').on('click', function () {
+        $('.class-id').on('click', function () {
             var classId = $(this).data('class-id');
             window.location.href = "{% url 'teacher_app:coursework_exercise_details' '123' %}".replace('123', classId);
         });
@@ -517,60 +522,60 @@
     });
 </script>
 <script>
-$(document).ready(function() {
-  $('#aiForm').on('submit', function(e) {
-    e.preventDefault();
-    var question = $('#question').val();
+    $(document).ready(function () {
+        $('#aiForm').on('submit', function (e) {
+            e.preventDefault();
+            var question = $('#question').val();
 
-    // 创建一个新的<div>元素来显示用户的问题
-    var userChat = $('<div class="chat"><p><strong>我:</strong> ' + question + '</p></div>');
-    // 添加到对话历史区域
-    $('#chatHistory').append(userChat);
+            // 创建一个新的<div>元素来显示用户的问题
+            var userChat = $('<div class="chat"><p><strong>我:</strong> ' + question + '</p></div>');
+            // 添加到对话历史区域
+            $('#chatHistory').append(userChat);
 
-    $.ajax({
-      url: "{% url 'Spark_app:chat' %}",  // 替换为chat函数的URL
-      type: 'POST',
-      data: {
-        'question': question,
-        'csrfmiddlewaretoken': '{{ csrf_token }}'
-      },
-      success: function(response) {
-        // 创建一个新的<div>元素来显示AI的回答
-        var aiChat = $('<div class="chat"><p><strong>讯飞星火:</strong></p></div>');
-        aiChat.append($(response.response));
-        // 添加到对话历史区域
-        $('#chatHistory').append(aiChat);
+            $.ajax({
+                url: "{% url 'Spark_app:chat' %}",
+                type: 'POST',
+                data: {
+                    'question': question,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    // 创建一个新的<div>元素来显示AI的回答
+                    var aiChat = $('<div class="chat"><p><strong>讯飞星火:</strong></p></div>');
+                    aiChat.append($(response.response));
+                    // 添加到对话历史区域
+                    $('#chatHistory').append(aiChat);
 
-        // 清空输入框
-        $('#question').val('');
+                    // 清空输入框
+                    $('#question').val('');
 
-        // 滚动到对话历史区域的底部，以便最新的对话可见
-        $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
-      },
-      error: function(response) {
-        $('#aiResponse').text('出错了，请重试。');
-      }
+                    // 滚动到对话历史区域的底部，以便最新的对话可见
+                    $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+                },
+                error: function (response) {
+                    $('#aiResponse').text('出错了，请重试。');
+                }
+            });
+        });
+
+        // 为清空按钮添加点击事件
+        $('#clearChat').on('click', function () {
+            $.ajax({
+                url: "{% url 'Spark_app:clear_chat' %}",
+                type: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    $('#chatHistory').empty(); // 清空对话历史区域的内容
+                },
+                error: function (response) {
+                    $('#aiResponse').text('出错了，请重试。');
+                }
+            });
+        });
+
     });
-  });
-
-  // 为清空按钮添加点击事件
-  $('#clearChat').on('click', function() {
-    $.ajax({
-        url: "{% url 'Spark_app:clear_chat' %}",  // 替换为clear_chat函数的URL
-        type: 'POST',
-        data: {
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-        },
-        success: function(response) {
-            $('#chatHistory').empty(); // 清空对话历史区域的内容
-        },
-        error: function(response) {
-            $('#aiResponse').text('出错了，请重试。');
-        }
-    });
-  });
-
-});
 </script>
 </body>
 </html>

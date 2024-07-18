@@ -7,7 +7,7 @@ int main() {
 
     std::cin >> num2;
 
-    sum = num1 + 10;
+    sum = num1 * num2;
 
     std::cout << sum ;
 

@@ -49,73 +49,66 @@
         top: 0
     }
 
-    .modal-custom {
-            max-width: 950px;  /* 设置模态框的最大宽度 */
-            height: 1000px;    /* 设置模态框的高度 */
-        }
-    </style>
-
-    <style>
 
     .container-flex {
-      display: flex;
-      flex: 1;
+        display: flex;
+        flex: 1;
     }
 
-     .problem-container, .editor-container {
-      flex: 1;
-      overflow: auto;
-      height: 100vh;
-      padding: 20px;
-      border-width: 0 2px 0 0;
-      box-sizing: border-box;
-      border-radius:10px;
+    .problem-container, .editor-container {
+        flex: 1;
+        overflow: auto;
+        height: 100vh;
+        padding: 20px;
+        border-width: 0 2px 0 0;
+        box-sizing: border-box;
+        border-radius: 10px;
     }
 
-        .editor-container {
-      position: relative;
-      display: flex; /* 使用 flex 布局 */
-      flex-direction: column; /* 子元素按列排列 */
-      justify-content: space-between; /* 在垂直方向上分配空间 */
-}
+    .editor-container {
+        position: relative;
+        display: flex; /* 使用 flex 布局 */
+        flex-direction: column; /* 子元素按列排列 */
+        justify-content: space-between; /* 在垂直方向上分配空间 */
+    }
 
-#debugger {
-    position: absolute; /* 使用固定定位 */
-    bottom: 0; /* 在视窗的底部 */
-    left: 0; /* 与视窗的左边缘对齐 */
-    right: 2px; /* 与视窗的右边缘对色以确保调试信息可齐，确保它横跨整个屏幕宽度 */
-    background: #fff; /* 添加背景读 */
-    border-top: 1px solid royalblue; /* 调试器上方的边界线 */
-    z-index: 9999; /* 确保它在其他内容之上 */
-    box-sizing: border-box;
-    padding: 10px; /* 适当的内间距 */
-    height: 300px; /* 固定高度 */
-    overflow: auto; /* 内容太多时可以滚动查看 */
-}
+    #debugger {
+        position: absolute; /* 使用固定定位 */
+        bottom: 0; /* 在视窗的底部 */
+        left: 0; /* 与视窗的左边缘对齐 */
+        right: 2px; /* 与视窗的右边缘对色以确保调试信息可齐，确保它横跨整个屏幕宽度 */
+        background: #fff; /* 添加背景读 */
+        border-top: 1px solid royalblue; /* 调试器上方的边界线 */
+        z-index: 9999; /* 确保它在其他内容之上 */
+        box-sizing: border-box;
+        padding: 10px; /* 适当的内间距 */
+        height: 300px; /* 固定高度 */
+        overflow: auto; /* 内容太多时可以滚动查看 */
+    }
 
     /* 切换按钮样式 */
-.toggle-buttons {
-  display: flex;
-  align-items: center;
-  border-top: 1px solid #ccc; /* 上边框 */
-  padding: 1px;
-  border-radius: 10px 10px 10px 10px; /* 圆角矩形样式，上方左右两个角 */
-  background-color: whitesmoke; /* 按钮背景颜色 */
-}
+    .toggle-buttons {
+        display: flex;
+        align-items: center;
+        border-top: 1px solid #ccc; /* 上边框 */
+        padding: 1px;
+        border-radius: 10px 10px 10px 10px; /* 圆角矩形样式，上方左右两个角 */
+        background-color: whitesmoke; /* 按钮背景颜色 */
+    }
 
-/* 单个按钮样式 */
-.toggle-buttons button {
-  padding: 2px 10px;
-  border: none;
-  cursor: pointer;
-  background-color: transparent;
-    border-right: 1px solid #ccc;
-}
+    /* 单个按钮样式 */
+    .toggle-buttons button {
+        padding: 2px 10px;
+        border: none;
+        cursor: pointer;
+        background-color: transparent;
+        border-right: 1px solid #ccc;
+    }
 
-/* 按钮激活状态的样式 */
-.toggle-buttons button:focus {
-  background-color: floralwhite; /* 激活状态背景颜色 */
-}
+    /* 按钮激活状态的样式 */
+    .toggle-buttons button:focus {
+        background-color: floralwhite; /* 激活状态背景颜色 */
+    }
 
     </style>
 </head>
@@ -265,23 +258,27 @@
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function (response) {
-                    if (response.status === 'pass') {
+                    if (response.status === 'pass')
+                    {
                         $('#debugger').empty().append(`<p>所有测试用例通过</p>`).show();
                     }
-                    else if (response.status === 'fail') {
+                    else if (response.status === 'fail')
+                    {
                         $('#debugger').empty().append(
                             `<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p>
                              <p>总测试用例数量: ${response.testcases}</p>`).show();
                     }
-                    else if (response.status === 'compile error') {
+                    else if (response.status === 'compile error')
+                    {
                         $('#debugger').empty().append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
                     }
-                    else if (response.status === 'error') {
-                        alert(response.message);
+                    else if (response.status === 'other error')
+                    {
+                        $('#debugger').empty().append(`<p>其他错误</p><p>错误信息: ${response.error}</p>`).show();
                     }
                 },
-                error: function (error) {
-                    alert(error.responseJSON.message);
+                error: function (response) {
+                    alert(response.responseJSON.message);
                 }
             });
         });

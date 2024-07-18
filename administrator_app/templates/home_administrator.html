@@ -475,7 +475,7 @@
             $('#chatHistory').append(userChat);
 
             $.ajax({
-                url: "{% url 'Spark_app:chat' %}",  // 替换为chat函数的URL
+                url: "{% url 'Spark_app:chat' %}",
                 type: 'POST',
                 data: {
                     'question': question,
@@ -503,7 +503,7 @@
         // 为清空按钮添加点击事件
         $('#clearChat').on('click', function () {
             $.ajax({
-                url: "{% url 'Spark_app:clear_chat' %}",  // 替换为clear_chat函数的URL
+                url: "{% url 'Spark_app:clear_chat' %}", 
                 type: 'POST',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}'

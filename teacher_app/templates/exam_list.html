@@ -143,9 +143,9 @@
         top: 0;
     }
 
-   .sidebar .nav .nav-item .nav-link .menu-title  {
-       font-size:16px; /* 调整为需要的大小 */
-   }
+    .sidebar .nav .nav-item .nav-link .menu-title {
+        font-size: 16px; /* 调整为需要的大小 */
+    }
 
     </style>
     <script>
@@ -312,7 +312,7 @@
                                             {% endwith %}
                                             </tbody>
                                         </table>
-                                    <!-- 根据exam.questions.all是否为空，添加隐藏字段到DOM中，供JavaScript检查 -->
+                                        <!-- 根据exam.questions.all是否为空，添加隐藏字段到DOM中，供JavaScript检查 -->
                                         {% if exam.questions.all %}
                                             <input type="hidden" id="has-questions" value="1">
                                         {% else %}
@@ -324,10 +324,12 @@
                         </div>
                     </div>
                     <div class="button-group">
-                        <button type="submit" id="submit-button" class="btn-default" >发布考试</button>
+                        <button type="submit" id="submit-button" class="btn-default">发布考试</button>
                     </div>
                 </form>
-                <button class="btn-default" onclick="window.location.href='{% url 'teacher_app:create_exam' exam.id %}'">创建考试题</button>
+                <button class="btn-default"
+                        onclick="window.location.href='{% url 'teacher_app:create_exam' exam.id %}'">创建考试题
+                </button>
             </div>
         </div>
     </div>
@@ -353,30 +355,30 @@
 <!-- End custom js for this page-->
 <script src="{% static 'teacher_app/js/jquery.cookie.js' %}" type="text/javascript"></script>
 <script>
-document.getElementById('examFrom').onsubmit = function(event) {
-    // 获取所有的输入值
-    var recipientIds = document.getElementById('recipientIds').value.trim();
-    var title = document.getElementById('title').value.trim();
-    var content = document.getElementById('content').value.trim();
-    var starttime = document.getElementById('starttime').value.trim();
-    var deadline = document.getElementById('deadline').value.trim();
-    var hasQuestions = document.getElementById('has-questions').value === '1'; // 检查隐藏字段的值
+    document.getElementById('examFrom').onsubmit = function (event) {
+        // 获取所有的输入值
+        var recipientIds = document.getElementById('recipientIds').value.trim();
+        var title = document.getElementById('title').value.trim();
+        var content = document.getElementById('content').value.trim();
+        var starttime = document.getElementById('starttime').value.trim();
+        var deadline = document.getElementById('deadline').value.trim();
+        var hasQuestions = document.getElementById('has-questions').value === '1'; // 检查隐藏字段的值
 
-    var errorMessages = [];
+        var errorMessages = [];
 
-    if (!recipientIds) errorMessages.push('“接收班级”是必选项。');
-    if (!title) errorMessages.push('“考试标题”为必填项。');
-    if (!content) errorMessages.push('“考试题描述”为必填项。');
-    if (!starttime) errorMessages.push('“开始时间”为必填项。');
-    if (!deadline) errorMessages.push('“截止时间”为必填项。');
+        if (!recipientIds) errorMessages.push('“接收班级”是必选项。');
+        if (!title) errorMessages.push('“考试标题”为必填项。');
+        if (!content) errorMessages.push('“考试题描述”为必填项。');
+        if (!starttime) errorMessages.push('“开始时间”为必填项。');
+        if (!deadline) errorMessages.push('“截止时间”为必填项。');
 
-    if (!hasQuestions) errorMessages.push('“考试列表”不能为空，请添加至少一个考试题目。');
+        if (!hasQuestions) errorMessages.push('“考试列表”不能为空，请添加至少一个考试题目。');
 
-    if (errorMessages.length > 0) {
-      event.preventDefault(); // 阻止表单提交
-      alert('请填写所有必填信息:\n' + errorMessages.join('\n'));
-    }
-};
+        if (errorMessages.length > 0) {
+            event.preventDefault(); // 阻止表单提交
+            alert('请填写所有必填信息:\n' + errorMessages.join('\n'));
+        }
+    };
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {

@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- Required meta tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>学情分析-考试</title>
+    <title>学情分析-年级考试</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="{% static 'administrator_app/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'administrator_app/css/vendor.bundle.base.css' %}">
@@ -439,7 +439,7 @@
             $('#chatHistory').append(userChat);
 
             $.ajax({
-                url: "{% url 'Spark_app:chat' %}",  // 替换为chat函数的URL
+                url: "{% url 'Spark_app:chat' %}",
                 type: 'POST',
                 data: {
                     'question': question,
@@ -467,7 +467,7 @@
         // 为清空按钮添加点击事件
         $('#clearChat').on('click', function () {
             $.ajax({
-                url: "{% url 'Spark_app:clear_chat' %}",  // 替换为clear_chat函数的URL
+                url: "{% url 'Spark_app:clear_chat' %}", 
                 type: 'POST',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}'

@@ -74,9 +74,9 @@
             margin-left: 10px;
         }
 
-   .sidebar .nav .nav-item .nav-link .menu-title  {
-       font-size:16px; /* 调整为需要的大小 */
-   }
+        .sidebar .nav .nav-item .nav-link .menu-title {
+            font-size: 16px; /* 调整为需要的大小 */
+        }
     </style>
 </head>
 <body>
@@ -171,8 +171,7 @@
             if (inputRowsContainer.childElementCount > 1) {
                 inputRowsContainer.removeChild(inputRowsContainer.lastChild);
                 testCaseCount--; // 每次移除一个测试用例时，计数器减1
-            }
-            else {
+            } else {
                 alert("测试用例不能少于一个");
             }
         }
@@ -187,7 +186,7 @@
     });
 </script>
 <script>
-    window.onload = function() {
+    window.onload = function () {
         var form = document.querySelector('form[method="post"]');
         if (form) {
             form.onsubmit = function (event) {

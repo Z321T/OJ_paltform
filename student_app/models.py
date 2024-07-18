@@ -16,10 +16,16 @@ class Student(models.Model):
 
 class Score(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="学生", related_name='scores')
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, verbose_name="练习", null=True, blank=True,
+                                 related_name='scores')
     exercise_question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE,
                                           verbose_name="练习题", null=True, blank=True, related_name='scores')
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, verbose_name="考试", null=True, blank=True,
+                             related_name='scores')
     exam_question = models.ForeignKey(ExamQuestion, on_delete=models.CASCADE,
                                       verbose_name="考试题", null=True, blank=True, related_name='scores')
+    adminexam = models.ForeignKey(AdminExam, on_delete=models.CASCADE, verbose_name="年级考试", null=True, blank=True,
+                                  related_name='scores')
     adminexam_question = models.ForeignKey(AdminExamQuestion, on_delete=models.CASCADE,
                                            verbose_name="年级考试题", null=True, blank=True, related_name='scores')
     score = models.DecimalField(verbose_name="得分", max_digits=6, decimal_places=2)
@@ -42,6 +48,8 @@ class ExerciseCompletion(models.Model):
 class ExerciseQuestionCompletion(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="学生",
                                 related_name='exercise_question_completions')
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, verbose_name="练习", null=True, blank=True,
+                                 related_name='exercise_question_completions')
     exercise_question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE, verbose_name="练习题",
                                           related_name='exercise_question_completions')
     completed_at = models.DateTimeField(verbose_name="完成时间", null=True, blank=True)
@@ -64,6 +72,8 @@ class ExamCompletion(models.Model):
 class ExamQuestionCompletion(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="学生",
                                 related_name='exam_question_completions')
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, verbose_name="考试", null=True, blank=True,
+                             related_name='exam_question_completions')
     exam_question = models.ForeignKey(ExamQuestion, on_delete=models.CASCADE, verbose_name="考试题",
                                       related_name='exam_question_completions')
     completed_at = models.DateTimeField(verbose_name="完成时间", null=True, blank=True)
@@ -86,6 +96,8 @@ class AdminExamCompletion(models.Model):
 class AdminExamQuestionCompletion(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="学生",
                                 related_name='adminexam_question_completions')
+    adminexam = models.ForeignKey(AdminExam, on_delete=models.CASCADE, verbose_name="考试", null=True, blank=True,
+                                  related_name='adminexam_question_completions')
     adminexam_question = models.ForeignKey(AdminExamQuestion, on_delete=models.CASCADE, verbose_name="考试题",
                                            related_name='adminexam_question_completions')
     completed_at = models.DateTimeField(verbose_name="完成时间", null=True, blank=True)

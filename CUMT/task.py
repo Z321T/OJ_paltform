@@ -70,6 +70,7 @@ def test_cpp_code(student, code, types, question_id):
                         'passed_tests': passed_tests,
                     },
                 )
+                return
 
         except Exception as e:  # 如果发生其他异常
             test_result = TestResult.objects.update_or_create(
@@ -77,12 +78,13 @@ def test_cpp_code(student, code, types, question_id):
                 question_type=types,
                 question_id=question_id,
                 defaults={
-                    'status': 'error',
+                    'status': 'other error',
                     'type': '其他错误',
                     'error': str(e),
                     'passed_tests': passed_tests,
                 },
             )
+            return
 
     if passed_tests == len(testcases):
         test_result = TestResult.objects.update_or_create(

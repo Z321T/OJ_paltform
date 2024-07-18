@@ -49,7 +49,7 @@
         .custom-textarea {
             margin-top: 10px;
             width: 500px;
-            height: 500px !important; /* 或者根据你的需求设置为其他值 */
+            height: 500px !important; 
         }
 
         .container-flex {
@@ -57,9 +57,9 @@
             justify-content: space-between
         }
 
-   .sidebar .nav .nav-item .nav-link .menu-title  {
-       font-size:16px; /* 调整为需要的大小 */
-   }
+        .sidebar .nav .nav-item .nav-link .menu-title {
+            font-size: 16px; /* 调整为需要的大小 */
+        }
     </style>
 </head>
 <body>
@@ -153,8 +153,7 @@
             if (inputRowsContainer.childElementCount > 1) {
                 inputRowsContainer.removeChild(inputRowsContainer.lastChild);
                 testCaseCount--; // 每次移除一个测试用例时，计数器减1
-            }
-            else {
+            } else {
                 alert("测试用例不能少于一个");
             }
         }
@@ -169,7 +168,7 @@
     });
 </script>
 <script>
-    window.onload = function() {
+    window.onload = function () {
         var form = document.querySelector('form[method="post"]');
         if (form) {
             form.onsubmit = function (event) {
@@ -177,14 +176,14 @@
                 var content = document.querySelector('textarea[name="content"]').value.trim();
                 var memoryLimit = document.querySelector('input[name="memory_limit"]').value.trim();
                 var timeLimit = document.querySelector('input[name="time_limit"]').value.trim();
-                
+
                 var errors = [];
 
                 if (!title) errors.push("标题不能为空。");
                 if (!content) errors.push("题目内容不能为空。");
                 if (!memoryLimit) errors.push("内存限制不能为空。");
                 if (!timeLimit) errors.push("时间限制不能为空。");
-                
+
                 var inputRows = document.getElementById('inputRowsContainer').children;
                 for (var i = 0; i < inputRows.length; i++) {
                     var inputs = inputRows[i].getElementsByTagName('input');

@@ -67,7 +67,7 @@ def report_student(request, programmingexercise_id):
 
     # 检查截止时间
     if timezone.now() > programming_exercise.deadline:
-        return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交报告'})
+        return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交报告'}, status=400)
 
     if request.method == 'POST':
         reportstandards = ReportScore.objects.filter(teacher=student.class_assigned.teacher)
@@ -100,7 +100,7 @@ def report_student(request, programmingexercise_id):
                 analyze_programming_code(student, code, programmingexercise_id)
                 # 删除临时文件
                 os.unlink(temp_file.name)
-            return JsonResponse({'status': 'success', 'message': '提交成功'})
+            return JsonResponse({'status': 'success', 'message': '提交成功'}, status=200)
 
         else:
             return JsonResponse({'status': 'error', 'message': '教师未设置报告规范性评分标准'}, status=400)
@@ -252,6 +252,7 @@ def analyse_data(request):
                 # 计算这次练习的所有题目的总得分
                 total_score = Score.objects.filter(
                     student=student,
+                    exercise=ex,
                     exercise_question__in=ex_questions
                 ).aggregate(total_score=Sum('score'))['total_score']
 
@@ -270,7 +271,7 @@ def analyse_data(request):
             question_scores = []
             for question in questions:
                 try:
-                    score_obj = Score.objects.get(student=student, exercise_question=question)
+                    score_obj = Score.objects.get(student=student, exercise=exercise, exercise_question=question)
                     score = float(score_obj.score)
                 except Score.DoesNotExist:  # 如果没有找到得分，则为该题目设置得分为0
                     score = 0.0
@@ -284,7 +285,7 @@ def analyse_data(request):
                 'avg_scores': exercise_avg_scores,
                 'question_scores': question_scores,
             }
-            return JsonResponse({'data': context})
+            return JsonResponse({'data': context}, status=200)
 
         elif data_type == 'exam':
             # 计算每个考试的平均得分
@@ -295,6 +296,7 @@ def analyse_data(request):
                 ex_questions = ExamQuestion.objects.filter(exam=ex)
                 total_score = Score.objects.filter(
                     student=student,
+                    exam=ex,
                     exam_question__in=ex_questions
                 ).aggregate(total_score=Sum('score'))['total_score']
 
@@ -313,7 +315,7 @@ def analyse_data(request):
             question_scores = []
             for question in questions:
                 try:
-                    score_obj = Score.objects.get(student=student, exam_question=question)
+                    score_obj = Score.objects.get(student=student, exam=exam, exam_question=question)
                     score = float(score_obj.score)
                 except Score.DoesNotExist:
                     score = 0.0
@@ -327,7 +329,7 @@ def analyse_data(request):
                 'avg_scores': exam_avg_scores,
                 'question_scores': question_scores,
             }
-            return JsonResponse({'data': context})
+            return JsonResponse({'data': context}, status=200)
 
         else:
             return JsonResponse({'status': 'error', 'message': 'Invalid data type'}, status=400)
@@ -396,7 +398,7 @@ def profile_student_password(request):
             if new_password == confirm_password:
                 student.password = make_password(new_password)
                 student.save()
-                return JsonResponse({'status': 'success', 'message': '密码修改成功'})
+                return JsonResponse({'status': 'success', 'message': '密码修改成功'}, status=200)
             else:
                 return JsonResponse({'status': 'error', 'message': '两次输入的密码不一致'}, status=400)
         else:
@@ -407,12 +409,11 @@ def profile_student_password(request):
 # 通知内容
 @login_required
 def notification_content(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
         notification = Notification.objects.get(id=notification_id)
-        return JsonResponse({'title': notification.title, 'content': notification.content})
+        return JsonResponse({'title': notification.title, 'content': notification.content}, status=200)
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
@@ -420,7 +421,6 @@ def notification_content(request):
 # 答题界面
 @login_required
 def coding_exercise(request, exercisequestion_id):
-    user_id = request.session.get('user_id')
 
     if request.method == 'GET':
         question = get_object_or_404(ExerciseQuestion, id=exercisequestion_id)
@@ -438,7 +438,6 @@ def coding_exercise(request, exercisequestion_id):
 
 @login_required
 def coding_exam(request, examquestion_id):
-    user_id = request.session.get('user_id')
 
     if request.method == 'GET':
         question = get_object_or_404(ExamQuestion, id=examquestion_id)
@@ -446,9 +445,9 @@ def coding_exam(request, examquestion_id):
 
         # 检查开始、截止时间
         if timezone.now() < question_set.starttime:
-            return JsonResponse({'status': 'error', 'message': '考试尚未开始，不能作答'})
+            return JsonResponse({'status': 'error', 'message': '考试尚未开始，不能作答'}, status=400)
         elif timezone.now() > question_set.deadline:
-            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
+            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'}, status=400)
 
         types = 'exam'
         return render(request, 'coding_student.html',
@@ -492,61 +491,79 @@ def coding_adminexam(request, examquestion_id):
 
 
 # 标记完成的题目
-def mark_exercise_question_as_completed(student, exercise_question):
-    ExerciseQuestionCompletion.objects.create(
+def mark_exercise_question_as_completed(student, exercise, exercise_question):
+    ExerciseQuestionCompletion.objects.update_or_create(
         student=student,
+        exercise=exercise,
         exercise_question=exercise_question,
-        completed_at=timezone.now()
+        defaults={
+            'completed_at': timezone.now()
+        }
     )
     # 检查是否所有的练习题都已经完成
     all_questions = exercise_question.exercise.questions.all()
     completed_questions = ExerciseQuestionCompletion.objects.filter(
         student=student,
+        exercise=exercise,
         exercise_question__in=all_questions
     )
     if all_questions.count() == completed_questions.count():
-        ExerciseCompletion.objects.create(
+        ExerciseCompletion.objects.update_or_create(
             student=student,
-            exercise=exercise_question.exercise,
-            completed_at=timezone.now()
+            exercise=exercise,
+            defaults={
+                'completed_at': timezone.now()
+            }
         )
 
 
-def mark_exam_question_as_completed(student, exam_question):
-    ExamQuestionCompletion.objects.create(
+def mark_exam_question_as_completed(student, exam, exam_question):
+    ExamQuestionCompletion.objects.update_or_create(
         student=student,
+        exam=exam,
         exam_question=exam_question,
-        completed_at=timezone.now()
+        defaults={
+            'completed_at': timezone.now()
+        }
     )
     all_questions = exam_question.exam.questions.all()
     completed_questions = ExamQuestionCompletion.objects.filter(
         student=student,
+        exam=exam,
         exam_question__in=all_questions
     )
     if all_questions.count() == completed_questions.count():
-        ExamCompletion.objects.create(
+        ExamCompletion.objects.update_or_create(
             student=student,
-            exam=exam_question.exam,
-            completed_at=timezone.now()
+            exam=exam,
+            defaults={
+                'completed_at': timezone.now()
+            }
         )
 
 
-def mark_adminexam_question_as_completed(student, adminexam_question):
-    AdminExamQuestionCompletion.objects.create(
+def mark_adminexam_question_as_completed(student, adminexam, adminexam_question):
+    AdminExamQuestionCompletion.objects.update_or_create(
         student=student,
+        adminexam=adminexam,
         adminexam_question=adminexam_question,
-        completed_at=timezone.now()
+        defaults={
+            'completed_at': timezone.now()
+        }
     )
     all_questions = adminexam_question.exam.questions.all()
     completed_questions = AdminExamQuestionCompletion.objects.filter(
         student=student,
+        adminexam=adminexam,
         adminexam_question__in=all_questions
     )
     if all_questions.count() == completed_questions.count():
-        AdminExamCompletion.objects.create(
+        AdminExamCompletion.objects.update_or_create(
             student=student,
             adminexam=adminexam_question.exam,
-            completed_at=timezone.now()
+            defaults={
+                'completed_at': timezone.now()
+            }
         )
 
 
@@ -561,9 +578,9 @@ def run_cpp_code(request):
         if not lock.acquire(blocking=False):
             return JsonResponse({'status': 'error', 'message': '当前测评人数较多，请稍后提交。'}, status=400)
 
-        user_code = request.POST.get('code', '')  # 从表单数据中获取代码
-        types = request.POST.get('types', '')  # 从表单数据中获取题目类型
-        question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
+        user_code = request.POST.get('code', '')
+        types = request.POST.get('types', '')
+        question_id = request.POST.get('questionId', '')
 
         # 检查是否在截止时间之前提交代码
         if types == 'exercise':
@@ -584,7 +601,7 @@ def run_cpp_code(request):
             if timezone.now() > exam.deadline:
                 return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'}, status=400)
         else:
-            return JsonResponse({'status': 'error', 'message': 'Invalid question type'}, status=400)
+            return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
         StudentCode.objects.update_or_create(
             student=student,
@@ -610,34 +627,38 @@ def run_cpp_code(request):
             except ObjectDoesNotExist:
                 time.sleep(5)
         if result is None:
-            return JsonResponse({'error': '测试出现错误，请重新提交'}, status=400)
-
+            return JsonResponse({'status': 'error', 'message': '测试出现错误，请重新提交'}, status=400)
         # 获取任务结果
         try:
             if result.status == 'pass':
-
                 # 测试用例全部通过的情况
                 if types == 'exercise':
                     question = ExerciseQuestion.objects.get(id=question_id)
-                    mark_exercise_question_as_completed(student, question)
+                    exercise = question.exercise
+                    mark_exercise_question_as_completed(student, exercise, question)
                     Score.objects.update_or_create(
                         student=student,
+                        exercise=exercise,
                         exercise_question=question,
                         defaults={'score': 10}
                     )
                 elif types == 'exam':
                     question = ExamQuestion.objects.get(id=question_id)
-                    mark_exam_question_as_completed(student, question)
+                    exam = question.exam
+                    mark_exam_question_as_completed(student, exam, question)
                     Score.objects.update_or_create(
                         student=student,
+                        exam=exam,
                         exam_question=question,
                         defaults={'score': 10}
                     )
                 else:
                     question = AdminExamQuestion.objects.get(id=question_id)
-                    mark_adminexam_question_as_completed(student, question)
+                    adminexam = question.exam
+                    mark_adminexam_question_as_completed(student, adminexam, question)
                     Score.objects.update_or_create(
                         student=student,
+                        adminexam=adminexam,
                         adminexam_question=question,
                         defaults={'score': 10}
                     )
@@ -645,7 +666,6 @@ def run_cpp_code(request):
                 return JsonResponse(result_dict)
 
             elif result.status == 'fail':
-
                 # 测试用例未全部通过的情况
                 passed_tests = result.passed_tests
                 total_tests = result.testcases
@@ -653,25 +673,31 @@ def run_cpp_code(request):
 
                 if types == 'exercise':
                     question = ExerciseQuestion.objects.get(id=question_id)
-                    mark_exercise_question_as_completed(student, question)
+                    exercise = question.exercise
+                    mark_exercise_question_as_completed(student, exercise, question)
                     Score.objects.update_or_create(
                         student=student,
+                        exercise=exercise,
                         exercise_question=question,
                         defaults={'score': score}
                     )
                 elif types == 'exam':
                     question = ExamQuestion.objects.get(id=question_id)
-                    mark_exam_question_as_completed(student, question)
+                    exam = question.exam
+                    mark_exam_question_as_completed(student, exam, question)
                     Score.objects.update_or_create(
                         student=student,
+                        exam=exam,
                         exam_question=question,
                         defaults={'score': score}
                     )
                 else:
                     question = AdminExamQuestion.objects.get(id=question_id)
-                    mark_adminexam_question_as_completed(student, question)
+                    adminexam = question.exam
+                    mark_adminexam_question_as_completed(student, adminexam, question)
                     Score.objects.update_or_create(
                         student=student,
+                        adminexam=adminexam,
                         adminexam_question=question,
                         defaults={'score': score}
                     )
@@ -679,16 +705,20 @@ def run_cpp_code(request):
                 return JsonResponse(result_dict)
 
             elif result.status == 'compile error':
-                error = result.error
                 result.delete()
                 # 出现编译错误的情况
-                return JsonResponse({'error': error})
+                return JsonResponse(result_dict)
+
+            elif result.status == 'other error':
+                result.delete()
+                # 出现其他错误的情况
+                return JsonResponse(result_dict)
 
         except Exception as e:
             result.delete()
-            return JsonResponse({'error': str(e)})
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     else:
-        return JsonResponse({'error': 'Invalid request'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 

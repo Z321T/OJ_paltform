@@ -21,7 +21,6 @@ from login.views import login_required
 # 管理员主页-程序设计
 @login_required
 def home_administrator(request):
-    # 获取用户id，若没有登录则返回登录页面
     user_id = request.session.get('user_id')
 
     programings = ProgrammingExercise.objects.all().order_by('-date_posted')
@@ -51,7 +50,6 @@ def home_administrator_exam(request):
 # 程序设计题详情
 @login_required
 def programmingexercise_details_data(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         question_id = request.POST.get('id')
@@ -67,7 +65,7 @@ def programmingexercise_details_data(request):
             context = {
                 'ratio_data': ratio_data,
             }
-            return JsonResponse({'data': context})
+            return JsonResponse({'data': context}, status=200)
 
         except ProgrammingExercise.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': '未找到对应的练习题'}, status=404)
@@ -79,7 +77,6 @@ def programmingexercise_details_data(request):
 # 考试题详情
 @login_required
 def exam_details_data(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         exam_id = request.POST.get('id')
@@ -90,7 +87,7 @@ def exam_details_data(request):
 
             for question in questions:
                 # 获取当前题目所有分数对象
-                scores = Score.objects.filter(adminexam_question=question)
+                scores = Score.objects.filter(adminexam=exam, adminexam_question=question)
                 total_score = sum(score.score for score in scores)
                 total_students = Student.objects.count()
                 # 计算平均分，若学生总数为0，则平均分为0
@@ -101,7 +98,7 @@ def exam_details_data(request):
                     'average_score': avg_score
                 })
 
-            return JsonResponse({'data': question_avg_scores})
+            return JsonResponse({'data': question_avg_scores}, status=200)
 
         except AdminExam.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': '未找到对应的考试'}, status=404)
@@ -127,7 +124,6 @@ def repository_administrator(request):
 # 程序设计题库：添加程序设计题
 @login_required
 def programmingexercise_create(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -149,7 +145,6 @@ def programmingexercise_create(request):
 # 程序设计题库：删除程序设计题
 @login_required
 def programmingexercise_delete(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         exercise_id = request.POST.get('exercise_id')
@@ -210,7 +205,7 @@ def report_administrator(request):
             code = open(temp_file.name, encoding='utf-8').read()
             analyze_programming_code(student, code, programmingexercise_id)
             os.unlink(temp_file.name)
-        return JsonResponse({'status': 'success', 'message': '提交成功'})
+        return JsonResponse({'status': 'success', 'message': '提交成功'}, status=200)
 
     context = {
         'user_id': user_id,
@@ -221,7 +216,6 @@ def report_administrator(request):
 # 题库查重管理-删除数据
 @login_required
 def reportdata_delete(request):
-    user_id = request.session.get('user_id')
 
     programmingexercise_id = request.POST.get('exerciseId')
     if programmingexercise_id:
@@ -241,7 +235,7 @@ def reportdata_delete(request):
         )
         reportfeatures_to_delete.delete()
 
-        return JsonResponse({'status': 'success', 'message': '数据删除成功'})
+        return JsonResponse({'status': 'success', 'message': '数据删除成功'}, status=200)
     else:
         return JsonResponse({'status': 'error', 'message': '未找到对应的练习题'}, status=404)
 
@@ -281,9 +275,7 @@ def admin_examlist_default(request):
 
 @login_required
 def admin_examlist(request, exam_id):
-    user_id = request.session.get('user_id')
 
-    admin = Administrator.objects.get(userid=user_id)
     exam = get_object_or_404(AdminExam, id=exam_id)
 
     if request.method == 'POST':
@@ -304,7 +296,6 @@ def admin_examlist(request, exam_id):
 # 考试-考试列表-创建考试
 @login_required
 def create_adminexam(request, exam_id):
-    user_id = request.session.get('user_id')
 
     exam = get_object_or_404(AdminExam, id=exam_id)
     if request.method == 'POST':
@@ -349,7 +340,6 @@ def adminexam_edit(request, exam_id):
 # 考试-考试列表-删除考试
 @login_required
 def adminexam_delete(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         exam_id = request.POST.get('exam_id')
@@ -359,16 +349,15 @@ def adminexam_delete(request):
                 exam_to_delete.questions.all().delete()
                 exam_to_delete.classes.clear()
                 exam_to_delete.delete()
-                return JsonResponse({'status': 'success'})
+                return JsonResponse({'status': 'success'}, status=200)
         return JsonResponse({'status': 'error', 'message': '考试未找到'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 考试-考试列表-删除考试题
 @login_required
 def adminexamquestion_delete(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         question_id = request.POST.get('question_id')
@@ -376,10 +365,10 @@ def adminexamquestion_delete(request):
             question_to_delete = AdminExamQuestion.objects.filter(id=question_id).first()
             if question_to_delete:
                 question_to_delete.delete()
-                return JsonResponse({'status': 'success'})
+                return JsonResponse({'status': 'success'}, status=200)
         return JsonResponse({'status': 'error', 'message': '考试题未找到'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 通知界面
@@ -414,14 +403,13 @@ def create_notice(request):
 # 通知界面：删除通知
 @login_required
 def delete_notice(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
         try:
             notification = AdminNotification.objects.filter(id=notification_id).first()
             notification.delete()
-            return JsonResponse({'status': 'success'})
+            return JsonResponse({'status': 'success'}, status=200)
         except AdminNotification.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': '通知未找到'}, status=404)
     else:
@@ -431,12 +419,11 @@ def delete_notice(request):
 # 通知界面：通知内容
 @login_required
 def notification_content(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
         notification = AdminNotification.objects.get(id=notification_id)
-        return JsonResponse({'title': notification.title, 'content': notification.content})
+        return JsonResponse({'title': notification.title, 'content': notification.content}, status=200)
     else:
         return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
@@ -454,7 +441,6 @@ def information_administrator(request):
 # 教师管理：添加教师
 @login_required
 def add_teacher(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         initial_password = request.POST.get('initialPassword')
@@ -476,7 +462,6 @@ def add_teacher(request):
 # 教师管理：删除教师
 @login_required
 def delete_teacher(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         teacher_id = request.POST.get('teacher_id')
@@ -493,7 +478,6 @@ def delete_teacher(request):
 # 教师管理：重置密码
 @login_required
 def reset_password(request):
-    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         teacher = Teacher.objects.get(id=request.POST.get('teacher_id'))
@@ -506,7 +490,7 @@ def reset_password(request):
         except Teacher.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': '初始化密码失败'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 管理员个人中心
@@ -566,7 +550,7 @@ def profile_adminadministrator_password(request):
             if new_password == confirm_password:
                 administrator.password = make_password(new_password)
                 administrator.save()
-                return JsonResponse({'status': 'success', 'message': '密码修改成功'})
+                return JsonResponse({'status': 'success', 'message': '密码修改成功'}, status=200)
             else:
                 return JsonResponse({'status': 'error', 'message': '两次输入的密码不一致'}, status=400)
         else:
