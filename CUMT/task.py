@@ -28,7 +28,7 @@ def scan_and_run():
 
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(scan_and_run, 'interval', seconds=10)
+    scheduler.add_job(scan_and_run, 'interval', seconds=20)
     scheduler.start()
 
 
@@ -72,15 +72,13 @@ def test_cpp_code(student, code, types, question_id):
     # 逐个运行测试用例
     for i, testcase in enumerate(testcases):
         try:
-            start_time = time.time()  # 记录开始时间
             result = subprocess.run(
                 ['docker', 'run', '--rm', '-v', f"{os.getcwd()}:/app",
                     '-w', '/app', '-m', '512m', '--cpus', '1', 'cpp-runner',
                     'bash', '-c', 'g++ temp.cpp -o temp && echo -n "{}" | ./temp'.format(testcase.input)],
                 capture_output=True, text=True, timeout=30
             )
-            execution_time = time.time() - start_time  # 计算执行时间
-            print('代码运行完毕')
+
             if result.returncode == 0:  # 如果运行成功
                 if result.stdout.strip() == testcase.expected_output.strip():
                     passed_tests += 1

@@ -573,6 +573,8 @@ def run_cpp_code(request):
             exam = question.exam
             if timezone.now() > exam.deadline:
                 return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid question type'}, status=400)
 
         StudentCode.objects.update_or_create(
             student=student,
