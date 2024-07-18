@@ -1,42 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 import subprocess
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from django.core.exceptions import ObjectDoesNotExist
-
-import time
 import os
-
-
-def scan_and_run():
-    from student_app.models import StudentCode
-
-    while True:
-        try:
-            student_code = StudentCode.objects.first()
-            if student_code:
-                # 运行函数
-                test_cpp_code(student_code.student, student_code.code,
-                              student_code.question_type, student_code.question_id)
-                # 删除已处理的实例
-                student_code.delete()
-            else:
-                break
-        except ObjectDoesNotExist:
-            break
-
-
-def start():
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(scan_and_run, 'interval', seconds=20)
-    scheduler.start()
+from student_app.models import TestResult
+from administrator_app.models import AdminExamQuestion, AdminExamQuestionTestCase
+from teacher_app.models import (ExerciseQuestion, ExamQuestion,
+                                ExerciseQuestionTestCase, ExamQuestionTestCase)
 
 
 def test_cpp_code(student, code, types, question_id):
-    from student_app.models import TestResult
-    from administrator_app.models import AdminExamQuestion, AdminExamQuestionTestCase
-    from teacher_app.models import (ExerciseQuestion, ExamQuestion,
-                                    ExerciseQuestionTestCase, ExamQuestionTestCase)
+
     # 将C++代码写入一个文件
     with open('temp.cpp', 'w') as file:
         file.write(code)

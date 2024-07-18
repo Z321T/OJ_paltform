@@ -262,7 +262,7 @@
                                                     </tr>
                                                 {% empty %}
                                                     <tr>
-                                                        <td colspan="4" style="text-align: center;">没有考试题目</td>
+                                                        <td colspan="4" style="text-align: center;">没有练习题目</td>
                                                     </tr>
                                                 {% endfor %}
                                                 </tbody>
@@ -391,15 +391,6 @@
         });
     });
 </script>
-{#<script>#}
-{#    $(document).ready(function () {#}
-{#        $('.doing-question').on('click', function () {#}
-{#            var questionId = $(this).data('question-id');#}
-            {#var url = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);#}
-{#            window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);#}
-{#        });#}
-{#    });#}
-{#</script>#}
 <script>
 $(document).ready(function () {
     $('.doing-question').on('click', function () {
@@ -410,14 +401,10 @@ $(document).ready(function () {
             url: url,
             type: "GET",
             success: function(response) {
-                if (response.status === 'error') {
-                    alert(response.message);
-                } else {
-                    window.location.href = url;
-                }
+                window.location.href = url;
             },
-            error: function(error) {
-                console.log(error);
+            error: function(response) {
+                alert(response.responseJSON.message);
             }
         });
     });

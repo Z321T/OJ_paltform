@@ -3,6 +3,7 @@ import docx
 import time
 import tempfile
 from io import BytesIO
+from threading import Lock
 
 from django.utils import timezone
 from django.db.models import Sum
@@ -21,6 +22,11 @@ from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, E
 from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
 from login.views import login_required
+from CUMT.task import test_cpp_code
+
+
+# 创建一个全局锁实例
+lock = Lock()
 
 
 # 学生主页
@@ -422,7 +428,7 @@ def coding_exercise(request, exercisequestion_id):
 
         # 检查截止时间
         if timezone.now() > question_set.deadline:
-            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
+            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'}, status=400)
 
         types = 'exercise'
         return render(request, 'coding_student.html',
@@ -468,9 +474,9 @@ def coding_adminexam(request, examquestion_id):
 
         # 检查开始、截止时间
         if timezone.now() < question_set.starttime:
-            return JsonResponse({'status': 'error', 'message': '考试尚未开始，不能作答'})
+            return JsonResponse({'status': 'error', 'message': '考试尚未开始，不能作答'}, status=400)
         elif timezone.now() > question_set.deadline:
-            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'})
+            return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'}, status=400)
 
         types = 'adminexam'
         context = {
@@ -551,6 +557,10 @@ def run_cpp_code(request):
 
     student = Student.objects.get(userid=user_id)
     if request.method == 'POST':
+        # 尝试获取锁
+        if not lock.acquire(blocking=False):
+            return JsonResponse({'status': 'error', 'message': '当前测评人数较多，请稍后提交。'}, status=400)
+
         user_code = request.POST.get('code', '')  # 从表单数据中获取代码
         types = request.POST.get('types', '')  # 从表单数据中获取题目类型
         question_id = request.POST.get('questionId', '')  # 从表单数据中获取题目id
@@ -560,19 +570,19 @@ def run_cpp_code(request):
             question = ExerciseQuestion.objects.get(id=question_id)
             exercise = question.exercise
             if timezone.now() > exercise.deadline:
-                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'})
+                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'}, status=400)
 
         elif types == 'exam':
             question = ExamQuestion.objects.get(id=question_id)
             exam = question.exam
             if timezone.now() > exam.deadline:
-                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'})
+                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'}, status=400)
 
         elif types == 'adminexam':
             question = AdminExamQuestion.objects.get(id=question_id)
             exam = question.exam
             if timezone.now() > exam.deadline:
-                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'})
+                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'}, status=400)
         else:
             return JsonResponse({'status': 'error', 'message': 'Invalid question type'}, status=400)
 
@@ -582,6 +592,12 @@ def run_cpp_code(request):
             question_id=question_id,
             defaults={'code': user_code},
         )
+        student_code = StudentCode.objects.get(student=student, question_type=types, question_id=question_id)
+
+        # 运行函数
+        test_cpp_code(student_code.student, student_code.code, student_code.question_type, student_code.question_id)
+        # 释放锁
+        lock.release()
 
         result = None
         for _ in range(50):
