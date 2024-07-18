@@ -669,6 +669,7 @@ def run_cpp_code(request):
                 return JsonResponse({'error': error})
 
         except Exception as e:
+            result.delete()
             return JsonResponse({'error': str(e)})
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
