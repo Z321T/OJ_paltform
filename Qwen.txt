@@ -1,0 +1,75 @@
+# coding: utf-8
+from django.http import JsonResponse
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+# 加载模型和分词器（通常在视图模块加载时执行，只加载一次）
+device = "cuda"
+
+model = AutoModelForCausalLM.from_pretrained(
+    "Qwen/Qwen2-1.5B-Instruct",
+    torch_dtype="auto",
+    device_map="auto"
+).to(device)
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-1.5B-Instruct")
+
+
+def chat(request):
+    if request.method == 'POST':
+        question = request.POST.get('question')
+        if question:
+            # 获取会话历史，如果没有则初始化为空列表
+            chat_history = request.session.get('chat_history', [])
+
+            # 将新的用户输入添加到对话历史
+            chat_history.append({"role": "user", "content": question})
+
+            # 准备输入给模型的消息列表，包含系统消息和历史对话
+            messages = [
+                           {"role": "system",
+                            "content": "你现在是一个代码学习助手，你会分步骤回答问题；接下来请用代码学习助手的口吻和用户对话。"},
+                       ] + chat_history
+
+            text = tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+
+            model_inputs = tokenizer([text], return_tensors="pt").to(device)
+
+            with torch.no_grad():
+                model_inputs = model_inputs.to(device)  # 确保输入在 GPU 上
+                generated_ids = model.generate(
+                    model_inputs.input_ids,
+                    max_new_tokens=512,
+                ).to(device)  # 确保输出在 GPU 上
+
+            generated_ids = [
+                output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+            ]
+
+            response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+            # 将助手的响应添加到对话历史
+            chat_history.append({"role": "assistant", "content": response})
+
+            # 保存更新后的对话历史到会话中
+            request.session['chat_history'] = chat_history
+
+            return JsonResponse({'response': '<pre>' + response + '</pre>'})
+        else:
+            return JsonResponse({'error': '没有接收到信息，请重新提问'}, status=400)
+    else:
+        return JsonResponse({'error': '错误的请求方式'}, status=400)
+
+
+def clear_chat(request):
+    if request.method == 'POST':
+        if 'chat_history' in request.session:
+            del request.session['chat_history']
+            request.session.modified = True
+        return JsonResponse({'status': 'success'})
+    else:
+        return JsonResponse({'error': '错误的请求方式'}, status=400)
+
