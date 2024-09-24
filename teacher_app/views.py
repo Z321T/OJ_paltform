@@ -1085,3 +1085,8 @@ def profile_teacher_password(request):
         else:
             return JsonResponse({'status': 'error', 'message': '旧密码错误'}, status=400)
     return render(request, 'password_teacher_edit.html', context)
+
+
+def test_check_process(request):
+    return render(request, 'test_check_process.html')
+

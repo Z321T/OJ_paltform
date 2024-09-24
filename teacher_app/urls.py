@@ -13,6 +13,7 @@ from .views import (coursework_exercise, coursework_exam, coursework_adminexam, 
                     coursework_exercise_details, coursework_exam_details, coursework_adminexam_details,
                     coursework_details_data)
 from .views import standard_report, scores_details
+from .views import test_check_process
 
 
 app_name = 'teacher_app'
@@ -66,6 +67,8 @@ urlpatterns = [
     path('profile/', profile_teacher, name='profile_teacher'),
     path('profile/edit/', profile_teacher_edit, name='profile_teacher_edit'),
     path('profile/password/', profile_teacher_password, name='profile_teacher_password'),
+
+    path('test', test_check_process, name='test_check_process'),
 
     path('static/<path:path>', serve),
 
