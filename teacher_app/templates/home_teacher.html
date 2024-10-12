@@ -88,6 +88,10 @@
             window.location.href = "{% url 'teacher_app:class_teacher' %}"
         }
 
+        function redirectToTestCheck() {
+            window.location.href = "{% url 'teacher_app:test_check_process' %}"
+        }
+
     </script>
     <!-- 引入Echarts -->
     <script src="{% static 'node_modules/echarts/dist/echarts.min.js' %}"></script>
@@ -173,6 +177,14 @@
                     <a class="nav-link" href="#" onclick="redirectToHome()">
                         <i class="mdi mdi-home menu-icon"></i>
                         <span class="menu-title">GUI编程</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToTestCheck()" aria-expanded="false"
+                       aria-controls="ui-basic">
+                        <i class="mdi mdi-chart-pie menu-icon"></i>
+                        <span class="menu-title">考试实况</span>
+                        <i class="menu-arrow"></i>
                     </a>
                 </li>
                 <li class="nav-item">

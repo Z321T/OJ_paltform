@@ -21,6 +21,7 @@ from student_app.models import (Student, Score, ExerciseCompletion, ExerciseQues
 from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, ExamQuestion, ReportScore
 from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
+from submissions_app.models import ClassExamSubmission, GradeExamSubmission
 from login.views import login_required
 from CUMT.task import test_cpp_code
 
@@ -702,6 +703,11 @@ def run_cpp_code(request):
                         defaults={'score': score}
                     )
                 result.delete()
+                return JsonResponse(result_dict)
+
+            elif result.status == 'timeout':
+                result.delete()
+                # 出现运行超时的情况
                 return JsonResponse(result_dict)
 
             elif result.status == 'compile error':

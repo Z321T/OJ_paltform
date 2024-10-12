@@ -13,7 +13,7 @@ from .views import (coursework_exercise, coursework_exam, coursework_adminexam, 
                     coursework_exercise_details, coursework_exam_details, coursework_adminexam_details,
                     coursework_details_data)
 from .views import standard_report, scores_details
-from .views import test_check_process
+from .views import test_check_process, get_exam_names
 
 
 app_name = 'teacher_app'
@@ -27,6 +27,9 @@ urlpatterns = [
     path('home/repeat_report/report_details/<int:programmingexercise_id>/', repeat_report_details, name='repeat_report_details'),
     path('home/repeat_report/code_details/<int:programmingexercise_id>/', repeat_code_details, name='repeat_code_details'),
     path('home/repeat_report/scores_details/<int:programmingexercise_id>/', scores_details, name='scores_details'),
+    # 有关考试实况的操作
+    path('test', test_check_process, name='test_check_process'),
+    path('test/get_exam_names/', get_exam_names, name='get_exam_names'),
     # 有关的coursework操作
     path('coursework/exercise/', coursework_exercise, name='coursework_exercise'),
     path('coursework/exam/', coursework_exam, name='coursework_exam'),
@@ -67,8 +70,6 @@ urlpatterns = [
     path('profile/', profile_teacher, name='profile_teacher'),
     path('profile/edit/', profile_teacher_edit, name='profile_teacher_edit'),
     path('profile/password/', profile_teacher_password, name='profile_teacher_password'),
-
-    path('test', test_check_process, name='test_check_process'),
 
     path('static/<path:path>', serve),
 

@@ -17,6 +17,7 @@ from teacher_app.models import (Teacher, Class, Notification,
 from student_app.models import (Student, ExerciseCompletion, ExamCompletion, Score,
                                 ExerciseQuestionCompletion, ExamQuestionCompletion,
                                 AdminExamCompletion, AdminExamQuestionCompletion)
+from submissions_app.models import ClassExamSubmission, GradeExamSubmission
 
 
 # 教师主页
@@ -241,6 +242,57 @@ def scores_details(request, programmingexercise_id):
         'programmingexercise_id': programmingexercise_id,
     }
     return render(request, 'scores_details.html', context)
+
+
+# 考试实况
+@login_required
+def test_check_process(request):
+    user_id = request.session.get('user_id')
+
+    teacher = Teacher.objects.get(userid=user_id)
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+
+    # 获取 exam_type 和 exam_id 参数
+    exam_type = request.GET.get('exam_type')
+    exam_id = request.GET.get('exam_id')
+    selected_exam = None
+    submissions = []
+
+    if exam_type and exam_id:
+        if exam_type == 'adminexam':
+            selected_exam = AdminExam.objects.filter(id=exam_id).first()
+            submissions = GradeExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
+        elif exam_type == 'classexam':
+            selected_exam = Exam.objects.filter(id=exam_id, teacher=teacher).first()
+            submissions = ClassExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
+
+    context = {
+        'user_id': user_id,
+        'adminnotifications': adminnotifications,
+        'selected_exam': selected_exam,
+        'submissions': submissions,
+        'exam_type': exam_type,
+        'exam_id': exam_id,
+    }
+    return render(request, 'test_check_process.html', context)
+
+
+# 考试实况-获取考试项目
+@login_required
+def get_exam_names(request):
+    exam_type = request.GET.get('exam_type')
+    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(userid=user_id)
+
+    if exam_type == 'adminexam':
+        exams = AdminExam.objects.all()
+    elif exam_type == 'classexam':
+        exams = Exam.objects.filter(teacher=teacher)
+    else:
+        exams = []
+
+    exam_names = [{'id': exam.id, 'name': exam.title} for exam in exams]
+    return JsonResponse({'exam_names': exam_names})
 
 
 # 作业情况
@@ -1087,6 +1139,5 @@ def profile_teacher_password(request):
     return render(request, 'password_teacher_edit.html', context)
 
 
-def test_check_process(request):
-    return render(request, 'test_check_process.html')
+
 

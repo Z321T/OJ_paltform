@@ -19,6 +19,7 @@ import teacher_app.apps
 import BERT_app.apps
 import login.apps
 import Spark_app.apps
+import submissions_app.apps
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,8 +56,7 @@ INSTALLED_APPS = [
     'BERT_app.apps.ScoreAppConfig',
     'login.apps.LoginConfig',
     'Spark_app.apps.SparkAppConfig',
-
-
+    "submissions_app.apps.SubmissionsAppConfig",
 ]
 
 MIDDLEWARE = [

@@ -2,7 +2,7 @@ import torch
 import json
 from sklearn.decomposition import PCA
 from django.shortcuts import get_object_or_404
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModel
+from transformers import AutoTokenizer, AutoModel
 from torch.nn.functional import cosine_similarity
 
 from BERT_app.models import (ProgrammingCodeFeature, ProgrammingReportFeature,
@@ -11,23 +11,28 @@ from administrator_app.models import ProgrammingExercise
 from teacher_app.models import ReportScore, Class
 
 # 加载 CodeBERT 模型和分词器
-tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
-model = AutoModel.from_pretrained("microsoft/codebert-base")
+codebert_tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
+codebert_model = AutoModel.from_pretrained("microsoft/codebert-base")
 # 加载 Sentence-BERT 模型和分词器
 sbert_tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
-sbert_model = AutoModelForSequenceClassification.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+sbert_model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+
+# 如果有GPU可用，移动模型到GPU
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+codebert_model.to(device)
+sbert_model.to(device)
 
 
 # 分析程序设计题代码
 def analyze_programming_code(student, code, question_id):
     # 代码分词
-    tokenized_code = tokenizer.tokenize(code)
+    tokenized_code = codebert_tokenizer.tokenize(code)
     features = []
     for i in range(0, len(tokenized_code), 512):
-        inputs = tokenizer(tokenized_code[i:i+512], return_tensors="pt", padding=True, truncation=True, max_length=512)
+        inputs = codebert_tokenizer(tokenized_code[i:i+512], return_tensors="pt", padding=True, truncation=True, max_length=512)
         # 获取特征值
         with torch.no_grad():
-            feature = model(**inputs).last_hidden_state.mean(dim=1)
+            feature = codebert_model(**inputs).last_hidden_state.mean(dim=1)
             features.append(feature)
     # 连接所有特征值
     concatenated_features = torch.cat(features, dim=0)
@@ -39,18 +44,12 @@ def analyze_programming_code(student, code, question_id):
     feature_as_json = json.dumps(reduced_features.tolist())
 
     question = ProgrammingExercise.objects.get(id=question_id)
-    if student:
-        ProgrammingCodeFeature.objects.update_or_create(
-            student=student,
-            programming_question=question,
-            defaults={'feature': feature_as_json}
-        )
-    else:
-        ProgrammingCodeFeature.objects.create(
-            student=student,
-            programming_question=question,
-            defaults={'feature': feature_as_json}
-        )
+
+    ProgrammingCodeFeature.objects.update_or_create(
+        student=student,
+        programming_question=question,
+        defaults={'feature': feature_as_json}
+    )
 
 
 # 分析程序设计题报告
@@ -62,7 +61,7 @@ def analyze_programming_report(student, report, question_id):
         inputs = sbert_tokenizer(tokenized_report[i:i+512], return_tensors="pt", padding=True, truncation=True, max_length=512)
         # 获取特征值
         with torch.no_grad():
-            feature = model(**inputs).last_hidden_state.mean(dim=1)
+            feature = sbert_model(**inputs).last_hidden_state.mean(dim=1)
             features.append(feature)
     # 连接所有特征值
     concatenated_features = torch.cat(features, dim=0)
@@ -74,18 +73,12 @@ def analyze_programming_report(student, report, question_id):
     feature_as_json = json.dumps(reduced_features.tolist())
 
     question = ProgrammingExercise.objects.get(id=question_id)
-    if student:
-        ProgrammingReportFeature.objects.update_or_create(
-            student=student,
-            programming_question=question,
-            defaults={'feature': feature_as_json}
-        )
-    else:
-        ProgrammingReportFeature.objects.create(
-            student=student,
-            programming_question=question,
-            defaults={'feature': feature_as_json}
-        )
+
+    ProgrammingReportFeature.objects.update_or_create(
+        student=student,
+        programming_question=question,
+        defaults={'feature': feature_as_json}
+    )
 
 
 # 计算程序设计报告&代码的相似度

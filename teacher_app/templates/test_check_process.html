@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- Required meta tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>班级详情</title>
+    <title>考试实况</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="{% static 'teacher_app/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'teacher_app/css/vendor.bundle.base.css' %}">
@@ -16,11 +16,11 @@
     <!-- End plugin css for this page -->
     <!-- inject:css -->
     <link rel="stylesheet" href="{% static 'teacher_app/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'student_app/css/test.css' %}">
     <!-- endinject -->
     <link rel="shortcut icon" href="{% static 'teacher_app/photo/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'node_modules/MDI/@mdi/font/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
-
     <style type="text/css">/* Chart.js */
     @keyframes chartjs-render-animation {
         from {
@@ -49,7 +49,7 @@
 
 
     .sidebar .nav .nav-item .nav-link .menu-title {
-        font-size: 16px; /* 调整为需要的大小 */
+        font-size: 16px;
     }
     </style>
     <script>
@@ -75,6 +75,10 @@
 
         function redirectToClass() {
             window.location.href = "{% url 'teacher_app:class_teacher' %}"
+        }
+
+        function redirectToTestCheck() {
+            window.location.href = "{% url 'teacher_app:test_check_process' %}"
         }
 
     </script>
@@ -114,74 +118,59 @@
         }
 
 
-               .container {
-  display: flex;
-  justify-content: space-around;
-  padding: 20px;
-}
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-  margin: 10px;
-}
+        .dropdown {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+        }
 
-.dropbtn {
-  background-color: white;
-  color: black;
-  padding: 16px;
-  font-size: 16px;
-  border: 2px solid black; /* 添加边框 */
-  cursor: pointer;
-  border-radius: 4px; /* 边框圆角 */
-  min-width: 150px; /* 确保按钮足够宽以显示文本 */
-  text-align: left; /* 文本左对齐 */
-  padding-left: 10px; /* 留出空间显示下拉箭头 */
-  position: relative; /* 为下拉箭头定位 */
-}
+        .dropdown-label {
+            margin-right: 20px; /* 标签与下拉框之间的间距 */
+            font-size: 18px !important; /* 增加字体大小 */
+            white-space: nowrap; /* 防止换行 */
+        }
 
-.dropbtn::after {
-  content: "▼";
-  position: absolute;
-  right: 10px;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  height: 16px;
-}
+        .dropbtn {
+            background-color: white;
+            color: grey;
+            font-size: 16px !important;
+            border: 2px solid black; /* 添加边框 */
+            cursor: pointer;
+            border-radius: 4px; /* 边框圆角 */
+            min-width: 220px; /* 确保按钮足够宽以显示文本 */
+            text-align: left; /* 文本左对齐 */
+            /* 留出空间显示下拉箭头 */
+            padding: 16px 16px 16px 10px;
+            position: relative; /* 为下拉箭头定位 */
+        }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-  border: 2px solid white; /* 下拉内容的边框 */
-  border-radius: 4px; /* 边框圆角 */
-}
+        .dropbtn:focus,
+        .dropbtn:active,
+        .dropbtn:visited,
+        .dropbtn:disabled,
+        .dropbtn[aria-expanded="false"] {
+            color: black !important; /* 保持字体黑色 */
+        }
 
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  border-bottom: 1px solid grey; /* 菜单项之间的分隔线 */
-}
+        .dropbtn::after {
+            content: "▼";
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            height: 16px;
+        }
 
-.dropdown-content a:hover {background-color: #f1f1f1}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-.dropdown:hover .dropbtn {
-  background-color: whitesmoke;
-}
-
-label {
-  margin-right: 10px; /* 标签与按钮之间的间距 */
-}
+        .dropdown:hover .dropbtn {
+            background-color: whitesmoke;
         }
     </style>
 </head>
@@ -262,10 +251,18 @@ label {
         <!-- partial:partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="nav-link" href="#" onclick="redirectToHome()">
                         <i class="mdi mdi-home menu-icon"></i>
                         <span class="menu-title">GUI编程</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToTestCheck()" aria-expanded="false"
+                       aria-controls="ui-basic">
+                        <i class="mdi mdi-chart-pie menu-icon"></i>
+                        <span class="menu-title">考试实况</span>
+                        <i class="menu-arrow"></i>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -288,6 +285,7 @@ label {
                     <a class="nav-link" href="#" onclick="redirectToNotice()">
                         <i class="mdi mdi-bulletin-board menu-icon"></i>
                         <span class="menu-title">通知</span>
+                        <i class="menu-arrow"></i>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -326,29 +324,27 @@ label {
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-12">
-{#                                        下拉框体#}
-                                        <div class="container">
-                                          <div class="dropdown">
-                                              <label for="dropbtn1">考试类型</label>
-                                            <button class="dropbtn">Dropdown 1</button>
-                                            <div class="dropdown-content">
-                                             <a href="#" data-value="Option 1">Option 1</a>
-                                              <a href="#" data-value="Option 2">Option 2</a>
-                                              <a href="#" data-value="Option 3">Option 3</a>
+                                            <div class="container">
+                                                <div class="dropdown">
+                                                    <label for="examType" class="dropdown-label">考试类型：</label>
+                                                    <select id="examType" class="dropbtn">
+                                                        <option value="">请选择考试类型</option>
+                                                        <option value="adminexam" {% if exam_type == 'adminexam' %}selected{% endif %}>年级考试</option>
+                                                        <option value="classexam" {% if exam_type == 'classexam' %}selected{% endif %}>班级考试</option>
+                                                    </select>
+                                                </div>
+                                                <div class="dropdown">
+                                                    <label for="examName" class="dropdown-label">考试名称：</label>
+                                                    <select id="examName" class="dropbtn">
+                                                        <option value="">请选择考试名称</option>
+                                                        <!-- 动态加载选项 -->
+                                                        {% if selected_exam %}
+                                                            <option value="{{ selected_exam.id }}" selected>{{ selected_exam.title }}</option>
+                                                        {% endif %}
+                                                    </select>
+                                                </div>
+                                                <button id="queryButton" class="btn-default" style="float: right;height:40px;">查询</button>
                                             </div>
-                                          </div>
-                                          <div class="dropdown">
-                                              <label for="dropbtn1">考试名称</label>
-                                            <button class="dropbtn">Dropdown 2</button>
-                                            <div class="dropdown-content">
-                                             <a href="#" data-value="Option 1">Option 1</a>
-                                             <a href="#" data-value="Option 2">Option 2</a>
-                                             <a href="#" data-value="Option 3">Option 3</a>
-                                            </div>
-                                          </div>
-                                              <button class="btn-default" style="float: right;height:40px;">查询</button>
-                                        </div>
-
                                             <table id="recent-purchases-listing" class="table dataTable no-footer"
                                                    role="grid">
                                                 <thead>
@@ -356,81 +352,79 @@ label {
                                                     <th class="sorting_asc" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-sort="ascending"
-                                                        aria-label="Name: activate to sort column descending"
-                                                        style="width: 167.95px;">提交编号
+                                                        aria-label="提交编号"
+                                                        style="width: 100px;">提交编号
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
-                                                        aria-label="Office: activate to sort column ascending"
-                                                        style="width: 155.6px;">学号
+                                                        aria-label="学号"
+                                                        style="width: 120px;">学号
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
-                                                        aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">题目编号
-                                                    </th>
-                                                     <th class="sorting" tabindex="0"
-                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
-                                                        aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">结果
-                                                    </th>
-                                                     <th class="sorting" tabindex="0"
-                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
-                                                        aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">内存
+                                                        aria-label="题目编号"
+                                                        style="width: 80px;">题目编号
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
-                                                        aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">耗时
+                                                        aria-label="结果"
+                                                        style="width: 80px;">结果
                                                     </th>
-                                                     <th class="sorting" tabindex="0"
+                                                    <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
-                                                        aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">语言
+                                                        aria-label="内存"
+                                                        style="width: 80px;">内存
                                                     </th>
-                                                     <th class="sorting" tabindex="0"
+                                                    <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
-                                                        aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">代码长度
+                                                        aria-label="耗时"
+                                                        style="width: 80px;">耗时
                                                     </th>
-                                                     <th class="sorting" tabindex="0"
+                                                    <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
-                                                        aria-label="Price: activate to sort column ascending"
-                                                        style="width: 72.575px;">提交时间
+                                                        aria-label="语言"
+                                                        style="width: 80px;">语言
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="代码长度"
+                                                        style="width: 100px;">代码长度
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="提交时间"
+                                                        style="width: 150px;">提交时间
                                                     </th>
                                                 </tr>
                                                 </thead>
-                                                <tbody>
-                                                {% for student in students %}
-                                                    <tr role="row"
-                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
-                                                    <td class="sorting_1"
-                                                        id="student{{ student.id }}"> {{ student.name }}
-                                                    </td>
-                                                    <td>{{ student.userid }}</td>
-                                                    <td>{{ student.email }}</td>
-                                                    <td>
-                                                        <button class="button-class delete-student btn-default"
-                                                                data-student-id="{{ student.id }}">删除
-                                                        </button>
-                                                        <button class="button-class reset-password btn-default"
-                                                                data-student-id="{{ student.id }}">初始化密码
-                                                        </button>
-                                                    </td>
-                                                {% endfor %}
-                                                </tbody>
-                                            </table>
+                                                    <tbody>
+                                                        {% if not exam_type or not exam_id %}
+                                                            <tr>
+                                                                <td colspan="9" style="text-align: center;">请选择考试类型与考试名称</td>
+                                                            </tr>
+                                                        {% else %}
+                                                            {% for submission in submissions %}
+                                                                <tr role="row" class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                                    <td>{{ submission.submission_id }}</td>
+                                                                    <td>{{ submission.student_id }}</td>
+                                                                    <td>{{ submission.question.id }}</td>
+                                                                    <td>{{ submission.result }}</td>
+                                                                    <td>{{ submission.memory }}</td>
+                                                                    <td>{{ submission.time }}</td>
+                                                                    <td>{{ submission.language }}</td>
+                                                                    <td>{{ submission.code_length }}</td>
+                                                                    <td>{{ submission.submission_time }}</td>
+                                                                </tr>
+                                                            {% empty %}
+                                                                <tr>
+                                                                    <td colspan="9" style="text-align: center;">没有提交记录</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </tbody>
+                                                </table>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-5"></div>
-                                <div class="col-sm-12 col-md-7">
-                                    <button onclick="window.location.href='{% url 'teacher_app:class_teacher' %}'"
-                                            class="btn-default" style="float: right;">返回
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -519,50 +513,6 @@ label {
 <script src="{% static 'teacher_app/js/jquery.cookie.js' %}" type="text/javascript"></script>
 <script>
     $(document).ready(function () {
-        $('.delete-student').on('click', function () {
-            var studentId = $(this).data('student-id');
-            var confirmation = confirm("确定要删除这个学生吗？删除之后，该学生的所有信息将会被清除！");
-            if (confirmation) {
-                $.ajax({
-                    url: "{% url 'teacher_app:delete_student' %}",
-                    type: 'POST',
-                    data: {
-                        'student_id': studentId,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
-                    },
-                    success: function (response) {
-                        alert(response.message);
-                        window.location.reload()
-                    },
-                    error: function (response) {
-                        alert(response.responseJSON.message);
-                    }
-                });
-            }
-        });
-    });
-    $(document).ready(function () {
-        $('.reset-password').on('click', function () {
-            var studentId = $(this).data('student-id');
-            $.ajax({
-                url: "{% url 'teacher_app:reset_password' %}",
-                type: 'POST',
-                data: {
-                    'student_id': studentId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    alert(response.message);
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message);
-                }
-            });
-        });
-    });
-</script>
-<script>
-    $(document).ready(function () {
         $('.adminnotification-item').on('click', function () {
             var adminnotificationId = $(this).data('adminnotification-id');
             $.ajax({
@@ -643,18 +593,56 @@ label {
     });
 </script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.dropdown-content a').forEach(item => {
-    item.addEventListener('click', function(event) {
-      event.preventDefault();
-      const dropdown = this.closest('.dropdown');
-      const button = dropdown.querySelector('.dropbtn');
-      const value = this.dataset.value; // 使用dataset获取data属性
-      button.textContent = value; // 更新按钮文本
-      button.setAttribute('data-selected', value); // 可选：设置一个data属性以存储选中的值
+    $(document).ready(function () {
+        $('#examType').on('change', function () {
+            var examType = $(this).val();
+            var examNameSelect = $('#examName');
+            examNameSelect.empty().append(new Option('加载中...', ''));
+
+            $.ajax({
+                url: "{% url 'teacher_app:get_exam_names' %}",
+                type: 'GET',
+                data: {
+                    'exam_type': examType
+                },
+                success: function (response) {
+                    examNameSelect.empty();
+                    if (response.exam_names.length > 0) {
+                        response.exam_names.forEach(function (exam) {
+                            examNameSelect.append(new Option(exam.name, exam.id));
+                        });
+                    } else {
+                        examNameSelect.append(new Option('无可用考试', ''));
+                    }
+                },
+                error: function (response) {
+                    alert('获取考试名称失败，请重试');
+                    examNameSelect.empty().append(new Option('加载失败', ''));
+                }
+            });
+        });
+
+        $('#queryButton').on('click', function () {
+            var examType = $('#examType').val();
+            var examId = $('#examName').val();
+            window.location.href = "{% url 'teacher_app:test_check_process' %}?exam_type=" + examType + "&exam_id=" + examId;
+        });
     });
-  });
-});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var dropbtns = document.querySelectorAll('.dropbtn');
+
+        dropbtns.forEach(function (dropbtn) {
+            dropbtn.addEventListener('change', function () {
+                if (dropbtn.value) {
+                    dropbtn.style.color = 'black'; // 选择后字体颜色为黑色
+                } else {
+                    dropbtn.style.color = 'grey'; // 未选择时字体颜色为灰色
+                }
+            });
+        });
+    });
 </script>
 </body>
 </html>
