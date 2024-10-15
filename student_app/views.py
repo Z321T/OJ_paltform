@@ -40,6 +40,7 @@ def home_student(request):
     programing_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
 
     context = {
+        'active_page': 'home',
         'user_id': user_id,
         'notifications': notifications,
         'programing_exercises': programing_exercises,
@@ -60,6 +61,7 @@ def report_student(request, programmingexercise_id):
         notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
         context = {
+            'active_page': 'home',
             'user_id': user_id,
             'notifications': notifications,
             'programming_exercise': programming_exercise,
@@ -118,6 +120,7 @@ def practice_student(request):
     exercises = Exercise.objects.filter(classes=class_assigned).order_by('-published_at')
 
     context = {
+        'active_page': 'practice',
         'user_id': user_id,
         'exercises': exercises,
         'notifications': notifications,
@@ -136,6 +139,7 @@ def practice_list(request, exercise_id):
         exercise = Exercise.objects.get(id=exercise_id)
 
         context = {
+            'active_page': 'practice',
             'user_id': user_id,
             'exercise': exercise,
             'notifications': notifications,
@@ -156,6 +160,7 @@ def exam_student(request):
     admin_exams = AdminExam.objects.filter(classes=class_assigned).order_by('-starttime')
 
     context = {
+        'active_page': 'exam',
         'user_id': user_id,
         'th_exams': th_exams,
         'admin_exams': admin_exams,
@@ -175,6 +180,7 @@ def teacherexam_list(request, exam_id):
         exam = Exam.objects.get(id=exam_id)
 
         context = {
+            'active_page': 'exam',
             'user_id': user_id,
             'exam': exam,
             'notifications': notifications,
@@ -193,6 +199,7 @@ def adminexam_list(request, exam_id):
         exam = AdminExam.objects.get(id=exam_id)
 
         context = {
+            'active_page': 'exam',
             'user_id': user_id,
             'exam': exam,
             'notifications': notifications,
@@ -210,6 +217,7 @@ def analyse_exercise(request):
     exercises = Exercise.objects.filter(classes=student.class_assigned).order_by('-published_at')
 
     context = {
+        'active_page': 'analyse',
         'user_id': user_id,
         'notifications': notifications,
         'coursework': exercises,
@@ -226,6 +234,7 @@ def analyse_exam(request):
     exams = Exam.objects.filter(classes=student.class_assigned).order_by('-starttime')
 
     context = {
+        'active_page': 'analyse',
         'user_id': user_id,
         'notifications': notifications,
         'coursework': exams,
@@ -345,6 +354,7 @@ def profile_student(request):
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
         'notifications': notifications,
         'student': student,
@@ -362,6 +372,7 @@ def profile_student_edit(request):
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
         'notifications': notifications,
         'student': student,
@@ -385,6 +396,7 @@ def profile_student_password(request):
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
         'notifications': notifications,
         'student': student,
