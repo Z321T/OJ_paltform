@@ -143,54 +143,59 @@
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-sort="ascending"
                                                         aria-label="提交编号"
-                                                        style="width: 100px;">提交编号
+                                                        style="width: 10%;">提交编号
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="学号"
-                                                        style="width: 120px;">学号
+                                                        style="width: 10%;">学号
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="题目编号"
-                                                        style="width: 80px;">题目编号
+                                                        style="width: 10%;">题目编号
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="结果"
-                                                        style="width: 80px;">结果
+                                                        style="width: 10%;">结果
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="内存"
-                                                        style="width: 80px;">内存
+                                                        style="width: 10%;">内存
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="耗时"
-                                                        style="width: 80px;">耗时
+                                                        style="width: 10%;">耗时
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="语言"
-                                                        style="width: 80px;">语言
+                                                        style="width: 10%;">语言
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="代码长度"
-                                                        style="width: 100px;">代码长度
+                                                        style="width: 10%;">代码长度
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="IP地址"
+                                                        style="width: 10%;">IP地址
                                                     </th>
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="提交时间"
-                                                        style="width: 150px;">提交时间
+                                                        style="width: 10%;">提交时间
                                                     </th>
                                                 </tr>
                                                 </thead>
                                                     <tbody>
                                                         {% if not exam_type or not exam_id %}
                                                             <tr>
-                                                                <td colspan="9" style="text-align: center;">请选择考试类型与考试名称</td>
+                                                                <td colspan="10" style="text-align: center;">请选择考试类型与考试名称</td>
                                                             </tr>
                                                         {% else %}
                                                             {% for submission in submissions %}
@@ -203,11 +208,12 @@
                                                                     <td>{{ submission.time }}</td>
                                                                     <td>{{ submission.language }}</td>
                                                                     <td>{{ submission.code_length }}</td>
+                                                                    <td>{{ submission.ip_address }}</td>
                                                                     <td>{{ submission.submission_time }}</td>
                                                                 </tr>
                                                             {% empty %}
                                                                 <tr>
-                                                                    <td colspan="9" style="text-align: center;">没有提交记录</td>
+                                                                    <td colspan="10" style="text-align: center;">没有提交记录</td>
                                                                 </tr>
                                                             {% endfor %}
                                                         {% endif %}

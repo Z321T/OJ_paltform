@@ -12,7 +12,7 @@ from teacher_app.models import (ExerciseQuestion, ExamQuestion,
 from submissions_app.models import GradeExamSubmission, ClassExamSubmission
 
 
-def test_cpp_code(student, code, types, question_id):
+def test_cpp_code(student, code, types, question_id, ip_address):
     # 将C++代码写入一个文件
     with open('temp.cpp', 'w') as file:
         file.write(code)
@@ -176,6 +176,7 @@ def test_cpp_code(student, code, types, question_id):
             time=total_time,  # 这里假设已经获取到时间信息
             language=language,
             code_length=code_length,
+            ip_address=ip_address,
             submission_time=submission_time
         )
 
