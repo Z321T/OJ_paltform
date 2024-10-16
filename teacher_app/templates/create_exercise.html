@@ -1,11 +1,9 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>练习题设计</title>
-    <link rel="stylesheet" href="{% static 'teacher_app/css/bootstrap.min.css' %}">
-    <style>
+{% extends 'teacher_base.html' %}
+
+{% block title %}练习题设计{% endblock %}
+
+{% block extra_css %}
+<style>
         .newproblem-container {
             display: flex;
             flex-direction: column; /* 设置主轴方向为垂直 */
@@ -77,9 +75,10 @@
         .sidebar .nav .nav-item .nav-link .menu-title {
             font-size: 16px; /* 调整为需要的大小 */
         }
-    </style>
-</head>
-<body>
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="container mt-5">
     <div class="newproblem-container bg-light p-4 border rounded">
         <form method="post" action="{% url 'teacher_app:create_exercise' exercise.id %}">
@@ -126,8 +125,9 @@
         </form>
     </div>
 </div>
+{% endblock %}
 
-</body>
+{% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const inputRowsContainer = document.getElementById('inputRowsContainer'); // 获取存放input行的容器
@@ -223,4 +223,4 @@
         }
     };
 </script>
-</html>
+{% endblock %}

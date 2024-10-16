@@ -1,27 +1,9 @@
-{% load static %}
-<!DOCTYPE html>
+{% extends 'teacher_base.html' %}
 
-<html lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <!-- Required meta tags -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>考试列表</title>
-    <!-- plugins:css -->
-    <link rel="stylesheet" href="{% static 'teacher_app/css/materialdesignicons.min.css' %}">
-    <link rel="stylesheet" href="{% static 'teacher_app/css/vendor.bundle.base.css' %}">
-    <!-- endinject -->
-    <!-- plugin css for this page -->
-    <link rel="stylesheet" href="{% static 'teacher_app/css/dataTables.bootstrap4.css' %}">
-    <!-- End plugin css for this page -->
-    <!-- inject:css -->
-    <link rel="stylesheet" href="{% static 'teacher_app/css/style.css' %}">
-    <!-- endinject -->
-    <link rel="shortcut icon" href="{% static 'teacher_app/photo/favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'node_modules/MDI/@mdi/font/css/materialdesignicons.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+{% block title %}考试列表{% endblock %}
 
-    <style>
+{% block extra_css %}
+<style>
         .recipient-container {
             display: flex; /* 使用 Flexbox 实现横向排列 */
             flex-wrap: wrap; /* 允许卡片换行 */
@@ -57,7 +39,7 @@
             border-bottom: 1px solid #ddd; /* 更淡的灰色边框 */
         }
 
-        .notification-panel {
+        .create-panel {
             display: flex;
             flex-direction: column;
             position: relative;
@@ -115,131 +97,11 @@
             align-items: center;
             gap: 10px;
         }
-    </style>
+</style>
+{% endblock %}
 
-    <style type="text/css">/* Chart.js */
-    @keyframes chartjs-render-animation {
-        from {
-            opacity: .99
-        }
-        to {
-            opacity: 1
-        }
-    }
-
-    .chartjs-size-monitor-expand > div {
-        position: absolute;
-        width: 1000000px;
-        height: 1000000px;
-        left: 0;
-        top: 0
-    }
-
-    .chartjs-size-monitor-shrink > div {
-        position: absolute;
-        width: 200%;
-        height: 200%;
-        left: 0;
-        top: 0;
-    }
-
-    .sidebar .nav .nav-item .nav-link .menu-title {
-        font-size: 16px; /* 调整为需要的大小 */
-    }
-
-    </style>
-    <script>
-        function redirectToHome() {
-            window.location.href = "{% url 'teacher_app:home_teacher' %}"
-        }
-
-        function redirectToNotice() {
-            window.location.href = "{% url 'teacher_app:notice_teacher' %}";
-        }
-
-        function redirectToTest() {
-            window.location.href = "{% url 'teacher_app:coursework_exercise' %}";
-        }
-
-        function redirectToProfile() {
-            window.location.href = "{% url 'teacher_app:profile_teacher' %}"
-        }
-
-        function redirectToRepository() {
-            window.location.href = "{% url 'teacher_app:repository_teacher' %}"
-        }
-
-        function redirectToClass() {
-            window.location.href = "{% url 'teacher_app:class_teacher' %}"
-        }
-
-
-    </script>
-</head>
-<body>
-<div class="container-scroller">
-    <!-- partial:partials/_navbar.html -->
-    <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
-        <div class="navbar-brand-wrapper d-flex justify-content-center">
-            <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
-                <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
-                    <span class="mdi mdi-sort-variant"></span>
-                </button>
-            </div>
-        </div>
-    </nav>
-    <!-- partial -->
-    <div class="container-fluid page-body-wrapper">
-        <!-- partial:partials/_sidebar.html -->
-        <nav class="sidebar sidebar-offcanvas" id="sidebar">
-            <ul class="nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="redirectToHome()">
-                        <i class="mdi mdi-home menu-icon"></i>
-                        <span class="menu-title">GUI编程</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToTest()" aria-expanded="false"
-                       aria-controls="ui-basic">
-                        <i class="mdi mdi-chart-pie menu-icon"></i>
-                        <span class="menu-title">作业情况</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToRepository()"
-                       aria-expanded="false" aria-controls="auth">
-                        <i class="mdi mdi-source-repository-multiple menu-icon"></i>
-                        <span class="menu-title">我的题库</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="redirectToNotice()">
-                        <i class="mdi mdi-bulletin-board menu-icon"></i>
-                        <span class="menu-title">通知</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToClass()"
-                       aria-expanded="false" aria-controls="auth">
-                        <i class="mdi mdi-microsoft-teams menu-icon"></i>
-                        <span class="menu-title">班级管理</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#" onclick="redirectToProfile()"
-                       aria-expanded="false" aria-controls="auth">
-                        <i class="mdi mdi-account menu-icon"></i>
-                        <span class="menu-title">个人中心</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <!-- partial -->
+{% block content %}
+<!-- partial -->
         <div class="container">
             <!-- 班级列表部分 -->
             <div class="class-list">
@@ -248,12 +110,12 @@
                     {% for class in classes %}
                         <li data-class-id="{{ class.id }}">{{ class.name }}</li>
                     {% empty %}
-                        <li>No classes found</li>
+                        <li>暂无班级</li>
                     {% endfor %}
                 </ul>
             </div>
             <!-- 通知发布窗口 -->
-            <div class="notification-panel">
+            <div class="create-panel">
                 <h3>发布考试</h3>
                 <form id="examFrom" method="post" action="{% url 'teacher_app:exam_list' exam.id %}">
                     {% csrf_token %}
@@ -332,28 +194,9 @@
                 </button>
             </div>
         </div>
-    </div>
-</div>
-<!-- plugins:js -->
-<script type="text/javascript" src="{% static 'teacher_app/js/vendor.bundle.base.js' %}"></script>
-<!-- endinject -->ru
-<!-- Plugin js for this page-->
-<script type="text/javascript" src="{% static 'teacher_app/js/Chart.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'teacher_app/js/jquery.dataTables.js' %}"></script>
-<script type="text/javascript" src="{% static 'teacher_app/js/dataTables.bootstrap4.js' %}"></script>
-<!-- End plugin js for this page-->
-<!-- inject:js -->
-<script type="text/javascript" src="{% static 'teacher_app/js/off-canvas.js' %}"></script>
-<script type="text/javascript" src="{% static 'teacher_app/js/hoverable-collapse.js' %}"></script>
-<script type="text/javascript" src="{% static 'teacher_app/js/template.js' %}"></script>
-<!-- endinject -->
-<!-- Custom js for this page-->
-<script type="text/javascript" src="{% static 'teacher_app/js/dashboard.js' %}"></script>
-<script type="text/javascript" src="{% static 'teacher_app/js/data-table.js' %}"></script>
-<script type="text/javascript" src="{% static 'teacher_app/js/jquery.dataTables(1).js' %}"></script>
-<script type="text/javascript" src="{% static 'teacher_app/js/dataTables.bootstrap4(1).js' %}"></script>
-<!-- End custom js for this page-->
-<script src="{% static 'teacher_app/js/jquery.cookie.js' %}" type="text/javascript"></script>
+{% endblock %}
+
+{% block extra_js %}
 <script>
     document.getElementById('examFrom').onsubmit = function (event) {
         // 获取所有的输入值
@@ -426,5 +269,4 @@
         });
     });
 </script>
-</body>
-</html>
+{% endblock %}

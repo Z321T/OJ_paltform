@@ -29,6 +29,7 @@ def home_teacher(request):
     programing_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
 
     context = {
+        'active_page': 'home',
         'user_id': user_id,
         'adminnotifications': adminnotifications,
         'programing_exercises': programing_exercises
@@ -47,6 +48,7 @@ def repeat_report(request, programmingexercise_id):
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
+        'active_page': 'home',
         'user_id': user_id,
         'adminnotifications': adminnotifications,
         'classes': classes,
@@ -100,6 +102,7 @@ def repeat_report_details(request, programmingexercise_id):
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
+        'active_page': 'home',
         'user_id': user_id,
         'adminnotifications': adminnotifications,
         'classes': classes,
@@ -155,6 +158,7 @@ def repeat_code_details(request, programmingexercise_id):
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
+        'active_page': 'home',
         'user_id': user_id,
         'adminnotifications': adminnotifications,
         'classes': classes,
@@ -179,12 +183,14 @@ def standard_report(request):
 
     if stand_score:
         context = {
+            'active_page': 'home',
             'user_id': user_id,
             'adminnotifications': adminnotifications,
             'stand_score': stand_score,
         }
     else:
         context = {
+            'active_page': 'home',
             'user_id': user_id,
             'adminnotifications': adminnotifications,
         }
@@ -235,6 +241,7 @@ def scores_details(request, programmingexercise_id):
         student_scores.append((student, report_score))
 
     context = {
+        'active_page': 'home',
         'student_scores': student_scores,
         'user_id': user_id,
         'classes': classes,
@@ -267,6 +274,7 @@ def test_check_process(request):
             submissions = ClassExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
 
     context = {
+        'active_page': 'testcheck',
         'user_id': user_id,
         'adminnotifications': adminnotifications,
         'selected_exam': selected_exam,
@@ -308,6 +316,7 @@ def coursework_exercise(request):
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
+        'active_page': 'teststatus',
         'user_id': user_id,
         'coursework': exercises,
         'classes': classes,
@@ -329,6 +338,7 @@ def coursework_exam(request):
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
+        'active_page': 'teststatus',
         'user_id': user_id,
         'coursework': exams,
         'classes': classes,
@@ -350,6 +360,7 @@ def coursework_adminexam(request):
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
+        'active_page': 'teststatus',
         'user_id': user_id,
         'coursework': exams,
         'classes': classes,
@@ -424,6 +435,7 @@ def coursework_exercise_details(request, class_id):
             exercises = Exercise.objects.filter(classes=class_item).order_by('-published_at')
 
             context = {
+                'active_page': 'teststatus',
                 'user_id': user_id,
                 'coursework': exercises,
                 'class_id': class_id,
@@ -446,6 +458,7 @@ def coursework_exam_details(request, class_id):
             exams = Exam.objects.filter(classes=class_item).order_by('-starttime')
 
             context = {
+                'active_page': 'teststatus',
                 'user_id': user_id,
                 'coursework': exams,
                 'class_id': class_id,
@@ -467,6 +480,7 @@ def coursework_adminexam_details(request, class_id):
             adminexams = AdminExam.objects.all().order_by('-starttime')
 
             context = {
+                'active_page': 'teststatus',
                 'user_id': user_id,
                 'coursework': adminexams,
                 'class_id': class_id,
@@ -625,6 +639,7 @@ def repository_teacher(request):
     exams = Exam.objects.filter(teacher=teacher).order_by('-starttime')
 
     context = {
+        'active_page': 'repository',
         'user_id': user_id,
         'exercises': exercises,
         'exams': exams,
@@ -640,6 +655,7 @@ def exercise_list_default(request):
 
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     exercise = Exercise.objects.create(
         title="默认标题",
@@ -648,8 +664,15 @@ def exercise_list_default(request):
         teacher=teacher
     )
 
-    return render(request, 'exercise_list.html',
-                  {'classes': classes, 'exercise': exercise})
+    context = {
+        'active_page': 'repository',
+        'user_id': user_id,
+        'adminnotifications': adminnotifications,
+        'classes': classes,
+        'exercise': exercise
+    }
+
+    return render(request, 'exercise_list.html', context)
 
 
 @login_required
@@ -659,6 +682,7 @@ def exercise_list(request, exercise_id):
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
     exercise = get_object_or_404(Exercise, id=exercise_id)
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     if request.method == 'POST':
         exercise.title = request.POST.get('title')
@@ -672,13 +696,22 @@ def exercise_list(request, exercise_id):
             exercise.save()
             exercise.classes.set(recipient_class)
             return redirect('teacher_app:repository_teacher')
-    return render(request, 'exercise_list.html',
-                  {'classes': classes, 'exercise': exercise})
+
+    context = {
+        'active_page': 'repository',
+        'user_id': user_id,
+        'adminnotifications': adminnotifications,
+        'classes': classes,
+        'exercise': exercise
+    }
+    return render(request, 'exercise_list.html', context)
 
 
 # 题库管理：练习列表-创建练习
 @login_required
 def create_exercise(request, exercise_id):
+    user_id = request.session.get('user_id')
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     exercise = get_object_or_404(Exercise, id=exercise_id)
     if request.method == 'POST':
@@ -703,17 +736,27 @@ def create_exercise(request, exercise_id):
                 testcase.save()
 
         return redirect('teacher_app:exercise_list', exercise_id=exercise.id)
-    return render(request, 'create_exercise.html', {'exercise': exercise})
+
+    context = {
+        'active_page': 'repository',
+        'user_id': user_id,
+        'exercise': exercise,
+        'adminnotifications': adminnotifications
+    }
+    return render(request, 'create_exercise.html', context)
 
 
 # 题库管理：练习列表-修改练习题
 @login_required
 def exercise_edit(request, exercise_id):
+    user_id = request.session.get('user_id')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
         exercise = Exercise.objects.get(id=exercise_id)
         context = {
+            'active_page': 'repository',
+            'user_id': user_id,
             'exercise': exercise,
             'adminnotifications': adminnotifications
         }
@@ -735,7 +778,7 @@ def exercise_delete(request):
                 return JsonResponse({'status': 'success'})
         return JsonResponse({'status': 'error', 'message': '练习未找到'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 题库管理：练习列表-删除练习题
@@ -751,7 +794,7 @@ def exercisequestion_delete(request):
                 return JsonResponse({'status': 'success'})
         return JsonResponse({'status': 'error', 'message': '练习题未找到'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 题库管理：考试列表
@@ -761,6 +804,7 @@ def exam_list_default(request):
 
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     exam = Exam.objects.create(
         title="默认标题",
@@ -770,8 +814,15 @@ def exam_list_default(request):
         teacher=teacher
     )
 
-    return render(request, 'exam_list.html',
-                  {'classes': classes, 'exam': exam})
+    context = {
+        'active_page': 'repository',
+        'user_id': user_id,
+        'adminnotifications': adminnotifications,
+        'classes': classes,
+        'exam': exam
+    }
+
+    return render(request, 'exam_list.html', context)
 
 
 @login_required
@@ -781,6 +832,7 @@ def exam_list(request, exam_id):
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
     exam = get_object_or_404(Exam, id=exam_id)
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     if request.method == 'POST':
         exam.title = request.POST.get('title')
@@ -794,13 +846,22 @@ def exam_list(request, exam_id):
             exam.save()
             exam.classes.set(recipient_class)
             return redirect('teacher_app:repository_teacher')
-    return render(request, 'exam_list.html',
-                  {'classes': classes, 'exam': exam})
+
+    context = {
+        'active_page': 'repository',
+        'user_id': user_id,
+        'adminnotifications': adminnotifications,
+        'classes': classes,
+        'exam': exam
+    }
+    return render(request, 'exam_list.html', context)
 
 
 # 题库管理：考试列表-创建考试
 @login_required
 def create_exam(request, exam_id):
+    user_id = request.session.get('user_id')
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     exam = get_object_or_404(Exam, id=exam_id)
     if request.method == 'POST':
@@ -825,17 +886,27 @@ def create_exam(request, exam_id):
                 testcase.save()
 
         return redirect('teacher_app:exam_list', exam_id=exam.id)
-    return render(request, 'create_exam.html', {'exam': exam})
+
+    context = {
+        'active_page': 'repository',
+        'user_id': user_id,
+        'exam': exam,
+        'adminnotifications': adminnotifications
+    }
+    return render(request, 'create_exam.html', context)
 
 
 # 题库管理：考试列表-修改考试题
 @login_required
 def exam_edit(request, exam_id):
+    user_id = request.session.get('user_id')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     if request.method == 'GET':
         exam = Exam.objects.get(id=exam_id)
         context = {
+            'active_page': 'repository',
+            'user_id': user_id,
             'exam': exam,
             'adminnotifications': adminnotifications
         }
@@ -857,7 +928,7 @@ def exam_delete(request):
                 return JsonResponse({'status': 'success'})
         return JsonResponse({'status': 'error', 'message': '考试未找到'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 题库管理：考试列表-删除考试题
@@ -873,7 +944,7 @@ def examquestion_delete(request):
                 return JsonResponse({'status': 'success'})
         return JsonResponse({'status': 'error', 'message': '考试题未找到'}, status=400)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
 # 通知界面
@@ -887,6 +958,7 @@ def notice_teacher(request):
     notifications = Notification.objects.filter(recipients__in=classes).order_by('-date_posted').distinct()
 
     context = {
+        'active_page': 'notice',
         'user_id': user_id,
         'notifications': notifications,
         'adminnotifications': adminnotifications
@@ -901,6 +973,7 @@ def create_notice(request):
 
     teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -913,8 +986,14 @@ def create_notice(request):
             notification.save()
             notification.recipients.set(recipients)
         return redirect('teacher_app:notice_teacher')
-    return render(request, 'create_notice.html',
-                  {'user_id': user_id, 'classes': classes})
+
+    context = {
+        'active_page': 'notice',
+        'user_id': user_id,
+        'adminnotifications': adminnotifications,
+        'classes': classes
+    }
+    return render(request, 'create_notice.html', context)
 
 
 # 删除通知
@@ -955,6 +1034,7 @@ def class_teacher(request):
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
+        'active_page': 'class',
         'classes': classes,
         'user_id': user_id,
         'adminnotifications': adminnotifications
@@ -969,6 +1049,7 @@ def create_class(request):
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
     context = {
+        'active_page': 'class',
         'user_id': user_id,
         'adminnotifications': adminnotifications
     }
@@ -991,6 +1072,7 @@ def create_class(request):
                     class_assigned=new_class
                 )
             return redirect('teacher_app:class_teacher')
+
     return render(request, 'create_class.html', context)
 
 
@@ -1019,6 +1101,7 @@ def class_details(request, class_id):
         try:
             students = Student.objects.filter(class_assigned=class_id)
             context = {
+                'active_page': 'class',
                 'students': students,
                 'user_id': user_id,
                 'adminnotifications': adminnotifications
@@ -1076,6 +1159,7 @@ def profile_teacher(request):
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
         'teacher': teacher,
         'adminnotifications': adminnotifications
@@ -1092,6 +1176,7 @@ def profile_teacher_edit(request):
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
         'teacher': teacher,
         'adminnotifications': adminnotifications
@@ -1117,6 +1202,7 @@ def profile_teacher_password(request):
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
         'teacher': teacher,
         'adminnotifications': adminnotifications

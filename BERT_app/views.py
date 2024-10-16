@@ -1,3 +1,4 @@
+import os
 import torch
 import json
 from sklearn.decomposition import PCA
@@ -10,12 +11,32 @@ from BERT_app.models import (ProgrammingCodeFeature, ProgrammingReportFeature,
 from administrator_app.models import ProgrammingExercise
 from teacher_app.models import ReportScore, Class
 
+# 获取当前文件所在目录
+project_root = os.path.dirname(os.path.abspath(__file__))
+local_codebert_directory = os.path.join(project_root, "local_codebert")
+local_sbert_directory = os.path.join(project_root, "local_sbert")
+
+# 检查本地目录是否存在，如果不存在则下载模型
+if not os.path.exists(local_codebert_directory):
+    os.makedirs(local_codebert_directory)
+    codebert_tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
+    codebert_model = AutoModel.from_pretrained("microsoft/codebert-base")
+    codebert_tokenizer.save_pretrained(local_codebert_directory)
+    codebert_model.save_pretrained(local_codebert_directory)
+
+if not os.path.exists(local_sbert_directory):
+    os.makedirs(local_sbert_directory)
+    sbert_tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+    sbert_model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+    sbert_tokenizer.save_pretrained(local_sbert_directory)
+    sbert_model.save_pretrained(local_sbert_directory)
+
 # 加载 CodeBERT 模型和分词器
-codebert_tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
-codebert_model = AutoModel.from_pretrained("microsoft/codebert-base")
+codebert_tokenizer = AutoTokenizer.from_pretrained(local_codebert_directory, local_files_only=True)
+codebert_model = AutoModel.from_pretrained(local_codebert_directory, local_files_only=True)
 # 加载 Sentence-BERT 模型和分词器
-sbert_tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
-sbert_model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+sbert_tokenizer = AutoTokenizer.from_pretrained(local_sbert_directory, local_files_only=True)
+sbert_model = AutoModel.from_pretrained(local_sbert_directory, local_files_only=True)
 
 # 如果有GPU可用，移动模型到GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
