@@ -1,25 +1,11 @@
 {% extends 'student_base.html' %}
+{% load static %}
 
 {% block title %}提交报告{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
     <style type="text/css">
-        input[type="text"]:not(.nav-search .input-group),
-        input[type="password"]:not(.nav-search .input-group),
-        input[type="file"]:not(.nav-search .input-group),
-        input[type="text"]:hover:not(.nav-search .input-group),
-        input[type="password"]:hover:not(.nav-search .input-group),
-        input[type="file"]:hover:not(.nav-search .input-group) {
-            /* 其他样式保持不变 */
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-
-        input[type="text"]:not(.nav-search .input-group):hover,
-        input[type="password"]:not(.nav-search .input-group):hover,
-        input[type="file"]:not(.nav-search .input-group):hover {
-            border-color: #66afe9; /* 悬停时的边框颜色 */
-            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6); /* 悬停时的立体阴影效果 */
-        }
 
         .form-group {
             margin-bottom: 15px;

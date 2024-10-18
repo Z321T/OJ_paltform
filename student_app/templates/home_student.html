@@ -1,8 +1,10 @@
 {% extends 'student_base.html' %}
+{% load static %}
 
 {% block title %}学生主页{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
 {% endblock %}
 
 {% block content %}
