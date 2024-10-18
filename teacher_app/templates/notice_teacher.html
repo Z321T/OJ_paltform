@@ -1,8 +1,10 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}通知{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -120,6 +122,31 @@
                 },
                 success: function (response) {
                     window.location.reload()
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.content-notification').on('click', function () {
+            var notificationId = $(this).data('notification-id');
+            $.ajax({
+                url: "{% url 'teacher_app:notification_content' %}",
+                type: 'POST',
+                data: {
+                    'notification_id': notificationId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    // 更新模态框的内容
+                    $('#notificationModalLabel').text(response.title);
+                    $('#notificationModalContent').text(response.content);
+                    // 显示模态框
+                    $('#notificationModal').modal('show');
                 },
                 error: function (response) {
                     alert(response.responseJSON.message);

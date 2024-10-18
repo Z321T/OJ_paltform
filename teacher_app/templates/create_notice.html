@@ -1,8 +1,10 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}发布通知{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
 <style>
         .recipient-container {
             display: flex;

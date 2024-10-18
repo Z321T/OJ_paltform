@@ -1,8 +1,10 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}考试实况{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
 <style>
         .table-container table {
             width: 100%; /* 表格宽度充满容器 */
@@ -31,12 +33,6 @@
             text-align: left; /* 文本左对齐 */
             padding: 8px; /* 单元格内边距 */
         }
-
-        .modal-custom {
-            max-width: 950px; /* 设置模态框的最大宽度 */
-            height: 1000px; /* 设置模态框的高度 */
-        }
-
 
         .container {
             display: flex;

@@ -1,8 +1,10 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}教师主页{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
 <style>
         .title-container {
             display: flex;

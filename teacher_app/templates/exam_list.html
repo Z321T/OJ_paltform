@@ -1,8 +1,10 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}考试列表{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
 <style>
         .recipient-container {
             display: flex; /* 使用 Flexbox 实现横向排列 */

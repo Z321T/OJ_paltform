@@ -1,8 +1,10 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}班级管理{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
 <style>
         .table-container table {
             width: 100%; /* 表格宽度充满容器 */
