@@ -18,7 +18,7 @@ from BERT_app.models import ReportStandardScore, ProgrammingCodeFeature, Program
 from login.views import login_required
 
 
-# 管理员主页-程序设计
+# 课程负责人主页-程序设计
 @login_required
 def home_administrator(request):
     user_id = request.session.get('user_id')
@@ -26,13 +26,14 @@ def home_administrator(request):
     programings = ProgrammingExercise.objects.all().order_by('-date_posted')
 
     context = {
+        'active_page': 'home',
         'user_id': user_id,
         'coursework': programings,
     }
     return render(request, 'home_administrator.html', context)
 
 
-# 管理员主页-考试
+# 课程负责人主页-年级考试
 @login_required
 def home_administrator_exam(request):
     user_id = request.session.get('user_id')
@@ -41,13 +42,14 @@ def home_administrator_exam(request):
     exams = AdminExam.objects.all().order_by('-starttime')
 
     context = {
+        'active_page': 'home',
         'user_id': user_id,
         'coursework': exams,
     }
     return render(request, 'home_administrator_exam.html', context)
 
 
-# 程序设计题详情
+# 课程负责人主页-程序设计题详情
 @login_required
 def programmingexercise_details_data(request):
 
@@ -74,7 +76,7 @@ def programmingexercise_details_data(request):
         return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
-# 考试题详情
+# 课程负责人主页-年级考试题详情
 @login_required
 def exam_details_data(request):
 
@@ -107,7 +109,22 @@ def exam_details_data(request):
         return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
-# 程序设计题库
+# 年级考试实况
+@login_required
+def admintest_check_process(request):
+    user_id = request.session.get('user_id')
+
+    exams = AdminExam.objects.all().order_by('-starttime')
+
+    context = {
+        'active_page': 'testcheck',
+        'user_id': user_id,
+        'exams': exams,
+    }
+    return render(request, 'admintest_check_process.html', context)
+
+
+# GUI程序设计题库
 @login_required
 def repository_administrator(request):
     user_id = request.session.get('user_id')
@@ -115,6 +132,7 @@ def repository_administrator(request):
     programming_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
 
     context = {
+        'active_page': 'guirepository',
         'user_id': user_id,
         'programming_exercises': programming_exercises,
     }
@@ -124,6 +142,7 @@ def repository_administrator(request):
 # 程序设计题库：添加程序设计题
 @login_required
 def programmingexercise_create(request):
+    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -139,7 +158,12 @@ def programmingexercise_create(request):
                 posted_by=Administrator.objects.get(userid=posted_by)
             )
             return redirect('administrator_app:repository_administrator')
-    return render(request, 'programmingexercise_create.html')
+
+    conetxt = {
+        'active_page': 'guirepository',
+        'user_id': user_id,
+    }
+    return render(request, 'programmingexercise_create.html', conetxt)
 
 
 # 程序设计题库：删除程序设计题
@@ -165,6 +189,7 @@ def problems_administrator(request):
     programming_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
 
     context = {
+        'active_page': 'problemsmanage',
         'user_id': user_id,
         'programming_exercises': programming_exercises,
     }
@@ -208,6 +233,7 @@ def report_administrator(request):
         return JsonResponse({'status': 'success', 'message': '提交成功'}, status=200)
 
     context = {
+        'active_page': 'problemsmanage',
         'user_id': user_id,
     }
     return render(request, 'report_administrator.html', context)
@@ -240,7 +266,7 @@ def reportdata_delete(request):
         return JsonResponse({'status': 'error', 'message': '未找到对应的练习题'}, status=404)
 
 
-# 考试
+# 年级考试
 @login_required
 def exam_administrator(request):
     user_id = request.session.get('user_id')
@@ -249,6 +275,7 @@ def exam_administrator(request):
     exams = AdminExam.objects.all().order_by('-starttime')
 
     context = {
+        'active_page': 'adminexam',
         'user_id': user_id,
         'exams': exams,
     }
@@ -269,12 +296,18 @@ def admin_examlist_default(request):
         teacher=admin
     )
 
-    return render(request, 'admin_examlist.html',
-                  {'exam': exam})
+    context = {
+        'active_page': 'adminexam',
+        'user_id': user_id,
+        'exam': exam,
+    }
+
+    return render(request, 'admin_examlist.html', context)
 
 
 @login_required
 def admin_examlist(request, exam_id):
+    user_id = request.session.get('user_id')
 
     exam = get_object_or_404(AdminExam, id=exam_id)
 
@@ -289,13 +322,19 @@ def admin_examlist(request, exam_id):
             exam.save()
             exam.classes.set(recipient_class)
             return redirect('administrator_app:exam_administrator')
-    return render(request, 'admin_examlist.html',
-                  {'exam': exam})
+
+    context = {
+        'active_page': 'adminexam',
+        'user_id': user_id,
+        'exam': exam,
+    }
+    return render(request, 'admin_examlist.html', context)
 
 
-# 考试-考试列表-创建考试
+# 考试-考试列表-创建考试题
 @login_required
 def create_adminexam(request, exam_id):
+    user_id = request.session.get('user_id')
 
     exam = get_object_or_404(AdminExam, id=exam_id)
     if request.method == 'POST':
@@ -320,7 +359,13 @@ def create_adminexam(request, exam_id):
                 testcase.save()
 
         return redirect('administrator_app:admin_examlist', exam_id=exam.id)
-    return render(request, 'create_adminexam.html', {'exam': exam})
+
+    context = {
+        'active_page': 'adminexam',
+        'user_id': user_id,
+        'exam': exam,
+    }
+    return render(request, 'create_adminexam.html', context)
 
 
 # 考试-考试列表-修改考试题
@@ -331,8 +376,9 @@ def adminexam_edit(request, exam_id):
     if request.method == 'GET':
         exam = AdminExam.objects.get(id=exam_id)
         context = {
-            'exam': exam,
+            'active_page': 'adminexam',
             'user_id': user_id,
+            'exam': exam,
         }
         return render(request, 'adminexam_edit.html', context)
 
@@ -377,8 +423,13 @@ def notice_administrator(request):
     user_id = request.session.get('user_id')
 
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted').distinct()
-    return render(request, 'notice_administrator.html',
-                  {'user_id': user_id, 'adminnotifications': adminnotifications})
+
+    context = {
+        'active_page': 'notice',
+        'user_id': user_id,
+        'adminnotifications': adminnotifications,
+    }
+    return render(request, 'notice_administrator.html', context)
 
 
 # 通知界面：发布通知
@@ -396,8 +447,12 @@ def create_notice(request):
             )
             adminnotification.save()
             return redirect('administrator_app:notice_administrator')
-    return render(request, 'create_notice_admin.html',
-                  {'user_id': user_id})
+
+    context = {
+        'active_page': 'notice',
+        'user_id': user_id,
+    }
+    return render(request, 'create_notice_admin.html', context)
 
 
 # 通知界面：删除通知
@@ -434,13 +489,19 @@ def information_administrator(request):
     user_id = request.session.get('user_id')
 
     teachers = Teacher.objects.all()
-    return render(request, 'information_administrator.html',
-                  {'user_id': user_id, 'teachers': teachers})
+
+    context = {
+        'active_page': 'teachermanage',
+        'user_id': user_id,
+        'teachers': teachers,
+    }
+    return render(request, 'information_administrator.html', context)
 
 
 # 教师管理：添加教师
 @login_required
 def add_teacher(request):
+    user_id = request.session.get('user_id')
 
     if request.method == 'POST':
         initial_password = request.POST.get('initialPassword')
@@ -456,7 +517,12 @@ def add_teacher(request):
                     password=hashed_password,
                 )
             return redirect('administrator_app:information_administrator')
-    return render(request, 'add_teacher.html')
+
+    context = {
+        'active_page': 'teachermanage',
+        'user_id': user_id,
+    }
+    return render(request, 'add_teacher.html', context)
 
 
 # 教师管理：删除教师
@@ -501,6 +567,7 @@ def profile_administrator(request):
     administrator = Administrator.objects.get(userid=request.session.get('user_id'))
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
         'administrator': administrator,
     }
@@ -515,6 +582,7 @@ def profile_administrator_edit(request):
     administrator = Administrator.objects.get(userid=request.session.get('user_id'))
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
         'administrator': administrator,
     }
@@ -538,6 +606,7 @@ def profile_adminadministrator_password(request):
     administrator = Administrator.objects.get(userid=user_id)
 
     context = {
+        'active_page': 'profile',
         'user_id': user_id,
     }
 

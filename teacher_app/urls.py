@@ -28,7 +28,7 @@ urlpatterns = [
     path('home/repeat_report/code_details/<int:programmingexercise_id>/', repeat_code_details, name='repeat_code_details'),
     path('home/repeat_report/scores_details/<int:programmingexercise_id>/', scores_details, name='scores_details'),
     # 有关考试实况的操作
-    path('test', test_check_process, name='test_check_process'),
+    path('test/', test_check_process, name='test_check_process'),
     path('test/get_exam_names/', get_exam_names, name='get_exam_names'),
     # 有关的coursework操作
     path('coursework/exercise/', coursework_exercise, name='coursework_exercise'),
