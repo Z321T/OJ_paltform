@@ -6,81 +6,107 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
 <style>
-        .recipient-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            border: 1px solid #ccc;
-            padding: 5px;
-            border-radius: 5px;
-        }
+.recipient-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+}
 
-        .container {
-            display: flex;
-            height: 100vh;
-        }
+.container {
+    display: flex;
+    flex-wrap: wrap; /* 允许子元素在必要时换行 */
+    height: 100vh;
+}
 
-        .class-list {
-            width: 20%;
-            background-color: #f9f9f9; /* 浅灰色背景 */
-            padding: 20px;
-            overflow-y: auto;
-            box-sizing: border-box;
-            border: 2px solid #d3d3d3; /* 深灰色边框 */
-            border-radius: 10px;
-        }
+.class-list {
+    width: 20%;
+    background-color: #f9f9f9; /* 浅灰色背景 */
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border: 2px solid #d3d3d3; /* 深灰色边框 */
+    border-radius: 10px;
+}
 
-        .class-list h3 {
-            margin-top: 0;
-        }
+.class-list h3 {
+    margin-top: 0;
+}
 
-        .class-list ul {
-            list-style: none;
-            padding: 0;
-        }
+.class-list ul {
+    list-style: none;
+    padding: 0;
+}
 
-        .class-list li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd; /* 为列表项添加边界 */
-        }
+.class-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd; /* 为列表项添加边界 */
+}
 
-        .notification-panel {
-            position: relative;
-            width: 80%; /* 占据总宽度的2/3 */
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: #f9f9f9; /* 浅灰色背景 */
-            border: 2px solid #d3d3d3; /* 深灰色边框 */
-            border-radius: 10px;
-        }
+.notification-panel {
+    position: relative;
+    width: 80%; /* 占据总宽度的4/5 */
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #f9f9f9; /* 浅灰色背景 */
+    border: 2px solid #d3d3d3; /* 深灰色边框 */
+    border-radius: 10px;
+}
 
-        /* 应用于不属于.nav-search中.input-group的样式 */
-        .input-group:not(.nav-search .input-group) {
-            margin-bottom: 10px;
-        }
+/* 应用于不属于.nav-search中.input-group的样式 */
+.input-group:not(.nav-search .input-group) {
+    margin-bottom: 10px;
+}
 
-        .input-group:not(.nav-search .input-group) label {
-            display: block;
-            margin-bottom: 5px;
-        }
+.input-group:not(.nav-search .input-group) label {
+    display: block;
+    margin-bottom: 5px;
+}
 
-        .input-group:not(.nav-search .input-group) input,
-        .input-group:not(.nav-search .input-group) textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 3px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-sizing: border-box;
-        }
+.input-group:not(.nav-search .input-group) input,
+.input-group:not(.nav-search .input-group) textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 3px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
 
-        .input-group:not(.nav-search .input-group) textarea {
-            height: 438px;
-        }
+.input-group:not(.nav-search .input-group) textarea {
+    height: 450px; /* 调整高度以适应更多屏幕 */
+}
 
-        .submit-button {
-            float: right;
-        }
+.submit-button {
+    float: right;
+}
+
+/* 媒体查询，为大屏幕调整布局 */
+@media (min-width: 1200px) {
+    .class-list {
+        width: 25%; /* 在大屏幕上增加班级列表的宽度 */
+    }
+
+    .notification-panel {
+        width: 75%; /* 相应减少通知面板的宽度 */
+    }
+}
+
+@media (min-width: 1800px) {
+    .class-list {
+        width: 20%; /* 在更大的屏幕上减少班级列表的宽度 */
+    }
+
+    .notification-panel {
+        width: 80%; /* 相应增加通知面板的宽度 */
+    }
+
+    .input-group:not(.nav-search .input-group) textarea {
+        height: 500px; /* 在更大的屏幕上增加文本区域的高度 */
+    }
+}
 </style>
 {% endblock %}
 

@@ -6,99 +6,109 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
 <style>
-        .recipient-container {
-            display: flex; /* 使用 Flexbox 实现横向排列 */
-            flex-wrap: wrap; /* 允许卡片换行 */
-            gap: 10px; /* 卡片之间的间隔 */
-        }
+.recipient-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
 
-        .container {
-            display: flex;
-            height: 100vh;
-        }
+.container {
+    display: flex;
+    height: 100vh;
+}
 
-        .class-list {
-            width: 20%;
-            background-color: #f0f0f0; /* 灰白色背景 */
-            padding: 20px;
-            overflow-y: auto;
-            box-sizing: border-box;
-            border: 2px solid #ccc; /* 灰色边框 */
-            border-radius: 10px;
-        }
+.class-list {
+    width: 20%;
+    background-color: #f0f0f0;
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+}
 
-        .class-list h3 {
-            margin-top: 0;
-        }
+.class-list h3 {
+    margin-top: 0;
+}
 
-        .class-list ul {
-            list-style: none;
-            padding: 0;
-        }
+.class-list ul {
+    list-style: none;
+    padding: 0;
+}
 
-        .class-list li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd; /* 更淡的灰色边框 */
-        }
+.class-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
 
-        .create-panel {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            width: 80%;
-            padding: 20px;
-            box-sizing: border-box;
-            border: 2px solid #ccc; /* 灰色边框 */
-            border-radius: 10px;
-        }
+.create-panel {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 80%;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+}
 
-        .input-group {
-            margin-bottom: 10px;
-        }
+.input-group {
+    margin-bottom: 10px;
+}
 
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+}
 
-        .input-group input,
-        .input-group textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc; /* 灰色边框 */
-            border-radius: 10px;
-            box-sizing: border-box;
-        }
+.input-group input,
+.input-group textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
 
-        .input-group textarea {
-            height: 500px;
-        }
+.input-group textarea {
+    height: 500px;
+}
 
-        #item-list li {
-            margin: 10px 0;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-        }
+.button-group {
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
 
-        #my-table td {
-            border-bottom: 1px solid black; /* 单元格横线 */
-        }
+/* 媒体查询，为大屏幕调整布局 */
+@media (min-width: 1200px) {
+    .container {
+        flex-wrap: wrap;
+    }
 
-        #my-table tr:last-child td {
-            border-bottom: none; /* 最后一行单元格不显示横线 */
-        }
+    .class-list {
+        width: 25%; /* 增加班级列表的宽度 */
+    }
 
-        .button-group {
-            position: absolute;
-            right: 3px;
-            bottom: 3px;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 10px;
-        }
+    .create-panel {
+        width: 75%; /* 相应减少创建面板的宽度 */
+    }
+}
+
+@media (min-width: 1800px) {
+    .class-list {
+        width: 20%; /* 在更大的屏幕上，可以减少班级列表的宽度 */
+    }
+
+    .create-panel {
+        width: 80%; /* 相应增加创建面板的宽度 */
+    }
+}
 </style>
 {% endblock %}
 
