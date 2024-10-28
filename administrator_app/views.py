@@ -1,12 +1,15 @@
 import os
 import tempfile
 import docx
+import logging
 import pandas as pd
 from io import BytesIO
 from datetime import datetime, timedelta
 
 from django.contrib.auth.hashers import make_password, check_password
-from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from BERT_app.views import analyze_programming_report, analyze_programming_code
@@ -22,92 +25,162 @@ from submissions_app.models import GradeExamSubmission
 # 课程负责人主页-程序设计
 @login_required
 def home_administrator(request):
-    user_id = request.session.get('user_id')
+    try:
+        # 尝试从会话中获取用户ID
+        user_id = request.session.get('user_id')
 
-    programings = ProgrammingExercise.objects.all().order_by('-date_posted')
+        # 尝试获取编程练习信息，并按日期倒序排列
+        programings = ProgrammingExercise.objects.all().order_by('-date_posted')
 
-    context = {
-        'active_page': 'home',
-        'user_id': user_id,
-        'coursework': programings,
-    }
-    return render(request, 'home_administrator.html', context)
+        # 构建上下文
+        context = {
+            'active_page': 'home',
+            'user_id': user_id,
+            'coursework': programings,
+        }
+
+        # 正常渲染页面
+        return render(request, 'home_administrator.html', context)
+
+    # 捕获会话获取错误
+    except KeyError:
+        logging.error("Failed to get user_id from session.")
+        return render(request, 'error.html', {'message': "会话中未找到用户ID"}, status=400)
+
+    # 捕获数据库相关错误
+    except DatabaseError as db_err:
+        logging.error(f"Database operation failed: {str(db_err)}")
+        return render(request, 'error.html', {'message': "无法连接到数据库，请稍后重试"}, status=500)
+
+    # 捕获其他未预见的错误
+    except Exception as e:
+        logging.error(f"An unknown error occurred: {str(e)}")
+        return render(request, 'error.html', {'message': f"发生未知错误: {e}"}, status=500)
 
 
 # 课程负责人主页-年级考试
 @login_required
 def home_administrator_exam(request):
-    user_id = request.session.get('user_id')
+    try:
+        # 尝试从会话中获取用户ID
+        user_id = request.session.get('user_id')
 
-    AdminExam.objects.filter(title="默认标题").delete()
-    exams = AdminExam.objects.all().order_by('-starttime')
+        # 尝试删除标题为"默认标题"的记录
+        AdminExam.objects.filter(title="默认标题").delete()
 
-    context = {
-        'active_page': 'home',
-        'user_id': user_id,
-        'coursework': exams,
-    }
-    return render(request, 'home_administrator_exam.html', context)
+        # 获取所有考试信息，并按开始时间倒序排列
+        exams = AdminExam.objects.all().order_by('-starttime')
+
+        # 构建上下文
+        context = {
+            'active_page': 'home',
+            'user_id': user_id,
+            'coursework': exams,
+        }
+
+        # 正常渲染页面
+        return render(request, 'home_administrator_exam.html', context)
+
+        # 捕获会话获取错误
+    except KeyError:
+        logging.error("Failed to get user_id from session.")
+        return render(request, 'error.html', {'message': "会话中未找到用户ID"}, status=400)
+
+        # 捕获数据库相关错误
+    except DatabaseError as db_err:
+        logging.error(f"Database operation failed: {str(db_err)}")
+        return render(request, 'error.html', {'message': "数据库操作失败，请稍后重试"}, status=500)
+
+        # 捕获其他未预见的错误
+    except Exception as e:
+        logging.error(f"An unknown error occurred: {str(e)}")
+        return render(request, 'error.html', {'message': f"发生未知错误: {e}"}, status=500)
 
 
 # 课程负责人主页-程序设计题详情
 @login_required
 def programmingexercise_details_data(request):
+    try:
+        if request.method == 'POST':
+            question_id = request.POST.get('id')
 
-    if request.method == 'POST':
-        question_id = request.POST.get('id')
-        try:
-            question = ProgrammingExercise.objects.get(id=question_id)
-            total_students = Student.objects.count()
-            total_submissions = ReportStandardScore.objects.filter(programming_question=question).count()
-            ratio = total_submissions / total_students if total_students else 0
-            ratio_data = [{
-                'completion_rate': ratio,
-            }]
+            # 尝试获取指定的编程练习题
+            try:
+                question = ProgrammingExercise.objects.get(id=question_id)
+                total_students = Student.objects.count()
+                total_submissions = ReportStandardScore.objects.filter(programming_question=question).count()
+                ratio = total_submissions / total_students if total_students else 0
+                ratio_data = [{
+                    'completion_rate': ratio,
+                }]
 
-            context = {
-                'ratio_data': ratio_data,
-            }
-            return JsonResponse({'data': context}, status=200)
+                context = {
+                    'ratio_data': ratio_data,
+                }
+                return JsonResponse({'data': context}, status=200)
 
-        except ProgrammingExercise.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': '未找到对应的练习题'}, status=404)
+            except ProgrammingExercise.DoesNotExist:
+                logging.error(f"ProgrammingExercise with id {question_id} does not exist.")
+                return JsonResponse({'status': 'error', 'message': '未找到对应的练习题'}, status=404)
+        else:
+            logging.warning("Invalid request method used for programmingexercise_details_data.")
+            return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
-    else:
-        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
+    # 捕获数据库相关错误
+    except DatabaseError as db_err:
+        logging.error(f"Database operation failed: {str(db_err)}")
+        return JsonResponse({'status': 'error', 'message': '数据库操作失败，请稍后重试'}, status=500)
+
+    # 捕获其他未预见的错误
+    except Exception as e:
+        logging.error(f"An unknown error occurred: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': f'发生未知错误: {e}'}, status=500)
 
 
 # 课程负责人主页-年级考试题详情
 @login_required
 def exam_details_data(request):
+    try:
+        if request.method == 'POST':
+            exam_id = request.POST.get('id')
 
-    if request.method == 'POST':
-        exam_id = request.POST.get('id')
-        try:
-            exam = AdminExam.objects.get(id=exam_id)
-            questions = exam.questions.all()
-            question_avg_scores = []
+            # 尝试获取指定的考试
+            try:
+                exam = AdminExam.objects.get(id=exam_id)
+                questions = exam.questions.all()
+                question_avg_scores = []
 
-            for question in questions:
-                # 获取当前题目所有分数对象
-                scores = Score.objects.filter(adminexam=exam, adminexam_question=question)
-                total_score = sum(score.score for score in scores)
-                total_students = Student.objects.count()
-                # 计算平均分，若学生总数为0，则平均分为0
-                avg_score = (total_score / total_students) if total_students else 0
+                for question in questions:
+                    # 获取当前题目所有分数对象
+                    scores = Score.objects.filter(adminexam=exam, adminexam_question=question)
+                    total_score = sum(score.score for score in scores)
+                    total_students = Student.objects.count()
+                    # 计算平均分，若学生总数为0，则平均分为0
+                    avg_score = (total_score / total_students) if total_students else 0
 
-                question_avg_scores.append({
-                    'question_title': question.title,
-                    'average_score': avg_score
-                })
+                    question_avg_scores.append({
+                        'question_title': question.title,
+                        'average_score': avg_score
+                    })
 
-            return JsonResponse({'data': question_avg_scores}, status=200)
+                return JsonResponse({'data': question_avg_scores}, status=200)
 
-        except AdminExam.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': '未找到对应的考试'}, status=404)
+            except AdminExam.DoesNotExist:
+                logging.error(f"AdminExam with id {exam_id} does not exist.")
+                return JsonResponse({'status': 'error', 'message': '未找到对应的考试'}, status=404)
+        else:
+            logging.warning("Invalid request method used for exam_details_data.")
+            return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
-    else:
-        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
+    # 捕获数据库相关错误
+    except DatabaseError as db_err:
+        logging.error(f"Database operation failed: {str(db_err)}")
+        return JsonResponse({'status': 'error', 'message': '数据库操作失败，请稍后重试'}, status=500)
+
+    # 捕获其他未预见的错误
+    except Exception as e:
+        logging.error(f"An unknown error occurred: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': f'发生未知错误: {e}'}, status=500)
 
 
 # 年级考试实况
@@ -121,14 +194,39 @@ def admintest_check_process(request):
     selected_exam = None
     submissions = []
 
-    if exam_type and exam_id:
+    # 检查 exam_type 和 exam_id 的有效性
+    if not exam_type or not exam_id:
+        return JsonResponse({'status': 'error', 'message': '参数缺失：考试类型 或 考试内容 无效。'}, status=400)
+
+    # 检查 exam_id 是否为有效整数
+    try:
+        exam_id = int(exam_id)
+    except ValueError:
+        return JsonResponse({'status': 'error', 'message': '请求中含有无效的参数'}, status=400)
+
+    try:
+        # 根据 exam_type 获取考试
         if exam_type == 'adminexam':
             selected_exam = AdminExam.objects.filter(id=exam_id).first()
             if selected_exam:
                 submissions = GradeExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
+            else:
+                return JsonResponse({'status': 'error', 'message': '未找到相应的考试记录。'}, status=404)
         else:
-            selected_exam = None
-            submissions = []
+            return JsonResponse({'status': 'error', 'message': '无效的 考试类型 参数。'}, status=400)
+    except AdminExam.DoesNotExist:
+        logging.error(f"AdminExam with id {exam_id} does not exist.")
+        return JsonResponse({'status': 'error', 'message': '未找到相应的考试记录，可能已被删除。'}, status=404)
+    except GradeExamSubmission.DoesNotExist:
+        logging.error(f"No GradeExamSubmission found for exam id {exam_id}.")
+        return JsonResponse({'status': 'error', 'message': '无法加载提交记录，可能数据库中不存在相关数据。'}, status=404)
+    except DatabaseError as db_err:
+        logging.error(f"Database operation failed: {str(db_err)}")
+        return JsonResponse({'status': 'error', 'message': '数据库操作失败，请稍后重试。'}, status=500)
+    except Exception as e:
+        # 捕获其他异常，防止应用崩溃
+        logging.error(f"An unknown error occurred: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': f'发生未知错误: {e}'}, status=500)
 
     context = {
         'active_page': 'testcheck',
@@ -146,15 +244,26 @@ def admintest_check_process(request):
 def get_adminexam_names(request):
     exam_type = request.GET.get('exam_type')
     user_id = request.session.get('user_id')
-    admin = Administrator.objects.get(userid=user_id)
 
-    if exam_type == 'adminexam':
-        exams = AdminExam.objects.filter(teacher=admin)
-    else:
-        exams = []
+    try:
+        admin = Administrator.objects.get(userid=user_id)
 
-    exam_names = [{'id': exam.id, 'name': exam.title} for exam in exams]
-    return JsonResponse({'exam_names': exam_names})
+        if exam_type == 'adminexam':
+            exams = AdminExam.objects.filter(teacher=admin)
+        else:
+            exams = []
+
+        exam_names = [{'id': exam.id, 'name': exam.title} for exam in exams]
+        return JsonResponse({'exam_names': exam_names}, status=200)
+    except Administrator.DoesNotExist:
+        logging.error(f"Administrator with user_id {user_id} does not exist.")
+        return JsonResponse({'status': 'error', 'message': '未找到管理员信息，请确认用户是否为管理员。'}, status=404)
+    except DatabaseError as db_err:
+        logging.error(f"Database operation failed: {str(db_err)}")
+        return JsonResponse({'status': 'error', 'message': '数据库操作失败，请稍后重试。'}, status=500)
+    except Exception as e:
+        logging.error(f"An unknown error occurred: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': f'发生未知错误: {e}'}, status=500)
 
 
 # GUI程序设计题库

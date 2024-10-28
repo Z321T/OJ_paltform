@@ -248,8 +248,17 @@
                         examNameSelect.append(new Option('无可用考试', ''));
                     }
                 },
-                error: function (response) {
-                    alert('获取考试名称失败，请重试');
+                error: function (xhr) {
+                    var errorMessage = '获取考试名称失败，请重试';
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            errorMessage = response.message;
+                        }
+                    } catch (e) {
+                        console.error('解析响应时出错:', e);
+                    }
+                    alert(errorMessage);
                     examNameSelect.empty().append(new Option('加载失败', ''));
                 }
             });
@@ -258,7 +267,26 @@
         $('#queryButton').on('click', function () {
             var examType = $('#examType').val();
             var examId = $('#examName').val();
-            window.location.href = "{% url 'administrator_app:admintest_check_process' %}?exam_type=" + examType + "&exam_id=" + examId;
+    
+            $.ajax({
+                url: "{% url 'administrator_app:admintest_check_process' %}",
+                method: "GET",
+                data: {
+                    exam_type: examType,
+                    exam_id: examId
+                },
+                success: function (response) {
+                    if (response.status === 'error') {
+                        alert(response.message);
+                    } else {
+                        window.location.href = "{% url 'administrator_app:admintest_check_process' %}?exam_type=" + examType + "&exam_id=" + examId;
+                    }
+                },
+                error: function (xhr) {
+                    var errorResponse = JSON.parse(xhr.responseText);
+                    alert(errorResponse.message);
+                }
+            });
         });
     });
 </script>
