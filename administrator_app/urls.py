@@ -9,7 +9,7 @@ from .views import information_administrator, add_teacher, delete_teacher, reset
 from .views import problems_administrator, report_administrator, reportdata_delete
 from .views import (exam_administrator, admin_examlist_default, admin_examlist,
                     create_adminexam, adminexam_edit, adminexam_delete, adminexamquestion_delete)
-from .views import admintest_check_process
+from .views import admintest_check_process, get_adminexam_names
 
 
 app_name = 'administrator_app'
@@ -22,6 +22,7 @@ urlpatterns = [
     path('home/exam/exam_details_data/', exam_details_data, name='exam_details_data'),
     # 年级考试实况
     path('admintest/', admintest_check_process, name='admintest_check_process'),
+    path('admintest/get_adminexam_names/', get_adminexam_names, name='get_adminexam_names'),
     # 有关程序设计题库的操作
     path('repository/', repository_administrator, name='repository_administrator'),
     path('repository/programmingexercise_delete/', programmingexercise_delete, name='programmingexercise_delete'),

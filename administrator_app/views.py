@@ -16,6 +16,7 @@ from teacher_app.models import Teacher, Class
 from student_app.models import Student, Score
 from BERT_app.models import ReportStandardScore, ProgrammingCodeFeature, ProgrammingReportFeature
 from login.views import login_required
+from submissions_app.models import GradeExamSubmission
 
 
 # 课程负责人主页-程序设计
@@ -114,14 +115,46 @@ def exam_details_data(request):
 def admintest_check_process(request):
     user_id = request.session.get('user_id')
 
-    exams = AdminExam.objects.all().order_by('-starttime')
+    # 获取 exam_type 和 exam_id 参数
+    exam_type = request.GET.get('exam_type')
+    exam_id = request.GET.get('exam_id')
+    selected_exam = None
+    submissions = []
+
+    if exam_type and exam_id:
+        if exam_type == 'adminexam':
+            selected_exam = AdminExam.objects.filter(id=exam_id).first()
+            if selected_exam:
+                submissions = GradeExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
+        else:
+            selected_exam = None
+            submissions = []
 
     context = {
         'active_page': 'testcheck',
         'user_id': user_id,
-        'exams': exams,
+        'selected_exam': selected_exam,
+        'submissions': submissions,
+        'exam_type': exam_type,
+        'exam_id': exam_id,
     }
     return render(request, 'admintest_check_process.html', context)
+
+
+# 年级考试实况-获取考试项目
+@login_required
+def get_adminexam_names(request):
+    exam_type = request.GET.get('exam_type')
+    user_id = request.session.get('user_id')
+    admin = Administrator.objects.get(userid=user_id)
+
+    if exam_type == 'adminexam':
+        exams = AdminExam.objects.filter(teacher=admin)
+    else:
+        exams = []
+
+    exam_names = [{'id': exam.id, 'name': exam.title} for exam in exams]
+    return JsonResponse({'exam_names': exam_names})
 
 
 # GUI程序设计题库
