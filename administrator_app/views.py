@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from BERT_app.views import analyze_programming_report, analyze_programming_code

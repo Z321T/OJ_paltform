@@ -160,7 +160,9 @@ USE_TZ = True
 
 # 静态文件设置
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 
 # 没有登录时跳转的url

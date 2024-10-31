@@ -1,4 +1,5 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}练习题设计{% endblock %}
 
@@ -6,6 +7,8 @@
 <style>
 .container mt-5 {
     padding-top: 3rem; /* 调整顶部间距 */
+    width: 90%; /* 调整宽度 */
+    margin: 0 auto; /* 居中对齐 */
 }
 
 .newproblem-container {
@@ -94,9 +97,6 @@
         height: 800px; /* 在更大的屏幕上进一步增加文本区域的高度 */
     }
 }
-</style>
-
-    <style>
 
     /* 自定义文本区域的样式 */
 .custom-textarea {
@@ -121,15 +121,8 @@
     border-radius: 5px; /* 设置边框圆角 */
     background-color: #f8f9fa; /* 设置背景颜色 */
 }
-
-/* 调整input-group-prepend和input-group-append的样式 */
-.input-group-prepend,
-.input-group-append {
-    margin-bottom: 10px; /* 设置下边距 */
-}
-
 </style>
-    </style>
+
 {% endblock %}
 
 {% block content %}
@@ -163,13 +156,17 @@
                 <div>
                     <div class="testcase-title">
                         <h4 class="fixed-title">测试用例</h4>
-                        <div class="button-container">
-                            <button type="button" id="addInputRowBtn">+</button>
-                            <button type="button" id="removeInputRowBtn">-</button>
-                        </div>
                     </div>
-                    <div id="inputRowsContainer" style="overflow-y:auto; max-height:500px;">
-                        <!-- 动态添加的input行将出现在这里 -->
+                    <div id="excelFilesContainer">
+                        <ul>
+                            <li>
+                                <a href="{% static 'documents/测试用例示例样式.xlsx' %}" download>下载 测试用例示例样式.xlsx</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <label for="testcaseFile" class="form-label">上传测试用例Excel文件</label>
+                        <input type="file" class="form-control" id="testcaseFile" name="testcase_file" accept=".xlsx, .xls">
                     </div>
                     <div class="button-container">
                         <button type="submit" class="btn btn-success">保存</button>
@@ -182,63 +179,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const inputRowsContainer = document.getElementById('inputRowsContainer'); // 获取存放input行的容器
-        const addInputRowBtn = document.getElementById('addInputRowBtn'); // 获取加号按钮
-        const removeInputRowBtn = document.getElementById('removeInputRowBtn'); // 获取减号按钮
-
-        let testCaseCount = 0; // 添加一个计数器来跟踪测试用例的数量
-
-        function addInputRow() {
-            // 创建一个新的div行容器
-            const rowDiv = document.createElement('div');
-            rowDiv.style.display = 'flex';
-            rowDiv.style.marginBottom = '8px';
-
-            // 创建第一个input框
-            const input1 = document.createElement('input');
-            input1.type = 'text';
-            input1.className = 'form-control';
-            input1.placeholder = '输入...';
-            input1.style.marginRight = '64px'; // 为了在两个输入框之间留出一些空间
-            input1.name = 'input' + testCaseCount;
-
-            // 创建第二个input框
-            const input2 = document.createElement('input');
-            input2.type = 'text';
-            input2.className = 'form-control';
-            input2.placeholder = '输出...';
-            input2.name = 'output' + testCaseCount;
-
-            // 将两个输入框添加到div行容器
-            rowDiv.appendChild(input1);
-            rowDiv.appendChild(input2);
-
-            // 将新创建的div行容器添加到input行容器中
-            inputRowsContainer.appendChild(rowDiv);
-
-            testCaseCount++; // 每次添加一个测试用例时，计数器加1
-        }
-
-        function removeInputRow() {
-            if (inputRowsContainer.childElementCount > 1) {
-                inputRowsContainer.removeChild(inputRowsContainer.lastChild);
-                testCaseCount--; // 每次移除一个测试用例时，计数器减1
-            } else {
-                alert("测试用例不能少于一个");
-            }
-        }
-
-        addInputRowBtn.addEventListener('click', addInputRow);
-        removeInputRowBtn.addEventListener('click', removeInputRow);
-
-        // 初始化测试用例
-        for (let i = 0; i < 4; i++) {
-            addInputRow();
-        }
-    });
-</script>
 <script>
     window.onload = function () {
         var form = document.querySelector('form[method="post"]');
