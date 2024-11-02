@@ -128,7 +128,7 @@
             </div>
             <!-- 通知发布窗口 -->
             <div class="create-panel">
-                <h3>发布考试</h3>
+                <h3>发布考试（请先创建考试题，再填写此页面的内容）</h3>
                 <form id="examFrom" method="post" action="{% url 'teacher_app:exam_list' exam.id %}">
                     {% csrf_token %}
                     <div class="input-group">
@@ -165,8 +165,7 @@
                                             <thead>
                                             <tr role="row">
                                                 <th>题目</th>
-                                                <th>内存限制</th>
-                                                <th>时间限制</th>
+                                                <th>操作</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -175,12 +174,13 @@
                                                     <tr role="row"
                                                         class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
                                                         <td>{{ question.title }}</td>
-                                                        <td>{{ question.memory_limit }}</td>
-                                                        <td>{{ question.time_limit }}</td>
+                                                        <td>
+                                                            <button class="btn btn-danger btn-delete" onclick="deleteQuestion({{ question.id }})">删除</button>
+                                                        </td>
                                                     </tr>
                                                 {% empty %}
                                                     <tr>
-                                                        <td colspan="4" style="text-align: center;">没有考试内容</td>
+                                                        <td colspan="2" style="text-align: center;">没有考试内容</td>
                                                     </tr>
                                                 {% endfor %}
                                             {% endwith %}
@@ -280,5 +280,30 @@
             });
         });
     });
+</script>
+<script>
+    function deleteQuestion(questionId) {
+        if (confirm('确定要删除这个考试题吗？')) {
+            // 使用 AJAX 提交删除请求
+            $.ajax({
+                url: "{% url 'teacher_app:examquestion_delete' %}",
+                type: "POST",
+                data: {
+                    question_id: questionId,  // 发送要删除的题目 ID
+                    csrfmiddlewaretoken: '{{ csrf_token }}'  // CSRF token
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('删除失败，请重试。');
+                    }
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message || '删除失败，请重试。');
+                }
+            });
+        }
+    }
 </script>
 {% endblock %}

@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime, timedelta
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -401,11 +402,13 @@ def coursework_data(request):
 
             if total_students > 0:
                 if data_type == 'exercise':
-                    completed_count = ExerciseCompletion.objects.filter(exercise=exercise, student_id__in=student_ids).count()
+                    completed_count = ExerciseCompletion.objects.filter(exercise=exercise,
+                                                                        student_id__in=student_ids).count()
                 elif data_type == 'exam':
                     completed_count = ExamCompletion.objects.filter(exam=exam, student_id__in=student_ids).count()
                 elif data_type == 'adminexam':
-                    completed_count = AdminExamCompletion.objects.filter(adminexam=adminexam, student_id__in=student_ids).count()
+                    completed_count = AdminExamCompletion.objects.filter(adminexam=adminexam,
+                                                                         student_id__in=student_ids).count()
 
                 completion_rate = (completed_count / total_students)
                 response_data.append({
@@ -494,7 +497,6 @@ def coursework_adminexam_details(request, class_id):
 # 作业情况-详情界面：获取数据
 @login_required
 def coursework_details_data(request):
-
     if request.method == 'POST':
         data_type = request.POST.get('type')
         item_id = request.POST.get('id')
@@ -687,7 +689,7 @@ def exercise_list(request, exercise_id):
     if request.method == 'POST':
         exercise.title = request.POST.get('title')
         exercise.content = request.POST.get('content')
-        exercise.published_at = datetime.now()
+        exercise.published_at = request.POST.get('starttime')
         exercise.deadline = request.POST.get('deadline')
 
         recipient_ids = request.POST.get('recipients').split(',')
@@ -720,20 +722,54 @@ def create_exercise(request, exercise_id):
         memory_limit = request.POST.get('memory_limit')
         time_limit = request.POST.get('time_limit')
 
-        question = ExerciseQuestion(exercise=exercise, title=title, content=content,
-                                    memory_limit=memory_limit, time_limit=time_limit)
-        question.save()
+        # 处理上传的 Excel 文件
+        if 'testcase_file' in request.FILES:
+            testcase_file = request.FILES['testcase_file']
+            if isinstance(testcase_file, InMemoryUploadedFile):
+                try:
+                    df = pd.read_excel(testcase_file)
 
-        # 遍历提交的测试用例
-        for key in request.POST.keys():
-            if key.startswith('input'):
-                testcase_num = key[5:]  # 获取测试用例的编号
-                input_data = request.POST.get('input' + testcase_num)
-                output_data = request.POST.get('output' + testcase_num)
+                    # 检查DataFrame是否为空
+                    if df.empty:
+                        raise ValueError('Excel文件为空，请上传有效的文件。')
 
-                # 创建一个新的ExerciseQuestionTestCase实例
-                testcase = ExerciseQuestionTestCase(question=question, input=input_data, expected_output=output_data)
-                testcase.save()
+                    # 检查第一行的列名
+                    expected_columns = ['input', 'output']
+                    if not all(col in df.columns for col in expected_columns):
+                        raise ValueError('Excel文件格式不正确，必须包含“input”和“output”列。')
+
+                    # 创建 question 实例
+                    question = ExerciseQuestion(
+                        exercise=exercise,
+                        title=title,
+                        content=content,
+                        memory_limit=memory_limit,
+                        time_limit=time_limit
+                    )
+                    question.save()
+
+                    # 初始化测试用例列表
+                    test_cases = [
+                        ExerciseQuestionTestCase(
+                            question=question,
+                            input=row['input'],
+                            expected_output=row['output']
+                        ) for index, row in df.iterrows() if index != 0  # 跳过标题行
+                    ]
+
+                    ExerciseQuestionTestCase.objects.bulk_create(test_cases)
+
+                except pd.errors.EmptyDataError:
+                    return JsonResponse({'status': 'error', 'message': '上传的文件为空，请提供测试用例文件。'},
+                                        status=400)
+                except pd.errors.ParserError:
+                    return JsonResponse({'status': 'error', 'message': '文件解析错误，请检查文件格式。'}, status=400)
+
+                except ValueError as ve:
+                    return JsonResponse({'status': 'error', 'message': str(ve)}, status=400)
+
+                except Exception as e:
+                    return JsonResponse({'status': 'error', 'message': f'未知错误: {str(e)}'}, status=400)
 
         return redirect('teacher_app:exercise_list', exercise_id=exercise.id)
 
@@ -766,7 +802,6 @@ def exercise_edit(request, exercise_id):
 # 题库管理：练习列表-删除练习
 @login_required
 def exercise_delete(request):
-
     if request.method == 'POST':
         exercise_id = request.POST.get('exercise_id')
         if exercise_id:
@@ -784,7 +819,6 @@ def exercise_delete(request):
 # 题库管理：练习列表-删除练习题
 @login_required
 def exercisequestion_delete(request):
-
     if request.method == 'POST':
         question_id = request.POST.get('question_id')
         if question_id:
@@ -870,20 +904,54 @@ def create_exam(request, exam_id):
         memory_limit = request.POST.get('memory_limit')
         time_limit = request.POST.get('time_limit')
 
-        question = ExamQuestion(exam=exam, title=title, content=content,
-                                memory_limit=memory_limit, time_limit=time_limit)
-        question.save()
+        # 处理上传的 Excel 文件
+        if 'testcase_file' in request.FILES:
+            testcase_file = request.FILES['testcase_file']
+            if isinstance(testcase_file, InMemoryUploadedFile):
+                try:
+                    df = pd.read_excel(testcase_file)
 
-        # 遍历提交的测试用例
-        for key in request.POST.keys():
-            if key.startswith('input'):
-                testcase_num = key[5:]  # 获取测试用例的编号
-                input_data = request.POST.get('input' + testcase_num)
-                output_data = request.POST.get('output' + testcase_num)
+                    # 检查DataFrame是否为空
+                    if df.empty:
+                        raise ValueError('Excel文件为空，请上传有效的文件。')
 
-                # 创建一个新的ExamQuestionTestCase实例
-                testcase = ExamQuestionTestCase(question=question, input=input_data, expected_output=output_data)
-                testcase.save()
+                    # 检查第一行的列名
+                    expected_columns = ['input', 'output']
+                    if not all(col in df.columns for col in expected_columns):
+                        raise ValueError('Excel文件格式不正确，必须包含“input”和“output”列。')
+
+                    # 创建 question 实例
+                    question = ExamQuestion(
+                        exam=exam,
+                        title=title,
+                        content=content,
+                        memory_limit=memory_limit,
+                        time_limit=time_limit
+                    )
+                    question.save()
+
+                    # 初始化测试用例列表
+                    test_cases = [
+                        ExamQuestionTestCase(
+                            question=question,
+                            input=row['input'],
+                            expected_output=row['output']
+                        ) for index, row in df.iterrows() if index != 0  # 跳过标题行
+                    ]
+
+                    ExamQuestionTestCase.objects.bulk_create(test_cases)
+
+                except pd.errors.EmptyDataError:
+                    return JsonResponse({'status': 'error', 'message': '上传的文件为空，请提供测试用例文件。'},
+                                        status=400)
+                except pd.errors.ParserError:
+                    return JsonResponse({'status': 'error', 'message': '文件解析错误，请检查文件格式。'}, status=400)
+
+                except ValueError as ve:
+                    return JsonResponse({'status': 'error', 'message': str(ve)}, status=400)
+
+                except Exception as e:
+                    return JsonResponse({'status': 'error', 'message': f'未知错误: {str(e)}'}, status=400)
 
         return redirect('teacher_app:exam_list', exam_id=exam.id)
 
@@ -916,7 +984,6 @@ def exam_edit(request, exam_id):
 # 题库管理：考试列表-删除考试
 @login_required
 def exam_delete(request):
-
     if request.method == 'POST':
         exam_id = request.POST.get('exam_id')
         if exam_id:
@@ -934,7 +1001,6 @@ def exam_delete(request):
 # 题库管理：考试列表-删除考试题
 @login_required
 def examquestion_delete(request):
-
     if request.method == 'POST':
         question_id = request.POST.get('question_id')
         if question_id:
@@ -999,7 +1065,6 @@ def create_notice(request):
 # 删除通知
 @login_required
 def delete_notice(request):
-
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
         if notification_id:
@@ -1015,7 +1080,6 @@ def delete_notice(request):
 # 通知详情
 @login_required
 def notification_content(request):
-
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
         notification = Notification.objects.get(id=notification_id)
@@ -1079,7 +1143,6 @@ def create_class(request):
 # 班级管理：删除班级
 @login_required
 def delete_class(request):
-
     if request.method == 'POST':
         class_id = request.POST.get('class_id')
         if class_id:
@@ -1117,7 +1180,6 @@ def class_details(request, class_id):
 # 班级管理：删除学生
 @login_required
 def delete_student(request):
-
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
         try:
@@ -1135,7 +1197,6 @@ def delete_student(request):
 # 班级管理：初始化密码
 @login_required
 def reset_password(request):
-
     if request.method == 'POST':
         student = Student.objects.get(id=request.POST.get('student_id'))
         try:
@@ -1223,7 +1284,3 @@ def profile_teacher_password(request):
         else:
             return JsonResponse({'status': 'error', 'message': '旧密码错误'}, status=400)
     return render(request, 'password_teacher_edit.html', context)
-
-
-
-

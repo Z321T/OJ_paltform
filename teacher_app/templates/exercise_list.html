@@ -128,7 +128,7 @@
             </div>
             <!-- 练习发布窗口 -->
             <div class="create-panel">
-                <h3>发布练习</h3>
+                <h3>发布练习（请先创建练习题，再填写此页面的内容）</h3>
                 <form id="exerciseFrom" method="post" action="{% url 'teacher_app:exercise_list' exercise.id %}">
                     {% csrf_token %}
                     <div class="input-group">
@@ -143,6 +143,10 @@
                     <div class="input-group">
                         <label for="content">练习题描述：</label>
                         <input id="content" name="content" placeholder="请输入练习题描述">
+                    </div>
+                    <div class="input-group">
+                        <label for="deadline">开始时间：</label>
+                        <input type="datetime-local" id="starttime" name="starttime" placeholder="请输入开始时间">
                     </div>
                     <div class="input-group">
                         <label for="deadline">截止时间：</label>
@@ -161,8 +165,7 @@
                                             <thead>
                                             <tr role="row">
                                                 <th>题目</th>
-                                                <th>发布时间</th>
-                                                <th>截止时间</th>
+                                                <th>操作</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -173,12 +176,13 @@
                                                         <td id="question{{ question.id }}">
                                                             {{ question.title }}
                                                         </td>
-                                                        <td>{{ exercise.published_at }}</td>
-                                                        <td>{{ exercise.deadline }}</td>
+                                                        <td>
+                                                            <button class="btn btn-danger btn-delete" onclick="deleteQuestion({{ question.id }})">删除</button>
+                                                        </td>
                                                     </tr>
                                                 {% empty %}
                                                     <tr>
-                                                        <td colspan="4" style="text-align: center;">没有练习内容</td>
+                                                        <td colspan="2" style="text-align: center;">没有练习内容</td>
                                                     </tr>
                                                 {% endfor %}
                                             {% endwith %}
@@ -214,6 +218,7 @@
         var recipientIds = document.getElementById('recipientIds').value.trim();
         var title = document.getElementById('title').value.trim();
         var content = document.getElementById('content').value.trim();
+        var starttime = document.getElementById('starttime').value.trim();
         var deadline = document.getElementById('deadline').value.trim();
         var hasQuestions = document.getElementById('has-questions').value === '1'; // 检查隐藏字段的值
 
@@ -222,6 +227,7 @@
         if (!recipientIds) errorMessages.push('“接收班级”是必选项。');
         if (!title) errorMessages.push('“练习标题”为必填项。');
         if (!content) errorMessages.push('“练习题描述”为必填项。');
+        if (!starttime) errorMessages.push('“开始时间”为必填项。');
         if (!deadline) errorMessages.push('“截止时间”为必填项。');
 
         if (!hasQuestions) errorMessages.push('“练习列表”不能为空，请添加至少一个练习题目。');
@@ -277,5 +283,30 @@
             });
         });
     });
+</script>
+<script>
+    function deleteQuestion(questionId) {
+        if (confirm('确定要删除这个练习题吗？')) {
+            // 使用 AJAX 提交删除请求
+            $.ajax({
+                url: "{% url 'teacher_app:exercisequestion_delete' %}",
+                type: "POST",
+                data: {
+                    question_id: questionId,  // 发送要删除的题目 ID
+                    csrfmiddlewaretoken: '{{ csrf_token }}'  // CSRF token
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('删除失败，请重试。');
+                    }
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message || '删除失败，请重试。');
+                }
+            });
+        }
+    }
 </script>
 {% endblock %}

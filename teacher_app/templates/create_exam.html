@@ -1,280 +1,134 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}考试题设计{% endblock %}
 
 {% block extra_css %}
 <style>
-.container mt-5 {
-    padding-top: 3rem; /* 调整顶部间距 */
-}
+    .container-flex {
+        display: flex;
+        justify-content: space-between;
+    }
 
-.newproblem-container {
-    display: flex;
-    flex-direction: column; /* 设置主轴方向为垂直 */
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    width: 100%; /* 响应式宽度 */
-    min-height: 500px; /* 增加最小高度 */
-    box-sizing: border-box;
-    max-width: 100%; /* 容器最大宽度为100%，但允许更大屏幕时内容扩展 */
-    flex-grow: 1; /* 允许容器在更大屏幕上占据更多空间 */
-}
+    .container-flex > div {
+        flex: 1;
+        margin: 10px;
+    }
 
-.container-flex {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap; /* 允许子元素在必要时换行 */
-}
-
-/* 按钮样式 */
-.button-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 10px;
-}
-
-.button-container button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    flex-shrink: 0; /* 防止按钮在屏幕缩小时被压缩 */
-}
-
-.button-container button:hover {
-    background-color: #0056b3;
-}
-
-.custom-textarea {
-    margin-top: 10px;
-    width: 100%; /* 使文本区域宽度自适应 */
-    height: 700px; /* 根据需要设置高度 */
-}
-
-.fixed-title {
-    position: static;
-}
-
-.testcase-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* 调整标题和按钮之间的间距 */
-}
-
-.testcase-title h4 {
-    margin-right: 10px; /* 为标题添加右边距 */
-}
-
-.testcase-title button {
-    margin-left: 10px;
-}
-
-/* 媒体查询，为大屏幕调整布局 */
-@media (min-width: 1200px) {
-    .newproblem-container {
-        padding: 30px; /* 在大屏幕上增加内边距 */
+    .container-flex > div:first-child {
+        margin-right: 100px;
     }
 
     .custom-textarea {
-        height: 700px; /* 在大屏幕上增加文本区域的高度 */
+        height: 300px !important; /* 增加高度 */
     }
-}
-
-@media (min-width: 1800px) {
-    .newproblem-container {
-        padding: 40px; /* 在更大的屏幕上进一步增加内边距 */
-    }
-
-    .custom-textarea {
-        height: 800px; /* 在更大的屏幕上进一步增加文本区域的高度 */
-    }
-}
 </style>
 
-    <style>
-
-    /* 自定义文本区域的样式 */
-.custom-textarea {
-    width: 100%; /* 设置宽度为100%，使其充满父容器 */
-    padding: 10px; /* 设置内边距，提高可读性 */
-    border: 1px solid #ccc; /* 设置边框样式 */
-    border-radius: 5px; /* 设置边框圆角 */
-    box-sizing: border-box; /* 确保边框和内边距不会增加总宽度 */
-    min-height: 300px; /* 设置最小高度 */
-}
-
-/* 调整input-group的布局 */
-.input-group {
-    width: 100%; /* 设置宽度为100%，使其充满父容器 */
-}
-
-/* 调整input-group-text的样式 */
-.input-group-text {
-    width: auto; /* 允许宽度自动调整 */
-    padding: 5px 10px; /* 设置内边距 */
-    border: 1px solid #ccc; /* 设置边框样式 */
-    border-radius: 5px; /* 设置边框圆角 */
-    background-color: #f8f9fa; /* 设置背景颜色 */
-}
-
-/* 调整input-group-prepend和input-group-append的样式 */
-.input-group-prepend,
-.input-group-append {
-    margin-bottom: 10px; /* 设置下边距 */
-}
-
-</style>
-    </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="newproblem-container bg-light p-4 border rounded">
-        <form method="post" action="{% url 'teacher_app:create_exam' exam.id %}">
-            {% csrf_token %}
-            <div class="container-flex">
-                <div>
-                    <input type="text" class="form-control mb-3" name="title" placeholder="编辑标题">
-                    <hr>
-                    <textarea class="form-control mb-3 custom-textarea" name="content"
-                              placeholder="编辑题目内容..."></textarea>
-                    <div class="input-container mb-3">
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="memory-addon">内存限制</span>
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="col-md-12 stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <form id="examForm">
+                            {% csrf_token %}
+                            <div class="container-flex">
+                                <div>
+                                    <input type="text" class="form-control mb-3" name="title" placeholder="编辑标题">
+                                    <hr>
+                                    <textarea class="form-control mb-3 custom-textarea" name="content"
+                                              placeholder="编辑题目内容..."></textarea>
+                                    <div class="input-container mb-3">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="memory-addon">内存限制</span>
+                                            </div>
+                                            <input type="text" class="form-control" name="memory_limit" placeholder="例如，256MB"
+                                                   aria-label="MemoryLimit" aria-describedby="memory-addon">
+                                        </div>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="time-addon">时间限制</span>
+                                            </div>
+                                            <input type="text" class="form-control" name="time_limit" placeholder="例如，1s"
+                                                   aria-label="TimeLimit" aria-describedby="time-addon">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="testcase-title">
+                                        <h4 class="fixed-title">测试用例</h4>
+                                    </div>
+                                    <div id="excelFilesContainer">
+                                        <ul>
+                                            <li>
+                                                <a href="{% static 'documents/测试用例示例样式.xlsx' %}" download>下载 测试用例示例样式.xlsx</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="testcaseFile" class="form-label">上传测试用例Excel文件</label>
+                                        <input type="file" class="form-control" id="testcaseFile" name="testcase_file" accept=".xlsx, .xls">
+                                    </div>
+                                    <div class="button-container">
+                                        <button type="button" id="submitBtn" class="btn btn-success">保存</button>
+                                    </div>
+                                </div>
                             </div>
-                            <input type="text" class="form-control" name="memory_limit" placeholder="例如，256MB"
-                                   aria-label="MemoryLimit" aria-describedby="memory-addon">
-                        </div>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="time-addon">时间限制</span>
-                            </div>
-                            <input type="text" class="form-control" name="time_limit" placeholder="例如，1s"
-                                   aria-label="TimeLimit" aria-describedby="time-addon">
-                        </div>
+                        </form>
                     </div>
                 </div>
-                <div>
-                    <div class="testcase-title">
-                        <h4 class="fixed-title">测试用例</h4>
-                        <div class="button-container">
-                            <button type="button" id="addInputRowBtn">+</button>
-                            <button type="button" id="removeInputRowBtn">-</button>
-                        </div>
-                    </div>
-                    <div id="inputRowsContainer" style="overflow-y:auto; max-height:500px;">
-                        <!-- 动态添加的input行将出现在这里 -->
-                    </div>
-                    <div class="button-container">
-                        <button type="submit" class="btn btn-success">保存</button>
-                    </div>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const inputRowsContainer = document.getElementById('inputRowsContainer'); // 获取存放input行的容器
-        const addInputRowBtn = document.getElementById('addInputRowBtn'); // 获取加号按钮
-        const removeInputRowBtn = document.getElementById('removeInputRowBtn'); // 获取减号按钮
+    document.getElementById('submitBtn').addEventListener('click', function () {
+        var form = document.getElementById('examForm');
+        var formData = new FormData(form);
 
-        let testCaseCount = 0; // 添加一个计数器来跟踪测试用例的数量
+        // 进行表单验证
+        var title = formData.get('title').trim();
+        var content = formData.get('content').trim();
+        var memoryLimit = formData.get('memory_limit').trim();
+        var timeLimit = formData.get('time_limit').trim();
+        var testcaseFile = formData.get('testcase_file');
 
-        function addInputRow() {
-            // 创建一个新的div行容器
-            const rowDiv = document.createElement('div');
-            rowDiv.style.display = 'flex';
-            rowDiv.style.marginBottom = '8px';
-
-            // 创建第一个input框
-            const input1 = document.createElement('input');
-            input1.type = 'text';
-            input1.className = 'form-control';
-            input1.placeholder = '输入...';
-            input1.style.marginRight = '64px'; // 为了在两个输入框之间留出一些空间
-            input1.name = 'input' + testCaseCount;
-
-            // 创建第二个input框
-            const input2 = document.createElement('input');
-            input2.type = 'text';
-            input2.className = 'form-control';
-            input2.placeholder = '输出...';
-            input2.name = 'output' + testCaseCount;
-
-            // 将两个输入框添加到div行容器
-            rowDiv.appendChild(input1);
-            rowDiv.appendChild(input2);
-
-            // 将新创建的div行容器添加到input行容器中
-            inputRowsContainer.appendChild(rowDiv);
-
-            testCaseCount++; // 每次添加一个测试用例时，计数器加1
+        var errors = [];
+        if (!title) errors.push("标题不能为空。");
+        if (!content) errors.push("题目内容不能为空。");
+        if (!memoryLimit) errors.push("内存限制不能为空。");
+        if (!timeLimit) errors.push("时间限制不能为空。");
+        if (!testcaseFile || (testcaseFile instanceof File && testcaseFile.size === 0)) {
+            errors.push("测试用例Excel文件不能为空。");
         }
 
-        function removeInputRow() {
-            if (inputRowsContainer.childElementCount > 1) {
-                inputRowsContainer.removeChild(inputRowsContainer.lastChild);
-                testCaseCount--; // 每次移除一个测试用例时，计数器减1
-            } else {
-                alert("测试用例不能少于一个");
+        if (errors.length > 0) {
+            alert("请填写所有必填信息:\n" + errors.join("\n"));
+            return;
+        }
+
+        // 使用AJAX提交表单
+        $.ajax({
+            url: "{% url 'teacher_app:create_exam' exam.id %}",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            success: function (response) {
+                window.location.href = "{% url 'teacher_app:exam_list' exam.id %}";
+            },
+            error: function (response) {
+                alert(response.responseJSON.message);
             }
-        }
-
-        addInputRowBtn.addEventListener('click', addInputRow);
-        removeInputRowBtn.addEventListener('click', removeInputRow);
-
-        // 初始化测试用例
-        for (let i = 0; i < 4; i++) {
-            addInputRow();
-        }
+        });
     });
-</script>
-<script>
-    window.onload = function () {
-        var form = document.querySelector('form[method="post"]');
-        if (form) {
-            form.onsubmit = function (event) {
-                var title = document.querySelector('input[name="title"]').value.trim();
-                var content = document.querySelector('textarea[name="content"]').value.trim();
-                var memoryLimit = document.querySelector('input[name="memory_limit"]').value.trim();
-                var timeLimit = document.querySelector('input[name="time_limit"]').value.trim();
-                var answer = document.querySelector('textarea[name="answer"]');
-
-                var errors = [];
-
-                if (!title) errors.push("标题不能为空。");
-                if (!content) errors.push("题目内容不能为空。");
-                if (!memoryLimit) errors.push("内存限制不能为空。");
-                if (!timeLimit) errors.push("时间限制不能为空。");
-                if (answer && !answer.value.trim()) errors.push("答案不能为空。");
-
-                var inputRows = document.getElementById('inputRowsContainer').children;
-                for (var i = 0; i < inputRows.length; i++) {
-                    var inputs = inputRows[i].getElementsByTagName('input');
-                    for (var j = 0; j < inputs.length; j++) {
-                        if (inputs[j].value.trim() === '') {
-                            errors.push("测试用例不能为空。");
-                            break;
-                        }
-                    }
-                }
-
-                if (errors.length > 0) {
-                    event.preventDefault();
-                    alert("请填写所有必填信息:\n" + errors.join("\n"));
-                }
-            };
-        }
-    };
 </script>
 {% endblock %}
