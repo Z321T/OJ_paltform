@@ -5,7 +5,8 @@ from .views import home_teacher, repeat_report, repeat_report_details, repeat_co
 from .views import profile_teacher, profile_teacher_edit, profile_teacher_password
 from .views import class_teacher, create_class, delete_class, class_details, delete_student, reset_password
 from .views import (repository_teacher, exercise_list_default, exercise_list,
-                    create_exercise, exercise_delete, exercise_edit, exercisequestion_delete)
+                    create_exercise, exercise_delete, exercise_edit, exercisequestion_delete,
+                    get_exercise_cases, get_exam_cases)
 from .views import (exam_list_default, exam_list,
                     create_exam, exam_delete, exam_edit, examquestion_delete)
 from .views import notice_teacher, create_notice, delete_notice, notification_content
@@ -52,6 +53,7 @@ urlpatterns = [
     path('repository/delete_exercise/', exercise_delete, name='exercise_delete'),
     path('repository/edit_exercise/<int:exercise_id>/', exercise_edit, name='exercise_edit'),
     path('repository/edit_exercise/exercisequestion_delete/', exercisequestion_delete, name='exercisequestion_delete'),
+    path('repository/edit_exercise/get_exercise_cases/<int:question_id>/', get_exercise_cases, name='get_exercise_cases'),
     # 有关题库的操作：考试
     path('repository/exam_list/', exam_list_default, name='exam_list_default'),
     path('repository/exam_list/<int:exam_id>/', exam_list, name='exam_list'),
@@ -59,6 +61,7 @@ urlpatterns = [
     path('repository/delete_exam/', exam_delete, name='exam_delete'),
     path('repository/edit_exam/<int:exam_id>/', exam_edit, name='exam_edit'),
     path('repository/edit_exam/examquestion_delete/', examquestion_delete, name='examquestion_delete'),
+    path('repository/edit_exam/get_exam_cases/<int:question_id>/', get_exam_cases, name='get_exam_cases'),
     # 有关班级的操作
     path('class/', class_teacher, name='class_teacher'),
     path('class/create/', create_class, name='create_class'),

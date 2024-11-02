@@ -30,7 +30,7 @@
                                                    role="grid">
                                                 <thead>
                                                 <tr role="row">
-                                                    <th class="sorting_asc" tabindex="0"
+                                                    <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-sort="ascending"
                                                         aria-label="Name: activate to sort column descending"
@@ -49,6 +49,11 @@
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">测试用例
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
                                                         style="width: 72.575px;">操作
                                                     </th>
                                                 </tr>
@@ -63,6 +68,15 @@
                                                         <td>{{ question.memory_limit }}</td>
                                                         <td>{{ question.time_limit }}</td>
                                                         <td>
+                                                            <button class="button-class view-test-case btn-default"
+                                                                    data-question-id="{{ question.id }}">查看
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <button class="button-class edit-test-case btn-default"
+                                                                    data-question-id="{{ question.id }}"
+                                                                    data-exercise-id="{{ exercise.id }}">修改
+                                                            </button>
                                                             <button class="button-class delete-exercisequestion btn-default"
                                                                     data-exercisequestion-id="{{ question.id }}"
                                                                     data-exercise-id="{{ exercise.id }}">删除
@@ -71,7 +85,7 @@
                                                     </tr>
                                                 {% empty %}
                                                     <tr>
-                                                        <td colspan="4" style="text-align: center;">没有练习内容</td>
+                                                        <td colspan="5" style="text-align: center;">没有练习内容</td>
                                                     </tr>
                                                 {% endfor %}
                                                 </tbody>
@@ -93,6 +107,36 @@
                 </div>
             </div>
         </div>
+<!-- 模态框结构 -->
+<div class="modal fade" id="testCaseModal" tabindex="-1" role="dialog" aria-labelledby="testCaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="testCaseModalLabel">测试用例详情</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Input</th>
+                            <th>Output</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testCaseTableBody">
+                        <!-- 测试用例数据将被插入到这里 -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <!-- 下载按钮 -->
+                <button id="downloadTestCases" class="btn btn-primary">下载 Excel</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -113,6 +157,42 @@
                 },
                 error: function (response) {
                     alert(response.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.view-test-case').on('click', function () {
+            var questionId = $(this).data('question-id');
+            $.ajax({
+                url: "{% url 'teacher_app:get_exercise_cases' question_id=0 %}".replace('0', questionId),
+                type: 'GET',
+                success: function (response) {
+                    if (response.status === "success") {
+                        var testCases = response.test_cases;
+                        var tableBody = $('#testCaseTableBody');
+                        tableBody.empty();  // 清空表格内容
+
+                        // 将测试用例填充到模态框表格中
+                        testCases.forEach(function (testCase) {
+                            var row = '<tr><td>' + testCase.input + '</td><td>' + testCase.expected_output + '</td></tr>';
+                            tableBody.append(row);
+                        });
+
+                        // 显示模态框
+                        $('#testCaseModal').modal('show');
+                        // 设置下载按钮的 URL
+                        $('#downloadTestCases').off('click').on('click', function () {
+                            window.location.href = "{% url 'teacher_app:get_exercise_cases' question_id=0 %}?download=true".replace('0', questionId);
+                        });
+                    } else {
+                        alert('无法获取测试用例，请重试。');
+                    }
+                },
+                error: function () {
+                    alert('请求失败，请重试。');
                 }
             });
         });

@@ -5,7 +5,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponseNotFound
+from django.http import JsonResponse, HttpResponseNotFound, HttpResponse
 from django.contrib.auth.hashers import make_password, check_password
 
 from BERT_app.models import ProgrammingCodeFeature, ProgrammingReportFeature, ReportStandardScore
@@ -799,6 +799,35 @@ def exercise_edit(request, exercise_id):
         return render(request, 'exercise_edit.html', context)
 
 
+# 题库管理：练习列表-获取练习题测试用例
+@login_required
+def get_exercise_cases(request, question_id):
+    # 确保该题目存在
+    try:
+        question = ExerciseQuestion.objects.get(id=question_id)
+        # 获取该题目下的所有测试用例
+        test_cases = question.exercise_testcases.values('input', 'expected_output')
+
+        # 检查请求是否包含下载请求
+        if request.GET.get('download') == 'true':
+            # 检查测试用例是否为空
+            if not test_cases:
+                return JsonResponse({"status": "error", "message": "没有可用的测试用例数据"}, status=400)
+
+            # 创建 DataFrame 并导出为 Excel 文件
+            df = pd.DataFrame(list(test_cases), columns=['input', 'expected_output'])
+            df.columns = ['input', 'output']  # 重命名列为 'input' 和 'output'
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="exercise_{str(question_id)}_cases.xlsx"'
+            df.to_excel(response, index=False, sheet_name='Test Cases', engine='openpyxl')
+            return response
+
+        return JsonResponse({"status": "success", "test_cases": list(test_cases)}, safe=False)
+    except ExerciseQuestion.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "题目不存在"}, status=404)
+
+
 # 题库管理：练习列表-删除练习
 @login_required
 def exercise_delete(request):
@@ -979,6 +1008,35 @@ def exam_edit(request, exam_id):
             'adminnotifications': adminnotifications
         }
         return render(request, 'exam_edit.html', context)
+
+
+# 题库管理：练习列表-获取练习题测试用例
+@login_required
+def get_exam_cases(request, question_id):
+    # 确保该题目存在
+    try:
+        question = ExamQuestion.objects.get(id=question_id)
+        # 获取该题目下的所有测试用例
+        test_cases = question.exam_testcases.values('input', 'expected_output')
+
+        # 检查请求是否包含下载请求
+        if request.GET.get('download') == 'true':
+            # 检查测试用例是否为空
+            if not test_cases:
+                return JsonResponse({"status": "error", "message": "没有可用的测试用例数据"}, status=400)
+
+            # 创建 DataFrame 并导出为 Excel 文件
+            df = pd.DataFrame(list(test_cases), columns=['input', 'expected_output'])
+            df.columns = ['input', 'output']  # 重命名列为 'input' 和 'output'
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="exam_{str(question_id)}_cases.xlsx"'
+            df.to_excel(response, index=False, sheet_name='Test Cases', engine='openpyxl')
+            return response
+
+        return JsonResponse({"status": "success", "test_cases": list(test_cases)}, safe=False)
+    except ExerciseQuestion.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "题目不存在"}, status=404)
 
 
 # 题库管理：考试列表-删除考试
