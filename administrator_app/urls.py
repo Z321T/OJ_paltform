@@ -8,7 +8,8 @@ from .views import repository_administrator, programmingexercise_delete, program
 from .views import information_administrator, add_teacher, delete_teacher, reset_password
 from .views import problems_administrator, report_administrator, reportdata_delete
 from .views import (exam_administrator, admin_examlist_default, admin_examlist,
-                    create_adminexam, adminexam_edit, adminexam_delete, adminexamquestion_delete)
+                    create_adminexam, adminexam_edit, adminexam_delete, adminexamquestion_delete,
+                    get_adminexam_cases, adminexamquestion_edit)
 from .views import admintest_check_process, get_adminexam_names
 
 
@@ -39,6 +40,8 @@ urlpatterns = [
     path('adminexam/delete_exam/', adminexam_delete, name='adminexam_delete'),
     path('adminexam/edit_exam/<int:exam_id>/', adminexam_edit, name='adminexam_edit'),
     path('adminexam/edit_exam/adminexamquestion_delete/', adminexamquestion_delete, name='adminexamquestion_delete'),
+    path('adminexam/edit_exam/adminexamquestion_edit/<int:question_id>/', adminexamquestion_edit, name='adminexamquestion_edit'),
+    path('adminexam/edit_exam/get_adminexam_cases/<int:question_id>/', get_adminexam_cases, name='get_adminexam_cases'),
     # 有关通知的操作
     path('notice/', notice_administrator, name='notice_administrator'),
     path('notice/create/', create_notice, name='create_notice'),

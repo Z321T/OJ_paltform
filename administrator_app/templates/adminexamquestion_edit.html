@@ -1,7 +1,7 @@
 {% extends 'teacher_base.html' %}
 {% load static %}
 
-{% block title %}考试题设计{% endblock %}
+{% block title %}考试题修改{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -34,25 +34,26 @@
                 <div class="card-body">
                     <form id="examForm">
                         {% csrf_token %}
+                        <input type="hidden" name="question_id" value="{{ question.id }}"><!-- 隐藏字段 -->
                         <div class="container-flex">
                             <div>
-                                <input type="text" class="form-control mb-3" name="title" placeholder="编辑标题">
+                                <input type="text" class="form-control" name="title" value="{{ question.title }}" placeholder="编辑标题">
                                 <hr>
                                 <textarea class="form-control mb-3 custom-textarea" name="content"
-                                          placeholder="编辑题目内容..."></textarea>
+                                          placeholder="编辑题目内容...">{{ question.content }}</textarea>
                                 <div class="input-container mb-3">
                                     <div class="input-group mb-3">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text" id="memory-addon">内存限制</span>
                                         </div>
-                                        <input type="text" class="form-control" name="memory_limit" placeholder="例如，256MB"
+                                        <input type="text" class="form-control" name="memory_limit" value="{{ question.memory_limit }}" placeholder="例如，256MB"
                                                aria-label="MemoryLimit" aria-describedby="memory-addon">
                                     </div>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text" id="time-addon">时间限制</span>
                                         </div>
-                                        <input type="text" class="form-control" name="time_limit" placeholder="例如，1s"
+                                        <input type="text" class="form-control" name="time_limit" value="{{ question.time_limit }}" placeholder="例如，1s"
                                                aria-label="TimeLimit" aria-describedby="time-addon">
                                     </div>
                                 </div>
@@ -114,7 +115,7 @@
 
         // 使用AJAX提交表单
         $.ajax({
-            url: "{% url 'teacher_app:create_exam' exam.id %}",
+            url: "{% url 'administrator_app:create_adminexam' exam.id %}",
             type: "POST",
             data: formData,
             processData: false,
@@ -123,7 +124,7 @@
                 "X-CSRFToken": "{{ csrf_token }}"
             },
             success: function (response) {
-                window.location.href = "{% url 'teacher_app:exam_list' exam.id %}";
+                window.location.href = "{% url 'administrator_app:adminexam_edit' exam.id %}";
             },
             error: function (response) {
                 alert(response.responseJSON.message);

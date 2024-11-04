@@ -34,6 +34,7 @@
                 <div class="card-body">
                     <form id="examForm">
                         {% csrf_token %}
+                        <input type="hidden" name="question_id" value="{{ question.id }}"><!-- 隐藏字段 -->
                         <div class="container-flex">
                             <div>
                                 <input type="text" class="form-control" name="title" value="{{ question.title }}" placeholder="编辑标题">

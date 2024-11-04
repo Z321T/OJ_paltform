@@ -8,8 +8,9 @@ from datetime import datetime, timedelta
 
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import DatabaseError
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from BERT_app.views import analyze_programming_report, analyze_programming_code
@@ -44,17 +45,14 @@ def home_administrator(request):
 
     # 捕获会话获取错误
     except KeyError:
-        logging.error("Failed to get user_id from session.")
         return render(request, 'error.html', {'message': "会话中未找到用户ID"}, status=400)
 
     # 捕获数据库相关错误
     except DatabaseError as db_err:
-        logging.error(f"Database operation failed: {str(db_err)}")
         return render(request, 'error.html', {'message': "无法连接到数据库，请稍后重试"}, status=500)
 
     # 捕获其他未预见的错误
     except Exception as e:
-        logging.error(f"An unknown error occurred: {str(e)}")
         return render(request, 'error.html', {'message': f"发生未知错误: {e}"}, status=500)
 
 
@@ -83,17 +81,14 @@ def home_administrator_exam(request):
 
         # 捕获会话获取错误
     except KeyError:
-        logging.error("Failed to get user_id from session.")
         return render(request, 'error.html', {'message': "会话中未找到用户ID"}, status=400)
 
         # 捕获数据库相关错误
     except DatabaseError as db_err:
-        logging.error(f"Database operation failed: {str(db_err)}")
         return render(request, 'error.html', {'message': "数据库操作失败，请稍后重试"}, status=500)
 
         # 捕获其他未预见的错误
     except Exception as e:
-        logging.error(f"An unknown error occurred: {str(e)}")
         return render(request, 'error.html', {'message': f"发生未知错误: {e}"}, status=500)
 
 
@@ -120,20 +115,16 @@ def programmingexercise_details_data(request):
                 return JsonResponse({'data': context}, status=200)
 
             except ProgrammingExercise.DoesNotExist:
-                logging.error(f"ProgrammingExercise with id {question_id} does not exist.")
                 return JsonResponse({'status': 'error', 'message': '未找到对应的练习题'}, status=404)
         else:
-            logging.warning("Invalid request method used for programmingexercise_details_data.")
             return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
     # 捕获数据库相关错误
     except DatabaseError as db_err:
-        logging.error(f"Database operation failed: {str(db_err)}")
         return JsonResponse({'status': 'error', 'message': '数据库操作失败，请稍后重试'}, status=500)
 
     # 捕获其他未预见的错误
     except Exception as e:
-        logging.error(f"An unknown error occurred: {str(e)}")
         return JsonResponse({'status': 'error', 'message': f'发生未知错误: {e}'}, status=500)
 
 
@@ -166,20 +157,16 @@ def exam_details_data(request):
                 return JsonResponse({'data': question_avg_scores}, status=200)
 
             except AdminExam.DoesNotExist:
-                logging.error(f"AdminExam with id {exam_id} does not exist.")
                 return JsonResponse({'status': 'error', 'message': '未找到对应的考试'}, status=404)
         else:
-            logging.warning("Invalid request method used for exam_details_data.")
             return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
     # 捕获数据库相关错误
     except DatabaseError as db_err:
-        logging.error(f"Database operation failed: {str(db_err)}")
         return JsonResponse({'status': 'error', 'message': '数据库操作失败，请稍后重试'}, status=500)
 
     # 捕获其他未预见的错误
     except Exception as e:
-        logging.error(f"An unknown error occurred: {str(e)}")
         return JsonResponse({'status': 'error', 'message': f'发生未知错误: {e}'}, status=500)
 
 
@@ -194,39 +181,10 @@ def admintest_check_process(request):
     selected_exam = None
     submissions = []
 
-    # 检查 exam_type 和 exam_id 的有效性
-    if not exam_type or not exam_id:
-        return JsonResponse({'status': 'error', 'message': '参数缺失：考试类型 或 考试内容 无效。'}, status=400)
-
-    # 检查 exam_id 是否为有效整数
-    try:
-        exam_id = int(exam_id)
-    except ValueError:
-        return JsonResponse({'status': 'error', 'message': '请求中含有无效的参数'}, status=400)
-
-    try:
-        # 根据 exam_type 获取考试
-        if exam_type == 'adminexam':
-            selected_exam = AdminExam.objects.filter(id=exam_id).first()
-            if selected_exam:
-                submissions = GradeExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
-            else:
-                return JsonResponse({'status': 'error', 'message': '未找到相应的考试记录。'}, status=404)
-        else:
-            return JsonResponse({'status': 'error', 'message': '无效的 考试类型 参数。'}, status=400)
-    except AdminExam.DoesNotExist:
-        logging.error(f"AdminExam with id {exam_id} does not exist.")
-        return JsonResponse({'status': 'error', 'message': '未找到相应的考试记录，可能已被删除。'}, status=404)
-    except GradeExamSubmission.DoesNotExist:
-        logging.error(f"No GradeExamSubmission found for exam id {exam_id}.")
-        return JsonResponse({'status': 'error', 'message': '无法加载提交记录，可能数据库中不存在相关数据。'}, status=404)
-    except DatabaseError as db_err:
-        logging.error(f"Database operation failed: {str(db_err)}")
-        return JsonResponse({'status': 'error', 'message': '数据库操作失败，请稍后重试。'}, status=500)
-    except Exception as e:
-        # 捕获其他异常，防止应用崩溃
-        logging.error(f"An unknown error occurred: {str(e)}")
-        return JsonResponse({'status': 'error', 'message': f'发生未知错误: {e}'}, status=500)
+    if exam_type and exam_id:
+        selected_exam = AdminExam.objects.filter(id=exam_id).first()
+        if selected_exam:
+            submissions = GradeExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
 
     context = {
         'active_page': 'testcheck',
@@ -484,21 +442,64 @@ def create_adminexam(request, exam_id):
         content = request.POST.get('content')
         memory_limit = request.POST.get('memory_limit')
         time_limit = request.POST.get('time_limit')
+        question_id = request.POST.get('question_id')
 
-        question = AdminExamQuestion(exam=exam, title=title, content=content,
-                                     memory_limit=memory_limit, time_limit=time_limit)
-        question.save()
+        # 处理上传的 Excel 文件
+        if 'testcase_file' in request.FILES:
+            testcase_file = request.FILES['testcase_file']
+            if isinstance(testcase_file, InMemoryUploadedFile):
+                try:
+                    df = pd.read_excel(testcase_file)
 
-        # 遍历提交的测试用例
-        for key in request.POST.keys():
-            if key.startswith('input'):
-                testcase_num = key[5:]  # 获取测试用例的编号
-                input_data = request.POST.get('input' + testcase_num)
-                output_data = request.POST.get('output' + testcase_num)
+                    # 检查DataFrame是否为空
+                    if df.empty:
+                        raise ValueError('Excel文件为空，请上传有效的文件。')
 
-                # 创建一个新的AdminExamQuestionTestCase实例
-                testcase = AdminExamQuestionTestCase(question=question, input=input_data, expected_output=output_data)
-                testcase.save()
+                    # 检查第一行的列名
+                    expected_columns = ['input', 'output']
+                    if not all(col in df.columns for col in expected_columns):
+                        raise ValueError('Excel文件格式不正确，必须包含“input”和“output”列。')
+
+                    if question_id:
+                        question = AdminExamQuestion.objects.get(id=question_id)
+                        question.title = title
+                        question.content = content
+                        question.memory_limit = memory_limit
+                        question.time_limit = time_limit
+                        question.save()
+                        # 删除原有的测试用例
+                        AdminExamQuestionTestCase.objects.filter(question=question).delete()
+
+                    else:
+                        question = AdminExamQuestion.objects.create(
+                            title=title,
+                            content=content,
+                            memory_limit=memory_limit,
+                            time_limit=time_limit,
+                            exam=exam
+                        )
+
+                    # 初始化测试用例列表
+                    test_cases = [
+                        AdminExamQuestionTestCase(
+                            question=question,
+                            input=row['input'],
+                            expected_output=row['output']
+                        ) for index, row in df.iterrows()  # 跳过标题行
+                    ]
+
+                    AdminExamQuestionTestCase.objects.bulk_create(test_cases)
+
+                except pd.errors.EmptyDataError:
+                    return JsonResponse({'status': 'error', 'message': '上传的文件为空，请提供测试用例文件。'}, status=400)
+                except pd.errors.ParserError:
+                    return JsonResponse({'status': 'error', 'message': '文件解析错误，请检查文件格式。'}, status=400)
+
+                except ValueError as ve:
+                    return JsonResponse({'status': 'error', 'message': str(ve)}, status=400)
+
+                except Exception as e:
+                    return JsonResponse({'status': 'error', 'message': f'未知错误: {str(e)}'}, status=400)
 
         return redirect('administrator_app:admin_examlist', exam_id=exam.id)
 
@@ -528,7 +529,6 @@ def adminexam_edit(request, exam_id):
 # 考试-考试列表-删除考试
 @login_required
 def adminexam_delete(request):
-
     if request.method == 'POST':
         exam_id = request.POST.get('exam_id')
         if exam_id:
@@ -543,10 +543,57 @@ def adminexam_delete(request):
         return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
 
+# 考试-考试列表-获取考试题测试用例
+@login_required
+def get_adminexam_cases(request, question_id):
+    # 确保该题目存在
+    try:
+        question = AdminExamQuestion.objects.get(id=question_id)
+        # 获取该题目下的所有测试用例
+        test_cases = question.adminexam_testcases.values('input', 'expected_output')
+
+        # 检查请求是否包含下载请求
+        if request.GET.get('download') == 'true':
+            # 检查测试用例是否为空
+            if not test_cases:
+                return JsonResponse({"status": "error", "message": "没有可用的测试用例数据"}, status=400)
+
+            # 创建 DataFrame 并导出为 Excel 文件
+            df = pd.DataFrame(list(test_cases), columns=['input', 'expected_output'])
+            df.columns = ['input', 'output']  # 重命名列为 'input' 和 'output'
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="adminexam_{str(question_id)}_cases.xlsx"'
+            df.to_excel(response, index=False, sheet_name='Test Cases', engine='openpyxl')
+            return response
+
+        return JsonResponse({"status": "success", "test_cases": list(test_cases)}, safe=False)
+    except AdminExamQuestion.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "题目不存在"}, status=404)
+
+
+# 考试-考试列表-修改考试题
+@login_required
+def adminexamquestion_edit(request, question_id):
+    user_id = request.session.get('user_id')
+
+    question = AdminExamQuestion.objects.get(id=question_id)
+    exam = question.exam
+
+    if request.method == 'GET':
+        question = AdminExamQuestion.objects.get(id=question_id)
+        context = {
+            'active_page': 'adminexam',
+            'user_id': user_id,
+            'question': question,
+            'exam': exam,
+        }
+        return render(request, 'adminexamquestion_edit.html', context)
+
+
 # 考试-考试列表-删除考试题
 @login_required
 def adminexamquestion_delete(request):
-
     if request.method == 'POST':
         question_id = request.POST.get('question_id')
         if question_id:

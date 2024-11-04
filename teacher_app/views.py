@@ -709,7 +709,7 @@ def exercise_list(request, exercise_id):
     return render(request, 'exercise_list.html', context)
 
 
-# 题库管理：练习列表-创建练习
+# 题库管理：练习列表-创建练习题
 @login_required
 def create_exercise(request, exercise_id):
     user_id = request.session.get('user_id')
@@ -721,6 +721,7 @@ def create_exercise(request, exercise_id):
         content = request.POST.get('content')
         memory_limit = request.POST.get('memory_limit')
         time_limit = request.POST.get('time_limit')
+        question_id = request.POST.get('question_id')
 
         # 处理上传的 Excel 文件
         if 'testcase_file' in request.FILES:
@@ -738,19 +739,26 @@ def create_exercise(request, exercise_id):
                     if not all(col in df.columns for col in expected_columns):
                         raise ValueError('Excel文件格式不正确，必须包含“input”和“output”列。')
 
-                    # 创建或更新 question 实例
-                    question, created = ExerciseQuestion.objects.update_or_create(
-                        exercise=exercise,
-                        defaults={
-                            'title': title,
-                            'content': content,
-                            'memory_limit': memory_limit,
-                            'time_limit': time_limit
-                        }
-                    )
+                    if question_id:
+                        question = ExerciseQuestion.objects.get(id=question_id, exercise=exercise)
+                        # 更新 question 实例
+                        question.title = title
+                        question.content = content
+                        question.memory_limit = memory_limit
+                        question.time_limit = time_limit
+                        question.save()
+                        # 删除原有的测试用例
+                        ExerciseQuestionTestCase.objects.filter(question=question).delete()
 
-                    # 删除原有的测试用例
-                    ExerciseQuestionTestCase.objects.filter(question=question).delete()
+                    else:
+                        # 创建 question 实例
+                        question = ExerciseQuestion.objects.create(
+                            exercise=exercise,
+                            title=title,
+                            content=content,
+                            memory_limit=memory_limit,
+                            time_limit=time_limit
+                        )
 
                     # 初始化测试用例列表
                     test_cases = [
@@ -957,6 +965,7 @@ def create_exam(request, exam_id):
         content = request.POST.get('content')
         memory_limit = request.POST.get('memory_limit')
         time_limit = request.POST.get('time_limit')
+        question_id = request.POST.get('question_id')
 
         # 处理上传的 Excel 文件
         if 'testcase_file' in request.FILES:
@@ -974,19 +983,26 @@ def create_exam(request, exam_id):
                     if not all(col in df.columns for col in expected_columns):
                         raise ValueError('Excel文件格式不正确，必须包含“input”和“output”列。')
 
-                    # 创建 question 实例
-                    question, created = ExamQuestion.objects.update_or_create(
-                        exam=exam,
-                        defaults={
-                            'title': title,
-                            'content': content,
-                            'memory_limit': memory_limit,
-                            'time_limit': time_limit
-                        }
-                    )
+                    if question_id:
+                        question = ExamQuestion.objects.get(id=question_id, exam=exam)
+                        # 更新 question 实例
+                        question.title = title
+                        question.content = content
+                        question.memory_limit = memory_limit
+                        question.time_limit = time_limit
+                        question.save()
+                        # 删除原有的测试用例
+                        ExamQuestionTestCase.objects.filter(question=question).delete()
 
-                    # 删除原有的测试用例
-                    ExamQuestionTestCase.objects.filter(question=question).delete()
+                    else:
+                        # 创建 question 实例
+                        question = ExamQuestion.objects.create(
+                            exam=exam,
+                            title=title,
+                            content=content,
+                            memory_limit=memory_limit,
+                            time_limit=time_limit
+                        )
 
                     # 初始化测试用例列表
                     test_cases = [
@@ -1000,8 +1016,7 @@ def create_exam(request, exam_id):
                     ExamQuestionTestCase.objects.bulk_create(test_cases)
 
                 except pd.errors.EmptyDataError:
-                    return JsonResponse({'status': 'error', 'message': '上传的文件为空，请提供测试用例文件。'},
-                                        status=400)
+                    return JsonResponse({'status': 'error', 'message': '上传的文件为空，请提供测试用例文件。'}, status=400)
                 except pd.errors.ParserError:
                     return JsonResponse({'status': 'error', 'message': '文件解析错误，请检查文件格式。'}, status=400)
 
