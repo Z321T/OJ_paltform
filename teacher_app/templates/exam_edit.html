@@ -153,12 +153,20 @@
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function (response) {
-                    window.location.href = "{% url 'teacher_app:exam_edit' exam_id='123' %}".replace('123', examId);
+                    window.location.href = "{% url 'teacher_app:exam_edit' exam_id='0' %}".replace('0', examId);
                 },
                 error: function (response) {
                     alert(response.responseJSON.message);
                 }
             });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.edit-test-case').on('click', function () {
+            var questionId = $(this).data('question-id');
+            window.location.href = "{% url 'teacher_app:examquestion_edit' question_id=0 %}".replace('0', questionId);
         });
     });
 </script>

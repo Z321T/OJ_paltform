@@ -1,0 +1,134 @@
+{% extends 'teacher_base.html' %}
+{% load static %}
+
+{% block title %}练习题修改{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container-flex {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .container-flex > div {
+        flex: 1;
+        margin: 10px;
+    }
+
+    .container-flex > div:first-child {
+        margin-right: 100px;
+    }
+
+    .custom-textarea {
+        height: 300px !important; /* 增加高度 */
+    }
+</style>
+
+{% endblock %}
+
+{% block content %}
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="col-md-12 stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <form id="exerciseForm">
+                        {% csrf_token %}
+                        <div class="container-flex">
+                            <div>
+                                <input type="text" class="form-control" name="title" value="{{ question.title }}" placeholder="编辑标题">
+                                <hr>
+                                <textarea class="form-control mb-3 custom-textarea" name="content"
+                                          placeholder="编辑题目内容...">{{ question.content }}</textarea>
+                                <div class="input-container mb-3">
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="memory-addon">内存限制</span>
+                                        </div>
+                                        <input type="text" class="form-control" name="memory_limit" value="{{ question.memory_limit }}" placeholder="例如，256MB"
+                                               aria-label="MemoryLimit" aria-describedby="memory-addon">
+                                    </div>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="time-addon">时间限制</span>
+                                        </div>
+                                        <input type="text" class="form-control" name="time_limit" value="{{ question.time_limit }}" placeholder="例如，1s"
+                                               aria-label="TimeLimit" aria-describedby="time-addon">
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="testcase-title">
+                                    <h4 class="fixed-title">测试用例</h4>
+                                </div>
+                                <div id="excelFilesContainer">
+                                    <ul>
+                                        <li>
+                                            <a href="{% static 'documents/测试用例示例样式.xlsx' %}" download>下载 测试用例示例样式.xlsx</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="testcaseFile" class="form-label">上传测试用例Excel文件</label>
+                                    <input type="file" class="form-control" id="testcaseFile" name="testcase_file" accept=".xlsx, .xls">
+                                </div>
+                                <div class="button-container">
+                                    <button type="button" id="submitBtn" class="btn btn-success">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('submitBtn').addEventListener('click', function () {
+        var form = document.getElementById('exerciseForm');
+        var formData = new FormData(form);
+
+        // 进行表单验证
+        var title = formData.get('title').trim();
+        var content = formData.get('content').trim();
+        var memoryLimit = formData.get('memory_limit').trim();
+        var timeLimit = formData.get('time_limit').trim();
+        var testcaseFile = formData.get('testcase_file');
+
+        var errors = [];
+        if (!title) errors.push("标题不能为空。");
+        if (!content) errors.push("题目内容不能为空。");
+        if (!memoryLimit) errors.push("内存限制不能为空。");
+        if (!timeLimit) errors.push("时间限制不能为空。");
+        if (!testcaseFile || (testcaseFile instanceof File && testcaseFile.size === 0)) {
+            errors.push("测试用例Excel文件不能为空。");
+        }
+
+        if (errors.length > 0) {
+            alert("请填写所有必填信息:\n" + errors.join("\n"));
+            return;
+        }
+
+        // 使用AJAX提交表单
+        $.ajax({
+            url: "{% url 'teacher_app:create_exercise' exercise.id %}",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            success: function (response) {
+                window.location.href = "{% url 'teacher_app:exercise_edit' exercise.id %}";
+            },
+            error: function (response) {
+                alert(response.responseJSON.message);
+            }
+        });
+    });
+</script>
+{% endblock %}

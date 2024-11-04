@@ -738,15 +738,19 @@ def create_exercise(request, exercise_id):
                     if not all(col in df.columns for col in expected_columns):
                         raise ValueError('Excel文件格式不正确，必须包含“input”和“output”列。')
 
-                    # 创建 question 实例
-                    question = ExerciseQuestion(
+                    # 创建或更新 question 实例
+                    question, created = ExerciseQuestion.objects.update_or_create(
                         exercise=exercise,
-                        title=title,
-                        content=content,
-                        memory_limit=memory_limit,
-                        time_limit=time_limit
+                        defaults={
+                            'title': title,
+                            'content': content,
+                            'memory_limit': memory_limit,
+                            'time_limit': time_limit
+                        }
                     )
-                    question.save()
+
+                    # 删除原有的测试用例
+                    ExerciseQuestionTestCase.objects.filter(question=question).delete()
 
                     # 初始化测试用例列表
                     test_cases = [
@@ -754,7 +758,7 @@ def create_exercise(request, exercise_id):
                             question=question,
                             input=row['input'],
                             expected_output=row['output']
-                        ) for index, row in df.iterrows() if index != 0  # 跳过标题行
+                        ) for index, row in df.iterrows()  # 跳过标题行
                     ]
 
                     ExerciseQuestionTestCase.objects.bulk_create(test_cases)
@@ -799,6 +803,23 @@ def exercise_edit(request, exercise_id):
         return render(request, 'exercise_edit.html', context)
 
 
+# 题库管理：练习列表-删除练习
+@login_required
+def exercise_delete(request):
+    if request.method == 'POST':
+        exercise_id = request.POST.get('exercise_id')
+        if exercise_id:
+            exercise_to_delete = Exercise.objects.filter(id=exercise_id).first()
+            if exercise_to_delete:
+                exercise_to_delete.questions.all().delete()
+                exercise_to_delete.classes.clear()
+                exercise_to_delete.delete()
+                return JsonResponse({'status': 'success'})
+        return JsonResponse({'status': 'error', 'message': '练习未找到'}, status=400)
+    else:
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
+
+
 # 题库管理：练习列表-获取练习题测试用例
 @login_required
 def get_exercise_cases(request, question_id):
@@ -828,21 +849,25 @@ def get_exercise_cases(request, question_id):
         return JsonResponse({"status": "error", "message": "题目不存在"}, status=404)
 
 
-# 题库管理：练习列表-删除练习
+# 题库管理：练习列表-修改练习题
 @login_required
-def exercise_delete(request):
-    if request.method == 'POST':
-        exercise_id = request.POST.get('exercise_id')
-        if exercise_id:
-            exercise_to_delete = Exercise.objects.filter(id=exercise_id).first()
-            if exercise_to_delete:
-                exercise_to_delete.questions.all().delete()
-                exercise_to_delete.classes.clear()
-                exercise_to_delete.delete()
-                return JsonResponse({'status': 'success'})
-        return JsonResponse({'status': 'error', 'message': '练习未找到'}, status=400)
-    else:
-        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
+def exercisequestion_edit(request, question_id):
+    user_id = request.session.get('user_id')
+
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    question = ExerciseQuestion.objects.get(id=question_id)
+    exercise = question.exercise
+
+    if request.method == 'GET':
+        question = ExerciseQuestion.objects.get(id=question_id)
+        context = {
+            'active_page': 'repository',
+            'user_id': user_id,
+            'question': question,
+            'exercise': exercise,
+            'adminnotifications': adminnotifications
+        }
+        return render(request, 'exercisequestion_edit.html', context)
 
 
 # 题库管理：练习列表-删除练习题
@@ -950,14 +975,18 @@ def create_exam(request, exam_id):
                         raise ValueError('Excel文件格式不正确，必须包含“input”和“output”列。')
 
                     # 创建 question 实例
-                    question = ExamQuestion(
+                    question, created = ExamQuestion.objects.update_or_create(
                         exam=exam,
-                        title=title,
-                        content=content,
-                        memory_limit=memory_limit,
-                        time_limit=time_limit
+                        defaults={
+                            'title': title,
+                            'content': content,
+                            'memory_limit': memory_limit,
+                            'time_limit': time_limit
+                        }
                     )
-                    question.save()
+
+                    # 删除原有的测试用例
+                    ExamQuestionTestCase.objects.filter(question=question).delete()
 
                     # 初始化测试用例列表
                     test_cases = [
@@ -965,7 +994,7 @@ def create_exam(request, exam_id):
                             question=question,
                             input=row['input'],
                             expected_output=row['output']
-                        ) for index, row in df.iterrows() if index != 0  # 跳过标题行
+                        ) for index, row in df.iterrows()  # 跳过标题行
                     ]
 
                     ExamQuestionTestCase.objects.bulk_create(test_cases)
@@ -1010,6 +1039,23 @@ def exam_edit(request, exam_id):
         return render(request, 'exam_edit.html', context)
 
 
+# 题库管理：考试列表-删除考试
+@login_required
+def exam_delete(request):
+    if request.method == 'POST':
+        exam_id = request.POST.get('exam_id')
+        if exam_id:
+            exam_to_delete = Exam.objects.filter(id=exam_id).first()
+            if exam_to_delete:
+                exam_to_delete.questions.all().delete()
+                exam_to_delete.classes.clear()
+                exam_to_delete.delete()
+                return JsonResponse({'status': 'success'})
+        return JsonResponse({'status': 'error', 'message': '考试未找到'}, status=400)
+    else:
+        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
+
+
 # 题库管理：练习列表-获取练习题测试用例
 @login_required
 def get_exam_cases(request, question_id):
@@ -1039,21 +1085,25 @@ def get_exam_cases(request, question_id):
         return JsonResponse({"status": "error", "message": "题目不存在"}, status=404)
 
 
-# 题库管理：考试列表-删除考试
+# 题库管理：考试列表-修改考试题
 @login_required
-def exam_delete(request):
-    if request.method == 'POST':
-        exam_id = request.POST.get('exam_id')
-        if exam_id:
-            exam_to_delete = Exam.objects.filter(id=exam_id).first()
-            if exam_to_delete:
-                exam_to_delete.questions.all().delete()
-                exam_to_delete.classes.clear()
-                exam_to_delete.delete()
-                return JsonResponse({'status': 'success'})
-        return JsonResponse({'status': 'error', 'message': '考试未找到'}, status=400)
-    else:
-        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
+def examquestion_edit(request, question_id):
+    user_id = request.session.get('user_id')
+
+    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    question = ExamQuestion.objects.get(id=question_id)
+    exam = question.exam
+
+    if request.method == 'GET':
+        question = ExamQuestion.objects.get(id=question_id)
+        context = {
+            'active_page': 'repository',
+            'user_id': user_id,
+            'question': question,
+            'exam': exam,
+            'adminnotifications': adminnotifications
+        }
+        return render(request, 'examquestion_edit.html', context)
 
 
 # 题库管理：考试列表-删除考试题
