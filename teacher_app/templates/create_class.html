@@ -71,6 +71,9 @@
 <!-- partial -->
         <div class="main-panel">
             <div class="content-wrapper">
+                   <div class="col-md-12 stretch-card">
+                    <div class="card">
+                                <div class="card">
                 <form action="{% url 'teacher_app:create_class' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
@@ -88,7 +91,11 @@
                     </div>
                     <button type="submit" class="btn btn-default">创建</button>
                 </form>
+                                </div>
+                    </div>
+                   </div>
             </div>
+
         </div>
 {% endblock %}
 

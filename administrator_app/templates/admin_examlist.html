@@ -88,10 +88,13 @@
 {% endblock %}
 
 {% block content %}
+    <div class="main-panel">
+    <div class="content-wrapper">
+        <div class="col-md-12 stretch-card">
+                    <div class="card">
+                                <div class="card">
 <!-- partial -->
-        <div class="container">
             <!-- 通知发布窗口 -->
-            <div class="create-panel">
                 <h3>发布考试（请先创建考试题，再填写此页面的内容）</h3>
                 <form id="examFrom" method="post" action="{% url 'administrator_app:admin_examlist' exam.id %}">
                     {% csrf_token %}

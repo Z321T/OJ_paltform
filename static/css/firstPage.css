@@ -5,9 +5,11 @@
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            width: auto; /* 按钮自身宽度 */
             margin-top: 1rem; /* 与输入框保持一致的间距 */
-            align-self: center; /* 自身居中对齐 */
+             margin-left: auto; /* 将按钮向右对齐 */
+           display: block; /* 使按钮成为块级元素，以便margin-left生效 */
+          width: 20px; /* 固定按钮宽度，您可以根据需要调整这个值 */
+
         }
 .btn-default:hover {
             background-color: #8470FF;

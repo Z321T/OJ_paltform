@@ -83,30 +83,23 @@
     float: right;
 }
 
-/* 媒体查询，为大屏幕调整布局 */
-@media (min-width: 1200px) {
-    .class-list {
-        width: 25%; /* 在大屏幕上增加班级列表的宽度 */
-    }
-
-    .notification-panel {
-        width: 75%; /* 相应减少通知面板的宽度 */
-    }
+select {
+  width: 100%; /* 使下拉框宽度填满容器 */
+  padding: 10px; /* 下拉框内边距 */
+  border: 1px solid #ccc; /* 下拉框边框 */
+  border-radius: 5px; /* 下拉框圆角 */
+  background-color: white; /* 下拉框背景色 */
+  cursor: pointer; /* 鼠标悬停时的指针样式 */
+  -webkit-appearance: none; /* 移除webkit默认样式 */
+  -moz-appearance: none; /* 移除firefox默认样式 */
+  appearance: none; /* 移除默认样式 */
 }
 
-@media (min-width: 1800px) {
-    .class-list {
-        width: 20%; /* 在更大的屏幕上减少班级列表的宽度 */
-    }
-
-    .notification-panel {
-        width: 80%; /* 相应增加通知面板的宽度 */
-    }
-
-    .input-group:not(.nav-search .input-group) textarea {
-        height: 500px; /* 在更大的屏幕上增加文本区域的高度 */
-    }
+select:focus {
+  outline: none; /* 移除焦点时的轮廓线 */
+  border-color: #483D8B; /* 焦点时边框颜色 */
 }
+
 </style>
 {% endblock %}
 
@@ -114,28 +107,25 @@
 <!-- partial -->
             <div class="main-panel">
                 <div class="content-wrapper">
-                    <div class="container">
-                        <!-- 班级列表部分 -->
-                        <div class="class-list">
-                            <h3>班级列表</h3>
-                            <ul>
-                                {% for class in classes %}
-                                    <li data-class-id="{{ class.id }}">{{ class.name }}</li>
-                                {% empty %}
-                                    <li>暂无班级</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                <div class="col-md-12 stretch-card">
+                    <div class="card">
+                                <div class="card">
                         <!-- 通知发布窗口 -->
-                        <div class="notification-panel">
+
                             <h2>发布通知</h2>
                             <form id="notificationForm" method="post" action="{% url 'teacher_app:create_notice' %}">
                                 {% csrf_token %}
                                 <div class="input-group">
-                                    <label for="recipient">收件人:</label>
-                                    <div id="recipient" class="recipient-container"></div>
-                                    <input type="hidden" id="recipientIds" name="recipients">
-                                </div>
+  <label for="recipient">收件人：</label>
+  <select id="recipient" name="recipient">
+    {% for class in classes %}
+      <option value="{{ class.id }}">{{ class.name }}</option>
+    {% empty %}
+      <option value="">暂无班级</option>
+    {% endfor %}
+  </select>
+  <input type="hidden" id="recipientIds" name="recipients">
+</div>
                                 <div class="input-group">
                                     <label for="title">通知标题:</label>
                                     <input id="title" name="title" placeholder="请输入通知标题" required>

@@ -6,55 +6,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
 <style>
-.recipient-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
 
-.container {
-    display: flex;
-    height: 100vh;
-}
-
-.class-list {
-    width: 20%;
-    background-color: #f0f0f0;
-    padding: 20px;
-    overflow-y: auto;
-    box-sizing: border-box;
-    border: 2px solid #ccc;
-    border-radius: 10px;
-}
-
-.class-list h3 {
-    margin-top: 0;
-}
-
-.class-list ul {
-    list-style: none;
-    padding: 0;
-}
-
-.class-list li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-.create-panel {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    width: 80%;
-    padding: 20px;
-    box-sizing: border-box;
-    border: 2px solid #ccc;
-    border-radius: 10px;
-}
-
-.input-group {
-    margin-bottom: 10px;
-}
 
 .input-group label {
     display: block;
@@ -75,6 +27,22 @@
     height: 500px;
 }
 
+select {
+  width: 100%; /* 使下拉框宽度填满容器 */
+  padding: 10px; /* 下拉框内边距 */
+  border: 1px solid #ccc; /* 下拉框边框 */
+  border-radius: 5px; /* 下拉框圆角 */
+  background-color: white; /* 下拉框背景色 */
+  cursor: pointer; /* 鼠标悬停时的指针样式 */
+  -webkit-appearance: none; /* 移除webkit默认样式 */
+  -moz-appearance: none; /* 移除firefox默认样式 */
+  appearance: none; /* 移除默认样式 */
+}
+
+select:focus {
+  outline: none; /* 移除焦点时的轮廓线 */
+  border-color: #483D8B; /* 焦点时边框颜色 */
+}
 .button-group {
     position: absolute;
     right: 3px;
@@ -85,57 +53,30 @@
     gap: 10px;
 }
 
-/* 媒体查询，为大屏幕调整布局 */
-@media (min-width: 1200px) {
-    .container {
-        flex-wrap: wrap;
-    }
-
-    .class-list {
-        width: 25%; /* 增加班级列表的宽度 */
-    }
-
-    .create-panel {
-        width: 75%; /* 相应减少创建面板的宽度 */
-    }
-}
-
-@media (min-width: 1800px) {
-    .class-list {
-        width: 20%; /* 在更大的屏幕上，可以减少班级列表的宽度 */
-    }
-
-    .create-panel {
-        width: 80%; /* 相应增加创建面板的宽度 */
-    }
-}
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- partial -->
-        <div class="container">
-            <!-- 班级列表部分 -->
-            <div class="class-list">
-                <h3>班级列表</h3>
-                <ul>
-                    {% for class in classes %}
-                        <li data-class-id="{{ class.id }}">{{ class.name }}</li>
-                    {% empty %}
-                        <li>暂无班级</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <!-- 练习发布窗口 -->
-            <div class="create-panel">
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="col-md-12 stretch-card">
+                    <div class="card">
+                                <div class="card">
+
                 <h3>发布练习（请先创建练习题，再填写此页面的内容）</h3>
                 <form id="exerciseFrom" method="post" action="{% url 'teacher_app:exercise_list' exercise.id %}">
                     {% csrf_token %}
-                    <div class="input-group">
-                        <label for="recipient">接收班级：</label>
-                        <div id="recipient" class="recipient-container"></div>
-                        <input type="hidden" id="recipientIds" name="recipients">
-                    </div>
+                   <div class="input-group">
+  <label for="recipient">接收班级：</label>
+  <select id="recipient" name="recipient">
+    {% for class in classes %}
+      <option value="{{ class.id }}">{{ class.name }}</option>
+    {% empty %}
+      <option value="">暂无班级</option>
+    {% endfor %}
+  </select>
+  <input type="hidden" id="recipientIds" name="recipients">
+</div>
                     <div class="input-group">
                         <label for="title">练习标题：</label>
                         <input type="text" id="title" name="title" placeholder="请输入练习标题">
@@ -199,16 +140,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="button-group">
-                        <button type="submit" id="submit-button" class="btn-default">发布练习</button>
+                <div class="button-group">
+                        <button type="submit" id="submit-button" class="btn-default">发布考试</button>
                     </div>
                 </form>
                 <button class="btn-default"
                         onclick="window.location.href='{% url 'teacher_app:create_exercise' exercise.id %}'">
                     创建练习题
                 </button>
-            </div>
-        </div>
+                                </div>
+
+
 {% endblock %}
 
 {% block extra_js %}
