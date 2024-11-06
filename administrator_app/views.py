@@ -175,26 +175,29 @@ def exam_details_data(request):
 def admintest_check_process(request):
     user_id = request.session.get('user_id')
 
-    # 获取 exam_type 和 exam_id 参数
-    exam_type = request.GET.get('exam_type')
-    exam_id = request.GET.get('exam_id')
+    # 初始化默认值
+    exam_type = None
+    exam_id = None
     selected_exam = None
     submissions = []
 
-    if exam_type and exam_id:
-        selected_exam = AdminExam.objects.filter(id=exam_id).first()
-        if selected_exam:
+    if request.method == 'GET':
+        exam_type = request.GET.get('exam_type')
+        exam_id = request.GET.get('exam_id')
+
+        if exam_type and exam_id:
+            selected_exam = AdminExam.objects.filter(id=exam_id).first()
             submissions = GradeExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
 
-    context = {
-        'active_page': 'testcheck',
-        'user_id': user_id,
-        'selected_exam': selected_exam,
-        'submissions': submissions,
-        'exam_type': exam_type,
-        'exam_id': exam_id,
-    }
-    return render(request, 'admintest_check_process.html', context)
+        context = {
+            'active_page': 'testcheck',
+            'user_id': user_id,
+            'selected_exam': selected_exam,
+            'submissions': submissions,
+            'exam_type': exam_type,
+            'exam_id': exam_id,
+        }
+        return render(request, 'admintest_check_process.html', context)
 
 
 # 年级考试实况-获取考试项目
@@ -212,15 +215,12 @@ def get_adminexam_names(request):
             exams = []
 
         exam_names = [{'id': exam.id, 'name': exam.title} for exam in exams]
-        return JsonResponse({'exam_names': exam_names}, status=200)
+        return JsonResponse({'exam_names': exam_names})
     except Administrator.DoesNotExist:
-        logging.error(f"Administrator with user_id {user_id} does not exist.")
         return JsonResponse({'status': 'error', 'message': '未找到管理员信息，请确认用户是否为管理员。'}, status=404)
     except DatabaseError as db_err:
-        logging.error(f"Database operation failed: {str(db_err)}")
         return JsonResponse({'status': 'error', 'message': '数据库操作失败，请稍后重试。'}, status=500)
     except Exception as e:
-        logging.error(f"An unknown error occurred: {str(e)}")
         return JsonResponse({'status': 'error', 'message': f'发生未知错误: {e}'}, status=500)
 
 

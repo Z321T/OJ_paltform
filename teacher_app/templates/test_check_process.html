@@ -228,10 +228,11 @@
 {% block extra_js %}
 <script>
     $(document).ready(function () {
-        $('#examType').on('change', function () {
-            var examType = $(this).val();
-            var examNameSelect = $('#examName');
-            examNameSelect.empty().append(new Option('加载中...', ''));
+        var $examType = $('#examType');
+        var $examName = $('#examName');
+
+        function loadExamNames(examType, selectedExamId = null) {
+            $examName.empty().append(new Option('加载中...', ''));
 
             $.ajax({
                 url: "{% url 'teacher_app:get_exam_names' %}",
@@ -240,27 +241,52 @@
                     'exam_type': examType
                 },
                 success: function (response) {
-                    examNameSelect.empty();
-                    if (response.exam_names.length > 0) {
+                    $examName.empty().append(new Option('请选择考试名称', ''));
+                    if (response.exam_names && response.exam_names.length) {
                         response.exam_names.forEach(function (exam) {
-                            examNameSelect.append(new Option(exam.name, exam.id));
+                            var option = new Option(exam.name, exam.id);
+                            if (exam.id === selectedExamId) {  // 使用严格相等运算符
+                                option.selected = true;  // 默认选择已选考试
+                            }
+                            $examName.append(option);
                         });
                     } else {
-                        examNameSelect.append(new Option('无可用考试', ''));
+                        $examName.append(new Option('无可用考试', ''));
                     }
                 },
-                error: function (response) {
+                error: function () {
                     alert('获取考试名称失败，请重试');
-                    examNameSelect.empty().append(new Option('加载失败', ''));
+                    $examName.empty().append(new Option('加载失败', ''));
                 }
             });
+        }
+
+        $examType.on('change', function () {
+            var examType = $(this).val();
+            if (examType) {
+                loadExamNames(examType);  // 重新加载考试名称
+            } else {
+                $examName.empty().append(new Option('请选择考试名称', ''));
+            }
         });
 
         $('#queryButton').on('click', function () {
-            var examType = $('#examType').val();
-            var examId = $('#examName').val();
+            var examType = $examType.val();
+            var examId = $examName.val();
+            // 如果没有选择考试类型或考试名称，弹出提示并不执行跳转
+            if (!examType || !examId) {
+                alert('请先选择考试类型和考试名称');
+                return;
+            }
             window.location.href = "{% url 'teacher_app:test_check_process' %}?exam_type=" + examType + "&exam_id=" + examId;
         });
+
+        // 页面加载时，初始化并加载已选的考试名称
+        var initialExamType = $examType.val();
+        var initialExamId = "{{ selected_exam.id }}";
+        if (initialExamType) {
+            loadExamNames(initialExamType, initialExamId);  // 加载对应考试类型的名称
+        }
     });
 </script>
 <script>

@@ -260,30 +260,36 @@ def test_check_process(request):
     teacher = Teacher.objects.get(userid=user_id)
     adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
 
-    # 获取 exam_type 和 exam_id 参数
-    exam_type = request.GET.get('exam_type')
-    exam_id = request.GET.get('exam_id')
+    # 初始化默认值
+    exam_type = None
+    exam_id = None
     selected_exam = None
     submissions = []
 
-    if exam_type and exam_id:
-        if exam_type == 'adminexam':
-            selected_exam = AdminExam.objects.filter(id=exam_id).first()
-            submissions = GradeExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
-        elif exam_type == 'classexam':
-            selected_exam = Exam.objects.filter(id=exam_id, teacher=teacher).first()
-            submissions = ClassExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
+    if request.method == 'GET':
+        # 获取 GET 请求中的 exam_type 和 exam_id 参数
+        exam_type = request.GET.get('exam_type')
+        exam_id = request.GET.get('exam_id')
 
-    context = {
-        'active_page': 'testcheck',
-        'user_id': user_id,
-        'adminnotifications': adminnotifications,
-        'selected_exam': selected_exam,
-        'submissions': submissions,
-        'exam_type': exam_type,
-        'exam_id': exam_id,
-    }
-    return render(request, 'test_check_process.html', context)
+        # 根据 exam_type 和 exam_id 查询数据
+        if exam_type and exam_id:
+            if exam_type == 'adminexam':
+                selected_exam = AdminExam.objects.filter(id=exam_id).first()
+                submissions = GradeExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
+            elif exam_type == 'classexam':
+                selected_exam = Exam.objects.filter(id=exam_id, teacher=teacher).first()
+                submissions = ClassExamSubmission.objects.filter(exam=selected_exam).order_by('-submission_time')
+
+        context = {
+            'active_page': 'testcheck',
+            'user_id': user_id,
+            'adminnotifications': adminnotifications,
+            'selected_exam': selected_exam,
+            'submissions': submissions,
+            'exam_type': exam_type,
+            'exam_id': exam_id,
+        }
+        return render(request, 'test_check_process.html', context)
 
 
 # 考试实况-获取考试项目
