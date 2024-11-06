@@ -113,20 +113,22 @@
     $(document).ready(function () {
         $('.delete-notification').on('click', function () {
             var notificationId = $(this).data('notification-id');
-            $.ajax({
-                url: "{% url 'teacher_app:delete_notice' %}",
-                type: 'POST',
-                data: {
-                    'notification_id': notificationId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    window.location.reload()
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message);
-                }
-            });
+            if (confirm('确定要删除这个通知吗？')) {
+                $.ajax({
+                    url: "{% url 'teacher_app:delete_notice' %}",
+                    type: 'POST',
+                    data: {
+                        'notification_id': notificationId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        window.location.reload()
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
         });
     });
 </script>

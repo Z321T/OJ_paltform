@@ -114,20 +114,22 @@
     $(document).ready(function () {
         $('.delete-exam').on('click', function () {
             var examId = $(this).data('exam-id');
-            $.ajax({
-                url: "{% url 'administrator_app:adminexam_delete' %}",
-                type: 'POST',
-                data: {
-                    'exam_id': examId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    window.location.reload()
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message);
-                }
-            });
+            if (confirm('确定要删除这个考试吗？')) {
+                $.ajax({
+                    url: "{% url 'administrator_app:adminexam_delete' %}",
+                    type: 'POST',
+                    data: {
+                        'exam_id': examId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        window.location.reload()
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
         });
     });
 </script>

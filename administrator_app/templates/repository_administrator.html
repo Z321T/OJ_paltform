@@ -107,20 +107,22 @@
     $(document).ready(function () {
         $('.delete-exercise').on('click', function () {
             var exerciseId = $(this).data('exercise-id');
-            $.ajax({
-                url: "{% url 'administrator_app:programmingexercise_delete' %}",
-                type: 'POST',
-                data: {
-                    'exercise_id': exerciseId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    window.location.reload()
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message);
-                }
-            });
+            if (confirm('确定要删除这个GUI题目吗？')) {
+                $.ajax({
+                    url: "{% url 'administrator_app:programmingexercise_delete' %}",
+                    type: 'POST',
+                    data: {
+                        'exercise_id': exerciseId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        window.location.reload()
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
         });
     });
 </script>    

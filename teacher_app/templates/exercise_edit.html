@@ -145,20 +145,22 @@
         $('.delete-exercisequestion').on('click', function () {
             var questionId = $(this).data('exercisequestion-id');
             var exerciseId = $(this).data('exercise-id');
-            $.ajax({
-                url: "{% url 'teacher_app:exercisequestion_delete' %}",
-                type: 'POST',
-                data: {
-                    'question_id': questionId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    window.location.href = "{% url 'teacher_app:exercise_edit' exercise_id='0' %}".replace('0', exerciseId);
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message);
-                }
-            });
+            if (confirm('确定要删除这个练习题吗？')) {
+                $.ajax({
+                    url: "{% url 'teacher_app:exercisequestion_delete' %}",
+                    type: 'POST',
+                    data: {
+                        'question_id': questionId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        window.location.href = "{% url 'teacher_app:exercise_edit' exercise_id='0' %}".replace('0', exerciseId);
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
         });
     });
 </script>
