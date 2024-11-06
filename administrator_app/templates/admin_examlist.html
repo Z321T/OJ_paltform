@@ -6,11 +6,6 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">    
 <style>
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-
         .class-list h3 {
             margin-top: 0;
         }
@@ -23,18 +18,6 @@
         .class-list li {
             padding: 10px;
             border-bottom: 1px solid #ddd; /* 更淡的灰色边框 */
-        }
-
-        .create-panel {
-            display: flex;
-            margin-left: 100px;
-            flex-direction: column;
-            position: relative;
-            width: 80%;
-            padding: 20px;
-            box-sizing: border-box;
-            border: 2px solid #ccc; /* 灰色边框 */
-            border-radius: 10px;
         }
 
         .input-group {
@@ -168,6 +151,9 @@
                 </button>
             </div>
         </div>    
+    </div>
+</div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
