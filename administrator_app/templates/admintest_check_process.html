@@ -229,9 +229,11 @@
     $(document).ready(function () {
         var $examType = $('#examType');
         var $examName = $('#examName');
+        var isExamNameLoaded = false;
 
         function loadExamNames(examType, selectedExamId = null) {
             $examName.empty().append(new Option('加载中...', ''));
+            isExamNameLoaded = true;
 
             $.ajax({
                 url: "{% url 'administrator_app:get_adminexam_names' %}",
@@ -260,12 +262,11 @@
             });
         }
 
-        $examType.on('change', function () {
-            var examType = $(this).val();
-            if (examType) {
-                loadExamNames(examType);  // 重新加载考试名称
-            } else {
-                $examName.empty().append(new Option('请选择考试名称', ''));
+        // 当点击 examName 下拉框时，执行加载考试名称的操作
+        $examName.on('click', function () {
+            var examType = $examType.val();
+            if (examType && !isExamNameLoaded) { // 如果 examType 已选择且 examName 未加载
+                loadExamNames(examType);
             }
         });
 
@@ -279,13 +280,6 @@
             }
             window.location.href = "{% url 'administrator_app:admintest_check_process' %}?exam_type=" + examType + "&exam_id=" + examId;
         });
-
-        // 页面加载时，初始化并加载载已选的考试名称
-        var initialExamType = $examType.val();
-        var initialExamId = "{{ selected_exam.id }}";
-        if (initialExamType) {
-            loadExamNames(initialExamType, initialExamId);  // 加载对应考试类型的名称
-        }
     });
 </script>
 <script>

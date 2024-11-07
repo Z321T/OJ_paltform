@@ -230,9 +230,11 @@
     $(document).ready(function () {
         var $examType = $('#examType');
         var $examName = $('#examName');
+        var isExamNameLoaded = false; // 用于判断 examName 是否已加载过
 
         function loadExamNames(examType, selectedExamId = null) {
             $examName.empty().append(new Option('加载中...', ''));
+            isExamNameLoaded = true; // 设置 examName 已加载
 
             $.ajax({
                 url: "{% url 'teacher_app:get_exam_names' %}",
@@ -245,8 +247,8 @@
                     if (response.exam_names && response.exam_names.length) {
                         response.exam_names.forEach(function (exam) {
                             var option = new Option(exam.name, exam.id);
-                            if (exam.id === selectedExamId) {  // 使用严格相等运算符
-                                option.selected = true;  // 默认选择已选考试
+                            if (exam.id === selectedExamId) {
+                                option.selected = true;
                             }
                             $examName.append(option);
                         });
@@ -261,32 +263,23 @@
             });
         }
 
-        $examType.on('change', function () {
-            var examType = $(this).val();
-            if (examType) {
-                loadExamNames(examType);  // 重新加载考试名称
-            } else {
-                $examName.empty().append(new Option('请选择考试名称', ''));
+        // 当点击 examName 下拉框时，执行加载考试名称的操作
+        $examName.on('click', function () {
+            var examType = $examType.val();
+            if (examType && !isExamNameLoaded) { // 如果 examType 已选择且 examName 未加载
+                loadExamNames(examType);
             }
         });
 
         $('#queryButton').on('click', function () {
             var examType = $examType.val();
             var examId = $examName.val();
-            // 如果没有选择考试类型或考试名称，弹出提示并不执行跳转
             if (!examType || !examId) {
                 alert('请先选择考试类型和考试名称');
                 return;
             }
             window.location.href = "{% url 'teacher_app:test_check_process' %}?exam_type=" + examType + "&exam_id=" + examId;
         });
-
-        // 页面加载时，初始化并加载已选的考试名称
-        var initialExamType = $examType.val();
-        var initialExamId = "{{ selected_exam.id }}";
-        if (initialExamType) {
-            loadExamNames(initialExamType, initialExamId);  // 加载对应考试类型的名称
-        }
     });
 </script>
 <script>
