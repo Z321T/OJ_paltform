@@ -129,4 +129,6 @@ class TestResult(models.Model):
     error = models.TextField(null=True, blank=True)
     passed_tests = models.IntegerField(null=True, blank=True)
     testcases = models.IntegerField(default=0, null=True, blank=True)
+    execution_time = models.IntegerField(default=0)  # 毫秒
+    max_memory = models.IntegerField(default=0)  # KB
 

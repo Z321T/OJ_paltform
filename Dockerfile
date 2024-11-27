@@ -4,6 +4,9 @@ FROM gcc:latest
 # 创建一个目录来存放用户代码
 WORKDIR /usercode
 
+# 安装 time 工具（用于计算时间和资源使用）
+RUN apt-get update && apt-get install -y time
+
 # 默认命令
 CMD ["bash"]
 

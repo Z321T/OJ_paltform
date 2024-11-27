@@ -257,27 +257,41 @@
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function (response) {
+                    let debuggerContent = '';
+
                     if (response.status === 'pass')
                     {
-                        $('#debugger').empty().append(`<p>所有测试用例通过</p>`).show();
+                         debuggerContent = `<p>所有测试用例通过</p>`;
                     }
                     else if (response.status === 'fail')
                     {
-                        $('#debugger').empty().append(
-                            `<p>部分测试用例未通过</p><p>通过的测试用例数量: ${response.passed_tests}</p>
-                             <p>总测试用例数量: ${response.testcases}</p>`).show();
+                        debuggerContent = `<p>部分测试用例未通过</p>
+                           <p>通过的测试用例数量: ${response.passed_tests}</p>
+                           <p>总测试用例数量: ${response.testcases}</p>`;
                     }
                     else if (response.status === 'compile error')
                     {
-                        $('#debugger').empty().append(`<p>编译错误</p><p>错误信息: ${response.error}</p>`).show();
+                        debuggerContent = `<p>编译错误</p><p>错误信息: ${response.error}</p>`;
                     }
                     else if (response.status === 'other error')
                     {
-                        $('#debugger').empty().append(`<p>其他错误</p><p>错误信息: ${response.error}</p>`).show();
+                         debuggerContent = `<p>其他错误</p><p>错误信息: ${response.error}</p>`;
+                    }else if (response.status === 'timeout') {
+                                    debuggerContent = `<p>运行超时</p>`;
                     }
+
+                     // 添加运行时间和内存信息
+                    if (response.execution_time !== undefined && response.max_memory !== undefined) {
+                        debuggerContent += `<p>运行时间: ${response.execution_time} s</p>
+                                            <p>内存使用: ${response.max_memory} KB</p>`;
+                    }
+
+                    // 更新调试器内容并显示
+                    $('#debugger').empty().append(debuggerContent).show();
                 },
+
                 error: function (response) {
-                    alert(response.responseJSON.message);
+                    alert(response.responseJSON.message ||'未知错误');
                 }
             });
         });

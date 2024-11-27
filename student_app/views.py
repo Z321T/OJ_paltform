@@ -583,18 +583,15 @@ def mark_adminexam_question_as_completed(student, adminexam, adminexam_question)
 @login_required
 def run_cpp_code(request):
     user_id = request.session.get('user_id')
-
     student = Student.objects.get(userid=user_id)
+    user_code = request.POST.get('code', '')
+    types = request.POST.get('types', '')
+    question_id = request.POST.get('questionId', '')
+    client_ip = request.META.get('REMOTE_ADDR')
     if request.method == 'POST':
-
         # 尝试获取锁
         if not lock.acquire(blocking=False):
             return JsonResponse({'status': 'error', 'message': '当前测评人数较多，请稍后提交。'}, status=400)
-
-        user_code = request.POST.get('code', '')
-        types = request.POST.get('types', '')
-        question_id = request.POST.get('questionId', '')
-        client_ip = request.META.get('REMOTE_ADDR')
 
         # 检查是否在截止时间之前提交代码
         if types == 'exercise':
@@ -616,7 +613,7 @@ def run_cpp_code(request):
                 return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'}, status=400)
         else:
             return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
-
+        # 保存代码到数据库
         StudentCode.objects.update_or_create(
             student=student,
             question_type=types,
@@ -625,23 +622,26 @@ def run_cpp_code(request):
         )
         student_code = StudentCode.objects.get(student=student, question_type=types, question_id=question_id)
 
-        # 运行函数
+        #  调用运行代码的测试函数
         test_cpp_code(student_code.student, student_code.code, student_code.question_type, student_code.question_id, client_ip)
         # 释放锁
         lock.release()
 
+        # 等待测试结果
         result = None
-        for _ in range(50):
+        for _ in range(50): # 最多等待 50 次，每次间隔 5 秒
             try:
                 result = TestResult.objects.get(student=student, question_type=types, question_id=question_id)
                 if result.status is not None:
                     # 将对象转换为字典
+                    # 测试结果已生成
                     result_dict = model_to_dict(result)
                     break
             except ObjectDoesNotExist:
                 time.sleep(5)
         if result is None:
             return JsonResponse({'status': 'error', 'message': '测试出现错误，请重新提交'}, status=400)
+
         # 获取任务结果
         try:
             if result.status == 'pass':
@@ -676,6 +676,11 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': 10}
                     )
+
+                # 添加运行时间和内存信息
+                result_dict['execution_time'] = result.execution_time
+                result_dict['max_memory'] = result.max_memory
+
                 result.delete()
                 return JsonResponse(result_dict)
 
@@ -715,25 +720,42 @@ def run_cpp_code(request):
                         adminexam_question=question,
                         defaults={'score': score}
                     )
+
+                # 添加运行时间和内存信息
+                result_dict['execution_time'] = result.execution_time
+                result_dict['max_memory'] = result.max_memory
+                print(result_dict)
                 result.delete()
                 return JsonResponse(result_dict)
 
             elif result.status == 'timeout':
+                # 添加运行时间和内存信息
+                result_dict['execution_time'] = result.execution_time
+                result_dict['max_memory'] = result.max_memory
                 result.delete()
                 # 出现运行超时的情况
                 return JsonResponse(result_dict)
 
             elif result.status == 'compile error':
+                # 添加运行时间和内存信息
+                result_dict['execution_time'] = result.execution_time
+                result_dict['max_memory'] = result.max_memory
                 result.delete()
                 # 出现编译错误的情况
                 return JsonResponse(result_dict)
 
             elif result.status == 'other error':
+                # 添加运行时间和内存信息
+                result_dict['execution_time'] = result.execution_time
+                result_dict['max_memory'] = result.max_memory
                 result.delete()
                 # 出现其他错误的情况
                 return JsonResponse(result_dict)
 
         except Exception as e:
+            # 添加运行时间和内存信息
+            result_dict['execution_time'] = result.execution_time
+            result_dict['max_memory'] = result.max_memory
             result.delete()
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     else:
