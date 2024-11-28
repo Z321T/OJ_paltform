@@ -184,7 +184,9 @@ STATICFILES_FINDERS = [
 ]
 
 
-# # 超级管理员设置
+# 用户模型设置
+# AUTH_USER_MODEL = 'student_app.Student'
+# AUTH_USER_MODEL = 'teacher_app.Teacher'
 # AUTH_USER_MODEL = 'administrator_app.Administrator'
 
 

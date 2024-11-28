@@ -13,11 +13,30 @@ from teacher_app.models import (ExerciseQuestion, ExamQuestion,
 from submissions_app.models import GradeExamSubmission, ClassExamSubmission
 
 
+def parse_resource_usage(file_path):
+    times = []
+    memories = []
+    try:
+        with open(file_path, 'r') as f:
+            for line in f:
+                match = re.match(r'(\d+) ms (\d+) KB', line.strip())
+                if match:
+                    time = int(match.group(1))
+                    memory = int(match.group(2))
+                    times.append(time)
+                    memories.append(memory)
+        avg_time = sum(times) / len(times) if times else 0
+        avg_memory = sum(memories) / len(memories) if memories else 0
+        return avg_time, avg_memory
+    except Exception as e:
+        print(f"An error occurred while parsing resource usage: {e}")
+        return 0, 0
+
+
 def test_cpp_code(student, code, types, question_id, ip_address):
     # 临时文件名
     source_file = 'temp.cpp'
     executable_file = 'temp_executable'
-    input_file = 'input.txt'
     output_file = 'output.txt'
     resource_file = 'resource_usage.txt'
 
@@ -62,8 +81,8 @@ def test_cpp_code(student, code, types, question_id, ip_address):
     # 初始化耗时和内存
     # 初始化变量
 
-    total_time = 0
-    max_memory = 0
+    # total_time = 0
+    # max_memory = 0
 
     # 逐个运行测试用例
     for i, testcase in enumerate(testcases):
@@ -87,35 +106,39 @@ def test_cpp_code(student, code, types, question_id, ip_address):
             result.check_returncode()  # 检查命令是否成功执行
 
             # 检查输出文件以确定测试用例是否通过
-            try:
-                with open(output_file, 'r') as f:
-                    output = f.read()
-                    print(f"output.strip(): {output.strip()}")
-                    print(f"testcase.output.strip(): {testcase.expected_output.strip()}")
-
-                    if output.strip() == testcase.expected_output.strip():
-                        passed_tests += 1
-                        print(passed_tests)
-
-            except Exception as e:
-                print(f"An error occurred: {e}")
+            with open(output_file, 'r') as f:
+                output = f.read()
+                if output.strip() == testcase.expected_output.strip():
+                    passed_tests += 1
+            # 检查输出文件以确定测试用例是否通过
+            # try:
+            #     with open(output_file, 'r') as f:
+            #         output = f.read()
+            #         print(f"output.strip(): {output.strip()}")
+            #         print(f"testcase.output.strip(): {testcase.expected_output.strip()}")
+            #
+            #         if output.strip() == testcase.expected_output.strip():
+            #             passed_tests += 1
+            #             print(passed_tests)
+            #
+            # except Exception as e:
+            #     print(f"An error occurred: {e}")
 
             # 读取资源使用情况
-            try:
-                print(resource_file)
-                with open(resource_file, 'r') as f:
-                    # 初始化变量
-                    resource_usage = f.read().strip()
-                    if resource_usage:
-                        time_used, memory_used = map(float, resource_usage.split())  # 假设格式为 "time memory"
-                        max_memory = max(max_memory, memory_used)
-                        total_time += time_used  # 假设资源文件格式为 "time memory"
-                    else:
-                        print("no value")
-
-            except Exception as e:
-                print(f"An error occurred: {e}")
-
+            # try:
+            #     print(resource_file)
+            #     with open(resource_file, 'r') as f:
+            #         # 初始化变量
+            #         resource_usage = f.read().strip()
+            #         if resource_usage:
+            #             time_used, memory_used = map(float, resource_usage.split())  # 假设格式为 "time memory"
+            #             max_memory = max(max_memory, memory_used)
+            #             total_time += time_used  # 假设资源文件格式为 "time memory"
+            #         else:
+            #             print("no value")
+            #
+            # except Exception as e:
+            #     print(f"An error occurred: {e}")
 
         except subprocess.CalledProcessError as e:
             test_result, created = TestResult.objects.update_or_create(
@@ -127,8 +150,8 @@ def test_cpp_code(student, code, types, question_id, ip_address):
                     'type': '编译错误',
                     'error': e.stderr,
                     'passed_tests': passed_tests,
-                    'execution_time': total_time,
-                    'max_memory': max_memory,
+                    'execution_time': 0,
+                    'max_memory': 0,
                 },
             )
             break
@@ -143,8 +166,8 @@ def test_cpp_code(student, code, types, question_id, ip_address):
                     'type': '运行超时',
                     'error': '代码运行超时',
                     'passed_tests': passed_tests,
-                    'execution_time': total_time,  # 添加运行时间
-                    'max_memory': max_memory,  # 添加最大内存使用
+                    'execution_time': 0,  # 添加运行时间
+                    'max_memory': 0,  # 添加最大内存使用
                 },
             )
             break
@@ -159,11 +182,14 @@ def test_cpp_code(student, code, types, question_id, ip_address):
                     'type': '其他错误',
                     'error': str(e),
                     'passed_tests': passed_tests,
-                    'execution_time': total_time,  # 添加运行时间
-                    'max_memory': max_memory,  # 添加最大内存使用
+                    'execution_time': 0,  # 添加运行时间
+                    'max_memory': 0,  # 添加最大内存使用
                 },
             )
             break
+
+    # 计算平均运行时间和内存使用
+    avg_time, avg_memory = parse_resource_usage(resource_file)
 
     # 更新最终的测试结果
     final_status = 'pass' if passed_tests == len(testcases) else 'fail'
@@ -178,8 +204,8 @@ def test_cpp_code(student, code, types, question_id, ip_address):
             'type': final_type,
             'error': None,
             'passed_tests': passed_tests,
-            'execution_time': total_time,
-            'max_memory': max_memory,
+            'execution_time': avg_time,
+            'max_memory': avg_memory,
         },
     )
 
@@ -205,8 +231,8 @@ def test_cpp_code(student, code, types, question_id, ip_address):
             exam=submission_exam,
             question=submission_question,
             result=test_result.status,  # 'pass', 'fail', etc.
-            memory=max_memory,  # 这里假设已经获取到内存信息
-            time=total_time,  # 这里假设已经获取到时间信息
+            memory=avg_memory,  # 这里假设已经获取到内存信息
+            time=avg_time,  # 这里假设已经获取到时间信息
             language=language,
             code_length=code_length,
             ip_address=ip_address,
@@ -214,8 +240,14 @@ def test_cpp_code(student, code, types, question_id, ip_address):
         )
 
     # 清理临时文件
-    try:
-        os.remove(source_file)
-        os.remove(executable_file)  # 如果生成了可执行文件
-    except OSError:
-        pass
+    for file in [source_file, executable_file, output_file, resource_file]:
+        try:
+            os.remove(file)
+        except OSError:
+            pass
+    # 清理临时文件
+    # try:
+    #     os.remove(source_file)
+    #     os.remove(executable_file)  # 如果生成了可执行文件
+    # except OSError:
+    #     pass
