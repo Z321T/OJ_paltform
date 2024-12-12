@@ -1,42 +1,35 @@
 import os
 import docx
-import time
 import tempfile
 from io import BytesIO
-from threading import Lock
 
 from django.utils import timezone
 from django.db.models import Sum
-from django.forms.models import model_to_dict
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password, check_password
 
 from administrator_app.models import ProgrammingExercise, AdminExam, AdminExamQuestion
-from student_app.models import (Student, Score, ExerciseCompletion, ExerciseQuestionCompletion,
-                                StudentCode, TestResult,
-                                ExamCompletion, ExamQuestionCompletion,
-                                AdminExamCompletion, AdminExamQuestionCompletion)
+from student_app.models import Student
 from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, ExamQuestion, ReportScore
 from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
 from login.views import login_required
-from CUMT.task import test_cpp_code
-
-
-# 创建一个全局锁实例
-lock = Lock()
+from Testingcode_app.models import (Score)
 
 
 # 学生主页
 @login_required
 def home_student(request):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
-    notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
-    programing_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
+    # 获取学生所在班级的通知
+    class_assigned = student.class_assigned
+    notifications = Notification.objects.filter(recipients=class_assigned).order_by('-date_posted')
+    # 获取GUI编程题目
+    teacher = class_assigned.teacher
+    course_coordinator = teacher.course_coordinator
+    programing_exercises = ProgrammingExercise.objects.filter(posted_by=course_coordinator).order_by('-date_posted')
 
     context = {
         'active_page': 'home',
@@ -51,9 +44,9 @@ def home_student(request):
 # 学生主页：提交报告
 @login_required
 def report_student(request, programmingexercise_id):
-    user_id = request.session.get('user_id')
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
 
-    student = Student.objects.get(userid=user_id)
     programming_exercise = get_object_or_404(ProgrammingExercise, id=programmingexercise_id)
 
     if request.method == 'GET':
@@ -74,34 +67,42 @@ def report_student(request, programmingexercise_id):
     if request.method == 'POST':
         reportstandards = ReportScore.objects.filter(teacher=student.class_assigned.teacher)
         if reportstandards:
-            word_file = request.FILES['wordFile']
+            # word_file = request.FILES['wordFile']
+            word_file = request.FILES.get('wordFile')
 
             if word_file:
-                # 读取文件内容并使用BytesIO创建一个类似文件的对象
-                word_file_bytes = BytesIO(word_file.read())
-                # 使用BytesIO对象创建docx文档对象
-                document = docx.Document(word_file_bytes)
-                full_text = []
-                for paragraph in document.paragraphs:
-                    full_text.append(paragraph.text)
-                # 获得纯文本代码，去除了图片
-                report = '\n'.join(full_text)
-                # 分析报告特征
-                analyze_programming_report(student, report, programmingexercise_id)
-                # 报告规范性评分
-                score_report(student, document, programmingexercise_id)
+                try:
+                    # 读取文件内容并使用BytesIO创建一个类似文件的对象
+                    word_file_bytes = BytesIO(word_file.read())
+                    # 使用BytesIO对象创建docx文档对象
+                    document = docx.Document(word_file_bytes)
+                    full_text = []
+                    for paragraph in document.paragraphs:
+                        full_text.append(paragraph.text)
+                    # 获得纯文本代码，去除了图片
+                    report = '\n'.join(full_text)
+                    # 分析报告特征
+                    analyze_programming_report(student, report, programmingexercise_id)
+                    # 报告规范性评分
+                    score_report(student, document, programmingexercise_id)
+                except Exception as e:
+                    return JsonResponse({'status': 'error', 'message': f'处理Word文件时出错: {str(e)}'}, status=400)
 
             # 读取TXT文件内容
             code_file = request.FILES.get('txtFile')
             if code_file:
-                temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".txt")
-                temp_file.write(code_file.read())
-                temp_file.close()
-                # 分析代码特征
-                code = open(temp_file.name, encoding='utf-8').read()
-                analyze_programming_code(student, code, programmingexercise_id)
-                # 删除临时文件
-                os.unlink(temp_file.name)
+                try:
+                    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".txt")
+                    temp_file.write(code_file.read())
+                    temp_file.close()
+                    # 分析代码特征
+                    code = open(temp_file.name, encoding='utf-8').read()
+                    analyze_programming_code(student, code, programmingexercise_id)
+                    # 删除临时文件
+                    os.unlink(temp_file.name)
+                except Exception as e:
+                    return JsonResponse({'status': 'error', 'message': f'处理TXT文件时出错: {str(e)}'}, status=400)
+
             return JsonResponse({'status': 'success', 'message': '提交成功'}, status=200)
 
         else:
@@ -111,11 +112,11 @@ def report_student(request, programmingexercise_id):
 # 我的练习
 @login_required
 def practice_student(request):
-    user_id = request.session.get('user_id')
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
 
-    student = Student.objects.get(userid=user_id)
-    notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     class_assigned = student.class_assigned
+    notifications = Notification.objects.filter(recipients=class_assigned).order_by('-date_posted')
     exercises = Exercise.objects.filter(classes=class_assigned).order_by('-published_at')
 
     context = {
@@ -130,9 +131,9 @@ def practice_student(request):
 # 我的练习：练习详情
 @login_required
 def practice_list(request, exercise_id):
-    user_id = request.session.get('user_id')
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
 
-    student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     if request.method == 'GET':
         exercise = Exercise.objects.get(id=exercise_id)
@@ -149,12 +150,10 @@ def practice_list(request, exercise_id):
 # 我的考试
 @login_required
 def exam_student(request):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
-    notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
     class_assigned = student.class_assigned
-
+    notifications = Notification.objects.filter(recipients=class_assigned).order_by('-date_posted')
     th_exams = Exam.objects.filter(classes=class_assigned).order_by('-starttime')
     admin_exams = AdminExam.objects.filter(classes=class_assigned).order_by('-starttime')
 
@@ -171,9 +170,9 @@ def exam_student(request):
 # 我的考试：教师考试详情
 @login_required
 def teacherexam_list(request, exam_id):
-    user_id = request.session.get('user_id')
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
 
-    student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     if request.method == 'GET':
         exam = Exam.objects.get(id=exam_id)
@@ -190,9 +189,9 @@ def teacherexam_list(request, exam_id):
 # 我的考试：管理员考试详情
 @login_required
 def adminexam_list(request, exam_id):
-    user_id = request.session.get('user_id')
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
 
-    student = Student.objects.get(userid=user_id)
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     if request.method == 'GET':
         exam = AdminExam.objects.get(id=exam_id)
@@ -209,9 +208,8 @@ def adminexam_list(request, exam_id):
 # 学情分析
 @login_required
 def analyse_exercise(request):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     exercises = Exercise.objects.filter(classes=student.class_assigned).order_by('-published_at')
 
@@ -226,9 +224,8 @@ def analyse_exercise(request):
 
 @login_required
 def analyse_exam(request):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     exams = Exam.objects.filter(classes=student.class_assigned).order_by('-starttime')
 
@@ -243,9 +240,7 @@ def analyse_exam(request):
 
 @login_required
 def analyse_data(request):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
+    student = Student.objects.get(pk=request.user.pk)
     class_assigned = student.class_assigned
     if request.method == 'POST':
         data_type = request.POST.get('type')
@@ -347,9 +342,8 @@ def analyse_data(request):
 # 学生个人中心
 @login_required
 def profile_student(request):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
     context = {
@@ -365,9 +359,8 @@ def profile_student(request):
 # 学生个人中心-编辑
 @login_required
 def profile_student_edit(request):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
     context = {
@@ -389,9 +382,8 @@ def profile_student_edit(request):
 # 学生个人中心-修改密码
 @login_required
 def profile_student_password(request):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
     context = {
@@ -469,9 +461,8 @@ def coding_exam(request, examquestion_id):
 
 @login_required
 def coding_adminexam(request, examquestion_id):
-    user_id = request.session.get('user_id')
-
-    student = Student.objects.get(userid=user_id)
+    student = Student.objects.get(pk=request.user.pk)
+    user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
 
     context = {
@@ -500,268 +491,4 @@ def coding_adminexam(request, examquestion_id):
         return render(request, 'coding_student.html', context)
 
     return render(request, 'coding_student.html', context)
-
-
-# 标记完成的题目
-def mark_exercise_question_as_completed(student, exercise, exercise_question):
-    ExerciseQuestionCompletion.objects.update_or_create(
-        student=student,
-        exercise=exercise,
-        exercise_question=exercise_question,
-        defaults={
-            'completed_at': timezone.now()
-        }
-    )
-    # 检查是否所有的练习题都已经完成
-    all_questions = exercise_question.exercise.questions.all()
-    completed_questions = ExerciseQuestionCompletion.objects.filter(
-        student=student,
-        exercise=exercise,
-        exercise_question__in=all_questions
-    )
-    if all_questions.count() == completed_questions.count():
-        ExerciseCompletion.objects.update_or_create(
-            student=student,
-            exercise=exercise,
-            defaults={
-                'completed_at': timezone.now()
-            }
-        )
-
-
-def mark_exam_question_as_completed(student, exam, exam_question):
-    ExamQuestionCompletion.objects.update_or_create(
-        student=student,
-        exam=exam,
-        exam_question=exam_question,
-        defaults={
-            'completed_at': timezone.now()
-        }
-    )
-    all_questions = exam_question.exam.questions.all()
-    completed_questions = ExamQuestionCompletion.objects.filter(
-        student=student,
-        exam=exam,
-        exam_question__in=all_questions
-    )
-    if all_questions.count() == completed_questions.count():
-        ExamCompletion.objects.update_or_create(
-            student=student,
-            exam=exam,
-            defaults={
-                'completed_at': timezone.now()
-            }
-        )
-
-
-def mark_adminexam_question_as_completed(student, adminexam, adminexam_question):
-    AdminExamQuestionCompletion.objects.update_or_create(
-        student=student,
-        adminexam=adminexam,
-        adminexam_question=adminexam_question,
-        defaults={
-            'completed_at': timezone.now()
-        }
-    )
-    all_questions = adminexam_question.exam.questions.all()
-    completed_questions = AdminExamQuestionCompletion.objects.filter(
-        student=student,
-        adminexam=adminexam,
-        adminexam_question__in=all_questions
-    )
-    if all_questions.count() == completed_questions.count():
-        AdminExamCompletion.objects.update_or_create(
-            student=student,
-            adminexam=adminexam_question.exam,
-            defaults={
-                'completed_at': timezone.now()
-            }
-        )
-
-
-# 运行C++代码
-@login_required
-def run_cpp_code(request):
-    user_id = request.session.get('user_id')
-    student = Student.objects.get(userid=user_id)
-    user_code = request.POST.get('code', '')
-    types = request.POST.get('types', '')
-    question_id = request.POST.get('questionId', '')
-    client_ip = request.META.get('REMOTE_ADDR')
-    if request.method == 'POST':
-        # 尝试获取锁
-        if not lock.acquire(blocking=False):
-            return JsonResponse({'status': 'error', 'message': '当前测评人数较多，请稍后提交。'}, status=400)
-
-        # 检查是否在截止时间之前提交代码
-        if types == 'exercise':
-            question = ExerciseQuestion.objects.get(id=question_id)
-            exercise = question.exercise
-            if timezone.now() > exercise.deadline:
-                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'}, status=400)
-
-        elif types == 'exam':
-            question = ExamQuestion.objects.get(id=question_id)
-            exam = question.exam
-            if timezone.now() > exam.deadline:
-                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'}, status=400)
-
-        elif types == 'adminexam':
-            question = AdminExamQuestion.objects.get(id=question_id)
-            exam = question.exam
-            if timezone.now() > exam.deadline:
-                return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交'}, status=400)
-        else:
-            return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
-        # 保存代码到数据库
-        StudentCode.objects.update_or_create(
-            student=student,
-            question_type=types,
-            question_id=question_id,
-            defaults={'code': user_code},
-        )
-        student_code = StudentCode.objects.get(student=student, question_type=types, question_id=question_id)
-
-        #  调用运行代码的测试函数
-        test_cpp_code(student_code.student, student_code.code, student_code.question_type, student_code.question_id, client_ip)
-        # 释放锁
-        lock.release()
-
-        # 等待测试结果
-        result = None
-        for _ in range(50): # 最多等待 50 次，每次间隔 5 秒
-            try:
-                result = TestResult.objects.get(student=student, question_type=types, question_id=question_id)
-                if result.status is not None:
-                    # 将对象转换为字典
-                    # 测试结果已生成
-                    result_dict = model_to_dict(result)
-                    break
-            except ObjectDoesNotExist:
-                time.sleep(5)
-        if result is None:
-            return JsonResponse({'status': 'error', 'message': '测试出现错误，请重新提交'}, status=400)
-
-        # 获取任务结果
-        try:
-            if result.status == 'pass':
-                # 测试用例全部通过的情况
-                if types == 'exercise':
-                    question = ExerciseQuestion.objects.get(id=question_id)
-                    exercise = question.exercise
-                    mark_exercise_question_as_completed(student, exercise, question)
-                    Score.objects.update_or_create(
-                        student=student,
-                        exercise=exercise,
-                        exercise_question=question,
-                        defaults={'score': 10}
-                    )
-                elif types == 'exam':
-                    question = ExamQuestion.objects.get(id=question_id)
-                    exam = question.exam
-                    mark_exam_question_as_completed(student, exam, question)
-                    Score.objects.update_or_create(
-                        student=student,
-                        exam=exam,
-                        exam_question=question,
-                        defaults={'score': 10}
-                    )
-                else:
-                    question = AdminExamQuestion.objects.get(id=question_id)
-                    adminexam = question.exam
-                    mark_adminexam_question_as_completed(student, adminexam, question)
-                    Score.objects.update_or_create(
-                        student=student,
-                        adminexam=adminexam,
-                        adminexam_question=question,
-                        defaults={'score': 10}
-                    )
-
-                # 添加运行时间和内存信息
-                result_dict['execution_time'] = result.execution_time
-                result_dict['max_memory'] = result.max_memory
-
-                result.delete()
-                return JsonResponse(result_dict)
-
-            elif result.status == 'fail':
-                # 测试用例未全部通过的情况
-                passed_tests = result.passed_tests
-                total_tests = result.testcases
-                score = round((passed_tests / total_tests) * 10, 3)
-
-                if types == 'exercise':
-                    question = ExerciseQuestion.objects.get(id=question_id)
-                    exercise = question.exercise
-                    mark_exercise_question_as_completed(student, exercise, question)
-                    Score.objects.update_or_create(
-                        student=student,
-                        exercise=exercise,
-                        exercise_question=question,
-                        defaults={'score': score}
-                    )
-                elif types == 'exam':
-                    question = ExamQuestion.objects.get(id=question_id)
-                    exam = question.exam
-                    mark_exam_question_as_completed(student, exam, question)
-                    Score.objects.update_or_create(
-                        student=student,
-                        exam=exam,
-                        exam_question=question,
-                        defaults={'score': score}
-                    )
-                else:
-                    question = AdminExamQuestion.objects.get(id=question_id)
-                    adminexam = question.exam
-                    mark_adminexam_question_as_completed(student, adminexam, question)
-                    Score.objects.update_or_create(
-                        student=student,
-                        adminexam=adminexam,
-                        adminexam_question=question,
-                        defaults={'score': score}
-                    )
-
-                # 添加运行时间和内存信息
-                result_dict['execution_time'] = result.execution_time
-                result_dict['max_memory'] = result.max_memory
-                print(result_dict)
-                result.delete()
-                return JsonResponse(result_dict)
-
-            elif result.status == 'timeout':
-                # 添加运行时间和内存信息
-                result_dict['execution_time'] = result.execution_time
-                result_dict['max_memory'] = result.max_memory
-                result.delete()
-                # 出现运行超时的情况
-                return JsonResponse(result_dict)
-
-            elif result.status == 'compile error':
-                # 添加运行时间和内存信息
-                result_dict['execution_time'] = result.execution_time
-                result_dict['max_memory'] = result.max_memory
-                result.delete()
-                # 出现编译错误的情况
-                return JsonResponse(result_dict)
-
-            elif result.status == 'other error':
-                # 添加运行时间和内存信息
-                result_dict['execution_time'] = result.execution_time
-                result_dict['max_memory'] = result.max_memory
-                result.delete()
-                # 出现其他错误的情况
-                return JsonResponse(result_dict)
-
-        except Exception as e:
-            # 添加运行时间和内存信息
-            result_dict['execution_time'] = result.execution_time
-            result_dict['max_memory'] = result.max_memory
-            result.delete()
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    else:
-        return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
-
-
-
-
 

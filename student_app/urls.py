@@ -5,7 +5,7 @@ from django.contrib.staticfiles.views import serve
 from .views import home_student, practice_student, exam_student, profile_student, report_student
 from .views import teacherexam_list, practice_list, notification_content, adminexam_list
 from .views import analyse_exercise, analyse_exam, analyse_data
-from .views import coding_exercise, coding_exam, run_cpp_code, coding_adminexam
+from .views import coding_exercise, coding_exam, coding_adminexam
 from .views import profile_student_edit, profile_student_password
 # 开发环境配置
 from django.conf import settings
@@ -39,8 +39,6 @@ urlpatterns = [
     path('profile/password/', profile_student_password, name='profile_student_password'),
     # 通知相关
     path('notification_content/', notification_content, name='notification_content'),
-    # 编码运行相关
-    path('run-cpp/', run_cpp_code, name='run-cpp'),
 
     path('static/<path:path>', serve),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

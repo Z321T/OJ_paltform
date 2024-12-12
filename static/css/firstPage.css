@@ -1,14 +1,13 @@
 .btn-default {
-    background-color: #483D8B;
+    background-color:#483D8B;
     color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
     margin-top: 1rem; /* 与输入框保持一致的间距 */
-    margin-left: auto; /* 将按钮向右对齐 */
-    display: inline-block; /* 使按钮成为内联块级元素，以便自动适应内容 */
-    white-space: nowrap; /* 防止文字换行 */
+    display: block; /* 使按钮成为块级元素，以便margin-left生效 */
+    width: 20px; /* 固定按钮宽度，您可以根据需要调整这个值 */
 }
 
 .btn-default:hover {

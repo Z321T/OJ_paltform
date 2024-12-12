@@ -15,19 +15,21 @@ from login.views import login_required
 from teacher_app.models import (Teacher, Class, Notification,
                                 Exercise, ExerciseQuestion, Exam, ExamQuestion, ReportScore,
                                 ExerciseQuestionTestCase, ExamQuestionTestCase)
-from student_app.models import (Student, ExerciseCompletion, ExamCompletion, Score,
-                                ExerciseQuestionCompletion, ExamQuestionCompletion,
-                                AdminExamCompletion, AdminExamQuestionCompletion)
+from student_app.models import Student
 from submissions_app.models import ClassExamSubmission, GradeExamSubmission
+from Testingcode_app.models import (ExerciseCompletion, ExamCompletion, Score,
+                                    ExerciseQuestionCompletion, ExamQuestionCompletion,
+                                    AdminExamCompletion, AdminExamQuestionCompletion)
 
 
 # 教师主页
 @login_required
 def home_teacher(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
-    programing_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
+    programing_exercises = ProgrammingExercise.objects.filter(posted_by=teacher.course_coordinator).order_by('-date_posted')
 
     context = {
         'active_page': 'home',
@@ -42,10 +44,10 @@ def home_teacher(request):
 # 教师主页-查看报告
 @login_required
 def repeat_report(request, programmingexercise_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    teacher = Teacher.objects.get(userid=request.session.get('user_id'))
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
@@ -61,7 +63,8 @@ def repeat_report(request, programmingexercise_id):
 # 教师主页-查看报告-获取文本数据
 @login_required
 def repeat_report_details(request, programmingexercise_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
     class_id = request.GET.get('class_id')
     students = Student.objects.filter(class_assigned=class_id)
@@ -98,8 +101,7 @@ def repeat_report_details(request, programmingexercise_id):
             # 如果没有学生特征，我们将相似度设置为None
             student_similarities.append((student, None, None))
 
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
@@ -117,7 +119,8 @@ def repeat_report_details(request, programmingexercise_id):
 # 教师主页-查看报告-获取代码数据
 @login_required
 def repeat_code_details(request, programmingexercise_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
     class_id = request.GET.get('class_id')
     students = Student.objects.filter(class_assigned=class_id)
@@ -154,8 +157,7 @@ def repeat_code_details(request, programmingexercise_id):
             # 如果没有学生特征，将相似度设置为None
             student_similarities.append((student, None, None))
 
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
@@ -173,10 +175,10 @@ def repeat_code_details(request, programmingexercise_id):
 # 教师主页-规范性评分
 @login_required
 def standard_report(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     try:
         stand_score = ReportScore.objects.get(teacher=teacher)
     except ObjectDoesNotExist:
@@ -222,12 +224,12 @@ def standard_report(request):
 # 教师主页-查看报告-得分详情
 @login_required
 def scores_details(request, programmingexercise_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
     # 获取特定编程题目，班级所有学生的代码规范性得分
-    teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     class_id = request.GET.get('class_id')
     students = Student.objects.filter(class_assigned=class_id)
@@ -255,10 +257,10 @@ def scores_details(request, programmingexercise_id):
 # 考试实况
 @login_required
 def test_check_process(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     # 初始化默认值
     exam_type = None
@@ -296,8 +298,7 @@ def test_check_process(request):
 @login_required
 def get_exam_names(request):
     exam_type = request.GET.get('exam_type')
-    user_id = request.session.get('user_id')
-    teacher = Teacher.objects.get(userid=user_id)
+    teacher = Teacher.objects.get(pk=request.user.pk)
 
     if exam_type == 'adminexam':
         exams = AdminExam.objects.all()
@@ -313,12 +314,12 @@ def get_exam_names(request):
 # 作业情况
 @login_required
 def coursework_exercise(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
     Exercise.objects.filter(title="默认标题").delete()
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
-    teacher = Teacher.objects.get(userid=user_id)
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     exercises = Exercise.objects.filter(teacher=teacher).order_by('-published_at')
     classes = Class.objects.filter(teacher=teacher)
 
@@ -335,12 +336,12 @@ def coursework_exercise(request):
 
 @login_required
 def coursework_exam(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
     Exam.objects.filter(title="默认标题").delete()
 
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     exams = Exam.objects.filter(teacher=teacher).order_by('-starttime')
     classes = Class.objects.filter(teacher=teacher)
 
@@ -357,13 +358,13 @@ def coursework_exam(request):
 
 @login_required
 def coursework_adminexam(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
     AdminExam.objects.filter(title="默认标题").delete()
 
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
-    exams = AdminExam.objects.all().order_by('-starttime')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
+    exams = AdminExam.objects.filter(teacher=teacher.course_coordinator).order_by('-starttime')
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
@@ -380,9 +381,7 @@ def coursework_adminexam(request):
 # 作业情况：获取数据
 @login_required
 def coursework_data(request):
-    user_id = request.session.get('user_id')
-
-    teacher = Teacher.objects.get(userid=user_id)
+    teacher = Teacher.objects.get(pk=request.user.pk)
 
     if request.method == 'POST':
         data_type = request.POST.get('type')
@@ -435,9 +434,10 @@ def coursework_data(request):
 # 作业情况：练习详情
 @login_required
 def coursework_exercise_details(request, class_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     if request.method == 'GET':
         try:
             class_item = Class.objects.get(id=class_id)
@@ -458,9 +458,10 @@ def coursework_exercise_details(request, class_id):
 # 作业情况：考试详情
 @login_required
 def coursework_exam_details(request, class_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     if request.method == 'GET':
         try:
             class_item = Class.objects.get(id=class_id)
@@ -481,12 +482,13 @@ def coursework_exam_details(request, class_id):
 # 作业情况：年级考试详情
 @login_required
 def coursework_adminexam_details(request, class_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     if request.method == 'GET':
         try:
-            adminexams = AdminExam.objects.all().order_by('-starttime')
+            adminexams = AdminExam.objects.filter(teacher=teacher.course_coordinator).order_by('-starttime')
 
             context = {
                 'active_page': 'teststatus',
@@ -636,10 +638,10 @@ def coursework_details_data(request):
 # 题库管理
 @login_required
 def repository_teacher(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     Exercise.objects.filter(title="默认标题").delete()
     Exam.objects.filter(title="默认标题").delete()
@@ -659,11 +661,10 @@ def repository_teacher(request):
 # 题库管理：练习列表
 @login_required
 def exercise_list_default(request):
-    user_id = request.session.get('user_id')
-
-    teacher = Teacher.objects.get(userid=user_id)
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
     classes = Class.objects.filter(teacher=teacher)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     exercise = Exercise.objects.create(
         title="默认标题",
@@ -685,12 +686,11 @@ def exercise_list_default(request):
 
 @login_required
 def exercise_list(request, exercise_id):
-    user_id = request.session.get('user_id')
-
-    teacher = Teacher.objects.get(userid=user_id)
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
     classes = Class.objects.filter(teacher=teacher)
     exercise = get_object_or_404(Exercise, id=exercise_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     if request.method == 'POST':
         exercise.title = request.POST.get('title')
@@ -718,8 +718,9 @@ def exercise_list(request, exercise_id):
 # 题库管理：练习列表-创建练习题
 @login_required
 def create_exercise(request, exercise_id):
-    user_id = request.session.get('user_id')
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     exercise = get_object_or_404(Exercise, id=exercise_id)
     if request.method == 'POST':
@@ -803,9 +804,10 @@ def create_exercise(request, exercise_id):
 # 题库管理：练习列表-修改练习题
 @login_required
 def exercise_edit(request, exercise_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     if request.method == 'GET':
         exercise = Exercise.objects.get(id=exercise_id)
         context = {
@@ -866,9 +868,10 @@ def get_exercise_cases(request, question_id):
 # 题库管理：练习列表-修改练习题
 @login_required
 def exercisequestion_edit(request, question_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     question = ExerciseQuestion.objects.get(id=question_id)
     exercise = question.exercise
 
@@ -902,11 +905,11 @@ def exercisequestion_delete(request):
 # 题库管理：考试列表
 @login_required
 def exam_list_default(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     exam = Exam.objects.create(
         title="默认标题",
@@ -929,12 +932,12 @@ def exam_list_default(request):
 
 @login_required
 def exam_list(request, exam_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    teacher = Teacher.objects.get(userid=user_id)
     classes = Class.objects.filter(teacher=teacher)
     exam = get_object_or_404(Exam, id=exam_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     if request.method == 'POST':
         exam.title = request.POST.get('title')
@@ -962,8 +965,9 @@ def exam_list(request, exam_id):
 # 题库管理：考试列表-创建考试
 @login_required
 def create_exam(request, exam_id):
-    user_id = request.session.get('user_id')
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     exam = get_object_or_404(Exam, id=exam_id)
     if request.method == 'POST':
@@ -1046,9 +1050,10 @@ def create_exam(request, exam_id):
 # 题库管理：考试列表-修改考试题
 @login_required
 def exam_edit(request, exam_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     if request.method == 'GET':
         exam = Exam.objects.get(id=exam_id)
         context = {
@@ -1109,9 +1114,10 @@ def get_exam_cases(request, question_id):
 # 题库管理：考试列表-修改考试题
 @login_required
 def examquestion_edit(request, question_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     question = ExamQuestion.objects.get(id=question_id)
     exam = question.exam
 
@@ -1145,10 +1151,9 @@ def examquestion_delete(request):
 # 通知界面
 @login_required
 def notice_teacher(request):
-    user_id = request.session.get('user_id')
-
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     classes = Class.objects.filter(teacher=teacher)
     notifications = Notification.objects.filter(recipients__in=classes).order_by('-date_posted').distinct()
 
@@ -1164,11 +1169,10 @@ def notice_teacher(request):
 # 发布通知
 @login_required
 def create_notice(request):
-    user_id = request.session.get('user_id')
-
-    teacher = Teacher.objects.get(userid=user_id)
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
     classes = Class.objects.filter(teacher=teacher)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -1220,10 +1224,10 @@ def notification_content(request):
 # 班级管理
 @login_required
 def class_teacher(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
-    teacher = Teacher.objects.get(userid=user_id)
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     classes = Class.objects.filter(teacher=teacher)
 
     context = {
@@ -1238,9 +1242,10 @@ def class_teacher(request):
 # 班级管理：创建班级
 @login_required
 def create_class(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     context = {
         'active_page': 'class',
         'user_id': user_id,
@@ -1252,7 +1257,6 @@ def create_class(request):
         file = request.FILES.get('excelFile')
 
         if class_name and initial_password and file:
-            teacher = Teacher.objects.get(userid=request.session.get('user_id'))
             new_class = Class.objects.create(name=class_name, teacher=teacher)
 
             data = pd.read_excel(file)
@@ -1286,9 +1290,10 @@ def delete_class(request):
 # 班级管理：班级详情
 @login_required
 def class_details(request, class_id):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
     if request.method == 'GET':
         try:
             students = Student.objects.filter(class_assigned=class_id)
@@ -1343,10 +1348,10 @@ def reset_password(request):
 # 教师个人中心
 @login_required
 def profile_teacher(request):
-    user_id = request.session.get('user_id')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
 
-    teacher = Teacher.objects.get(userid=request.session.get('user_id'))
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     context = {
         'active_page': 'profile',
@@ -1360,10 +1365,9 @@ def profile_teacher(request):
 # 教师个人中心-编辑
 @login_required
 def profile_teacher_edit(request):
-    user_id = request.session.get('user_id')
-
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     context = {
         'active_page': 'profile',
@@ -1386,10 +1390,9 @@ def profile_teacher_edit(request):
 # 教师个人中心-修改密码
 @login_required
 def profile_teacher_password(request):
-    user_id = request.session.get('user_id')
-
-    teacher = Teacher.objects.get(userid=user_id)
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted')
+    teacher = Teacher.objects.get(pk=request.user.pk)
+    user_id = teacher.userid
+    adminnotifications = AdminNotification.objects.filter(administrator=teacher.course_coordinator).order_by('-date_posted')
 
     context = {
         'active_page': 'profile',

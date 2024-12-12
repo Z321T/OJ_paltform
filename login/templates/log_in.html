@@ -123,7 +123,8 @@
                 method: 'POST',
                 contentType: 'application/json',
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'  // 使用 Django 上下文中的 CSRF token
+                    'X-CSRFToken': getCookie('csrftoken')  // 使用 getCookie 函数获取 CSRF token
+                    {#'X-CSRFToken': '{{ csrf_token }}'  // 使用 Django 上下文中的 CSRF token#}
                 },
 
                 data: JSON.stringify({username: username, password: password}),

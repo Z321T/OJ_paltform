@@ -601,3 +601,359 @@ Traceback (most recent call last):
     _mysql.connection.query(self, query)
 django.db.utils.OperationalError: (1054, "Unknown column 'student_app_testresult.execution_time' in 'field list'")
 ERROR 2024-11-27 23:11:25,316 basehttp "POST /student/run-cpp/ HTTP/1.1" 500 200283
+ERROR 2024-11-28 20:33:16,386 log Internal Server Error: /login/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 23, in log_in
+    user = (Student.objects.filter(userid=username) |
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\query.py", line 485, in __or__
+    combined.query.combine(other.query, sql.OR)
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\sql\query.py", line 683, in combine
+    raise TypeError("Cannot combine queries on two different base models.")
+TypeError: Cannot combine queries on two different base models.
+ERROR 2024-11-28 20:33:16,387 basehttp "POST /login/ HTTP/1.1" 500 82549
+ERROR 2024-11-28 23:35:04,032 log Internal Server Error: /administrator/information/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 54, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 706, in information_administrator
+    teachers = administrator.teachers.all()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'teachers'
+ERROR 2024-11-28 23:35:04,034 basehttp "GET /administrator/information/ HTTP/1.1" 500 81104
+ERROR 2024-11-28 23:35:27,113 log Internal Server Error: /administrator/information/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 54, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 706, in information_administrator
+    teachers = administrator.teachers.all()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'teachers'
+ERROR 2024-11-28 23:35:27,114 basehttp "GET /administrator/information/ HTTP/1.1" 500 81108
+ERROR 2024-12-01 10:52:57,688 log Internal Server Error: /administrator/information/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 54, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 706, in information_administrator
+    teachers = administrator.teachers.all()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'teachers'
+ERROR 2024-12-01 10:52:57,690 basehttp "GET /administrator/information/ HTTP/1.1" 500 81346
+ERROR 2024-12-01 10:57:58,011 log Internal Server Error: /administrator/information/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 54, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 706, in information_administrator
+    teachers = administrator.teachers.all() if administrator.teachers.exists() else None
+                                               ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'teachers'
+ERROR 2024-12-01 10:57:58,012 basehttp "GET /administrator/information/ HTTP/1.1" 500 81637
+ERROR 2024-12-01 10:58:04,174 log Internal Server Error: /administrator/information/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 54, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 706, in information_administrator
+    teachers = administrator.teachers.all() if administrator.teachers.exists() else None
+                                               ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'teachers'
+ERROR 2024-12-01 10:58:04,177 basehttp "GET /administrator/information/ HTTP/1.1" 500 81499
+ERROR 2024-12-01 11:11:33,446 log Internal Server Error: /administrator/information/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 54, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 706, in information_administrator
+    teachers = administrator.teachers.all() if administrator.teachers.exists() else None
+                                               ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'teachers'
+ERROR 2024-12-01 11:11:33,448 basehttp "GET /administrator/information/ HTTP/1.1" 500 81451
+ERROR 2024-12-01 11:36:25,370 log Internal Server Error: /administrator/information/add_teacher/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 54, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 733, in add_teacher
+    Teacher.objects.create(
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\query.py", line 677, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\base.py", line 543, in __init__
+    _setattr(self, field.name, rel_obj)
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 284, in __set__
+    raise ValueError(
+ValueError: Cannot assign "<SimpleLazyObject: <CustomUser: 123>>": "Teacher.course_coordinator" must be a "Administrator" instance.
+ERROR 2024-12-01 11:36:25,372 basehttp "POST /administrator/information/add_teacher/ HTTP/1.1" 500 99799
+ERROR 2024-12-01 14:43:09,596 log Internal Server Error: /administrator/home/
+ERROR 2024-12-01 14:43:09,596 basehttp "GET /administrator/home/ HTTP/1.1" 500 1673
+ERROR 2024-12-01 14:43:28,855 log Internal Server Error: /administrator/home/
+ERROR 2024-12-01 14:43:28,855 basehttp "GET /administrator/home/ HTTP/1.1" 500 1673
+ERROR 2024-12-01 14:44:01,842 log Internal Server Error: /administrator/home/
+ERROR 2024-12-01 14:44:01,842 basehttp "GET /administrator/home/ HTTP/1.1" 500 1673
+ERROR 2024-12-01 15:03:01,503 log Internal Server Error: /administrator/home/
+ERROR 2024-12-01 15:03:01,504 basehttp "GET /administrator/home/ HTTP/1.1" 500 1673
+ERROR 2024-12-01 15:16:55,723 log Internal Server Error: /login/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 40, in log_in
+    return JsonResponse({'status': 'success', 'message': user_type})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\http\response.py", line 733, in __init__
+    data = json.dumps(data, cls=encoder, **json_dumps_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\lucky\AppData\Local\Programs\Python\Python311\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "C:\Users\lucky\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\lucky\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\serializers\json.py", line 106, in default
+    return super().default(o)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\lucky\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type builtin_function_or_method is not JSON serializable
+ERROR 2024-12-01 15:16:55,726 basehttp "POST /login/ HTTP/1.1" 500 101879
+ERROR 2024-12-01 21:53:16,647 log Internal Server Error: /administrator/repository/programmingexercise_create/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 56, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 270, in programmingexercise_create
+    deadline = timezone.make_aware(datetime.strptime(deadline, '%Y-%m-%d %H:%M:%S'),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\lucky\AppData\Local\Programs\Python\Python311\Lib\_strptime.py", line 568, in _strptime_datetime
+    tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\lucky\AppData\Local\Programs\Python\Python311\Lib\_strptime.py", line 349, in _strptime
+    raise ValueError("time data %r does not match format %r" %
+ValueError: time data '2025-01-24T21:53' does not match format '%Y-%m-%d %H:%M:%S'
+ERROR 2024-12-01 21:53:16,650 basehttp "POST /administrator/repository/programmingexercise_create/ HTTP/1.1" 500 89673
+ERROR 2024-12-01 22:14:06,282 log Internal Server Error: /teacher/class/create/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 56, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\teacher_app\views.py", line 1260, in create_class
+    teacher = Teacher.objects.get(userid=request.session.get('user_id'))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\query.py", line 649, in get
+    raise self.model.DoesNotExist(
+teacher_app.models.Teacher.DoesNotExist: Teacher matching query does not exist.
+ERROR 2024-12-01 22:14:06,285 basehttp "POST /teacher/class/create/ HTTP/1.1" 500 88973
+ERROR 2024-12-01 22:16:49,482 log Internal Server Error: /administrator/home/
+ERROR 2024-12-01 22:16:49,482 basehttp "GET /administrator/home/ HTTP/1.1" 500 1673
+ERROR 2024-12-01 22:18:58,470 log Internal Server Error: /Testingcode/run-cpp/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\Testingcode_app\views.py", line 101, in run_cpp_code
+    student = Student.objects.get(userid=user_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\query.py", line 649, in get
+    raise self.model.DoesNotExist(
+student_app.models.Student.DoesNotExist: Student matching query does not exist.
+ERROR 2024-12-01 22:18:58,473 basehttp "POST /Testingcode/run-cpp/ HTTP/1.1" 500 83262
+ERROR 2024-12-01 22:41:20,433 log Internal Server Error: /administrator/adminexam/adminexam_list/7/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 56, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 439, in admin_examlist
+    exam.starttime = timezone.make_aware(datetime.fromisoformat(request.POST.get('starttime')),
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Invalid isoformat string: ''
+ERROR 2024-12-01 22:41:20,435 basehttp "POST /administrator/adminexam/adminexam_list/7/ HTTP/1.1" 500 79669
+ERROR 2024-12-01 22:41:32,347 log Internal Server Error: /administrator/adminexam/adminexam_list/8/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 56, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 439, in admin_examlist
+    exam.starttime = timezone.make_aware(datetime.fromisoformat(request.POST.get('starttime')),
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Invalid isoformat string: ''
+ERROR 2024-12-01 22:41:32,348 basehttp "POST /administrator/adminexam/adminexam_list/8/ HTTP/1.1" 500 79669
+ERROR 2024-12-01 22:42:00,500 log Internal Server Error: /administrator/adminexam/adminexam_list/8/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 56, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 439, in admin_examlist
+    exam.starttime = timezone.make_aware(datetime.fromisoformat(request.POST.get('starttime')),
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Invalid isoformat string: ''
+ERROR 2024-12-01 22:42:00,501 basehttp "POST /administrator/adminexam/adminexam_list/8/ HTTP/1.1" 500 79800
+ERROR 2024-12-01 22:42:18,140 log Internal Server Error: /administrator/adminexam/adminexam_list/8/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 56, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\administrator_app\views.py", line 439, in admin_examlist
+    exam.starttime = timezone.make_aware(datetime.fromisoformat(request.POST.get('starttime')),
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Invalid isoformat string: ''
+ERROR 2024-12-01 22:42:18,141 basehttp "POST /administrator/adminexam/adminexam_list/8/ HTTP/1.1" 500 79669
+ERROR 2024-12-12 20:08:44,453 log Internal Server Error: /Testingcode/run-cpp/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\Testingcode_app\views.py", line 101, in run_cpp_code
+    student = Student.objects.get(userid=user_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\db\models\query.py", line 649, in get
+    raise self.model.DoesNotExist(
+student_app.models.Student.DoesNotExist: Student matching query does not exist.
+ERROR 2024-12-12 20:08:44,455 basehttp "POST /Testingcode/run-cpp/ HTTP/1.1" 500 83331
+ERROR 2024-12-12 20:20:47,745 log Internal Server Error: /student/home/report_student/2/
+Traceback (most recent call last):
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\login\views.py", line 56, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\student_app\views.py", line 76, in report_student
+    document = docx.Document(word_file_bytes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GitHub\Project\Software_cup\venv\Lib\site-packages\docx\api.py", line 26, in Document
+    raise ValueError(tmpl % (docx, document_part.content_type))
+ValueError: file '<_io.BytesIO object at 0x000002784B7AAE30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+ERROR 2024-12-12 20:20:47,746 basehttp "POST /student/home/report_student/2/ HTTP/1.1" 500 84474

@@ -40,5 +40,8 @@ urlpatterns = [
 
     # 讯飞星火智能对话
     path('Spark/', include('Spark_app.urls')),
+
+    # 代码测试
+    path('Testingcode/', include('Testingcode_app.urls')),
 ]
 

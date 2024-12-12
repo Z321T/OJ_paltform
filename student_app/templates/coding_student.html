@@ -198,7 +198,7 @@
                 <div class="editor-container" id="editor">
                     <!-- Monaco编辑器将在这里初始化 -->
                     <!-- 表单 -->
-                    <form id="codeForm" action="{% url 'student_app:run-cpp' %}" method="post">
+                    <form id="codeForm" action="{% url 'Testingcode_app:run-cpp' %}" method="post">
                         {% csrf_token %}
                         <textarea id="codeTextArea" style="display: none;"></textarea> <!-- 隐藏 textarea -->
                         <input type="hidden" name="code" id="hiddenCodeInput">
@@ -248,7 +248,7 @@
             var questionId = {{ question.id }};
             // AJAX请求
             $.ajax({
-                url: "{% url 'student_app:run-cpp' %}",
+                url: "{% url 'Testingcode_app:run-cpp' %}",
                 type: 'POST',
                 data: {
                     'code': code,
@@ -282,7 +282,7 @@
 
                      // 添加运行时间和内存信息
                     if (response.execution_time !== undefined && response.max_memory !== undefined) {
-                        debuggerContent += `<p>运行时间: ${response.execution_time} s</p>
+                        debuggerContent += `<p>运行时间: ${response.execution_time} ms</p>
                                             <p>内存使用: ${response.max_memory} KB</p>`;
                     }
 

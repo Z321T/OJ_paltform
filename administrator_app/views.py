@@ -1,37 +1,37 @@
 import os
 import tempfile
 import docx
-import logging
 import pandas as pd
 from io import BytesIO
 from datetime import datetime, timedelta
 
 from django.contrib.auth.hashers import make_password, check_password
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import DatabaseError
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 
 from BERT_app.views import analyze_programming_report, analyze_programming_code
 from administrator_app.models import (Administrator, AdminNotification, ProgrammingExercise,
                                       AdminExam, AdminExamQuestion, AdminExamQuestionTestCase)
 from teacher_app.models import Teacher, Class
-from student_app.models import Student, Score
+from student_app.models import Student
 from BERT_app.models import ReportStandardScore, ProgrammingCodeFeature, ProgrammingReportFeature
 from login.views import login_required
 from submissions_app.models import GradeExamSubmission
+from Testingcode_app.models import Score
 
 
 # 课程负责人主页-程序设计
 @login_required
 def home_administrator(request):
     try:
-        # 尝试从会话中获取用户ID
-        user_id = request.session.get('user_id')
+        administrator = Administrator.objects.get(pk=request.user.pk)
+        user_id = administrator.userid
 
         # 尝试获取编程练习信息，并按日期倒序排列
-        programings = ProgrammingExercise.objects.all().order_by('-date_posted')
+        programings = ProgrammingExercise.objects.filter(posted_by=administrator).order_by('-date_posted')
 
         # 构建上下文
         context = {
@@ -60,14 +60,14 @@ def home_administrator(request):
 @login_required
 def home_administrator_exam(request):
     try:
-        # 尝试从会话中获取用户ID
-        user_id = request.session.get('user_id')
+        administrator = Administrator.objects.get(pk=request.user.pk)
+        user_id = administrator.userid
 
         # 尝试删除标题为"默认标题"的记录
         AdminExam.objects.filter(title="默认标题").delete()
 
         # 获取所有考试信息，并按开始时间倒序排列
-        exams = AdminExam.objects.all().order_by('-starttime')
+        exams = AdminExam.objects.filter(teacher=administrator).order_by('-starttime')
 
         # 构建上下文
         context = {
@@ -95,6 +95,8 @@ def home_administrator_exam(request):
 # 课程负责人主页-程序设计题详情
 @login_required
 def programmingexercise_details_data(request):
+    administrator = Administrator.objects.get(pk=request.user.pk)
+
     try:
         if request.method == 'POST':
             question_id = request.POST.get('id')
@@ -102,7 +104,12 @@ def programmingexercise_details_data(request):
             # 尝试获取指定的编程练习题
             try:
                 question = ProgrammingExercise.objects.get(id=question_id)
-                total_students = Student.objects.count()
+                # 获取当前题目所有学生
+                teachers = administrator.teachers.all()
+                classes = Class.objects.filter(teacher__in=teachers).distinct()
+                students = Student.objects.filter(class_assigned__in=classes).distinct()
+                total_students = students.count()
+                # 获取当前题目所有分数对象，来等效于提交记录
                 total_submissions = ReportStandardScore.objects.filter(programming_question=question).count()
                 ratio = total_submissions / total_students if total_students else 0
                 ratio_data = [{
@@ -131,6 +138,8 @@ def programmingexercise_details_data(request):
 # 课程负责人主页-年级考试题详情
 @login_required
 def exam_details_data(request):
+    administrator = Administrator.objects.get(pk=request.user.pk)
+
     try:
         if request.method == 'POST':
             exam_id = request.POST.get('id')
@@ -145,7 +154,11 @@ def exam_details_data(request):
                     # 获取当前题目所有分数对象
                     scores = Score.objects.filter(adminexam=exam, adminexam_question=question)
                     total_score = sum(score.score for score in scores)
-                    total_students = Student.objects.count()
+                    # 获取当前题目所有学生
+                    teachers = administrator.teachers.all()
+                    classes = Class.objects.filter(teacher__in=teachers).distinct()
+                    students = Student.objects.filter(class_assigned__in=classes).distinct()
+                    total_students = students.count()
                     # 计算平均分，若学生总数为0，则平均分为0
                     avg_score = (total_score / total_students) if total_students else 0
 
@@ -173,7 +186,8 @@ def exam_details_data(request):
 # 年级考试实况
 @login_required
 def admintest_check_process(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     # 初始化默认值
     exam_type = None
@@ -203,14 +217,13 @@ def admintest_check_process(request):
 # 年级考试实况-获取考试项目
 @login_required
 def get_adminexam_names(request):
+    administrator = Administrator.objects.get(pk=request.user.pk)
+
     exam_type = request.GET.get('exam_type')
-    user_id = request.session.get('user_id')
 
     try:
-        admin = Administrator.objects.get(userid=user_id)
-
         if exam_type == 'adminexam':
-            exams = AdminExam.objects.filter(teacher=admin)
+            exams = AdminExam.objects.filter(teacher=administrator)
         else:
             exams = []
 
@@ -227,9 +240,10 @@ def get_adminexam_names(request):
 # GUI程序设计题库
 @login_required
 def repository_administrator(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
-    programming_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
+    programming_exercises = ProgrammingExercise.objects.filter(posted_by=administrator).order_by('-date_posted')
 
     context = {
         'active_page': 'guirepository',
@@ -242,15 +256,19 @@ def repository_administrator(request):
 # 程序设计题库：添加程序设计题
 @login_required
 def programmingexercise_create(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('content')
         deadline = request.POST.get('deadline')
-        posted_by = request.session.get('user_id')
+        posted_by = administrator.userid
 
         if title and description and deadline and posted_by:
+            # 确保 deadline 包含时区信息
+            deadline = datetime.fromisoformat(deadline)
+            deadline = timezone.make_aware(deadline, timezone.get_current_timezone())
             ProgrammingExercise.objects.create(
                 title=title,
                 description=description,
@@ -284,9 +302,10 @@ def programmingexercise_delete(request):
 # 题库查重管理
 @login_required
 def problems_administrator(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
-    programming_exercises = ProgrammingExercise.objects.all().order_by('-date_posted')
+    programming_exercises = ProgrammingExercise.objects.filter(posted_by=administrator).order_by('-date_posted')
 
     context = {
         'active_page': 'problemsmanage',
@@ -299,7 +318,8 @@ def problems_administrator(request):
 # 题库查重管理-导入数据
 @login_required
 def report_administrator(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     programmingexercise_id = request.GET.get('exerciseId')
 
@@ -369,10 +389,11 @@ def reportdata_delete(request):
 # 年级考试
 @login_required
 def exam_administrator(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     AdminExam.objects.filter(title="默认标题").delete()
-    exams = AdminExam.objects.all().order_by('-starttime')
+    exams = AdminExam.objects.filter(teacher=administrator).order_by('-starttime')
 
     context = {
         'active_page': 'adminexam',
@@ -385,15 +406,15 @@ def exam_administrator(request):
 # 考试-考试列表
 @login_required
 def admin_examlist_default(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
-    admin = Administrator.objects.get(userid=user_id)
     exam = AdminExam.objects.create(
         title="默认标题",
         content="默认内容",
-        starttime=datetime.now(),
-        deadline=datetime.now() + timedelta(days=7),
-        teacher=admin
+        starttime=timezone.now(),
+        deadline=timezone.now() + timedelta(days=7),
+        teacher=administrator
     )
 
     context = {
@@ -407,17 +428,23 @@ def admin_examlist_default(request):
 
 @login_required
 def admin_examlist(request, exam_id):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     exam = get_object_or_404(AdminExam, id=exam_id)
 
     if request.method == 'POST':
         exam.title = request.POST.get('title')
         exam.content = request.POST.get('content')
-        exam.starttime = request.POST.get('starttime')
-        exam.deadline = request.POST.get('deadline')
-
-        recipient_class = Class.objects.all()
+        exam.starttime = timezone.make_aware(datetime.fromisoformat(request.POST.get('starttime')),
+                                             timezone.get_current_timezone())
+        exam.deadline = timezone.make_aware(datetime.fromisoformat(request.POST.get('deadline')),
+                                            timezone.get_current_timezone())
+        # exam.starttime = request.POST.get('starttime')
+        # exam.deadline = request.POST.get('deadline')
+        # 获取当前课程负责人的所有教师的关联班级
+        teachers = administrator.teachers.all()
+        recipient_class = Class.objects.filter(teacher__in=teachers).distinct()
         if recipient_class:
             exam.save()
             exam.classes.set(recipient_class)
@@ -434,7 +461,8 @@ def admin_examlist(request, exam_id):
 # 考试-考试列表-创建考试题
 @login_required
 def create_adminexam(request, exam_id):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     exam = get_object_or_404(AdminExam, id=exam_id)
     if request.method == 'POST':
@@ -514,7 +542,8 @@ def create_adminexam(request, exam_id):
 # 考试-考试列表-修改考试题
 @login_required
 def adminexam_edit(request, exam_id):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     if request.method == 'GET':
         exam = AdminExam.objects.get(id=exam_id)
@@ -575,7 +604,8 @@ def get_adminexam_cases(request, question_id):
 # 考试-考试列表-修改考试题
 @login_required
 def adminexamquestion_edit(request, question_id):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     question = AdminExamQuestion.objects.get(id=question_id)
     exam = question.exam
@@ -595,12 +625,14 @@ def adminexamquestion_edit(request, question_id):
 @login_required
 def adminexamquestion_delete(request):
     if request.method == 'POST':
+        adminexam_id = request.POST.get('exam_id')
         question_id = request.POST.get('question_id')
-        if question_id:
-            question_to_delete = AdminExamQuestion.objects.filter(id=question_id).first()
-            if question_to_delete:
-                question_to_delete.delete()
-                return JsonResponse({'status': 'success'}, status=200)
+        if AdminExam.objects.filter(id=adminexam_id).exists():
+            if question_id:
+                question_to_delete = AdminExamQuestion.objects.filter(id=question_id).first()
+                if question_to_delete:
+                    question_to_delete.delete()
+                    return JsonResponse({'status': 'success'}, status=200)
         return JsonResponse({'status': 'error', 'message': '考试题未找到'}, status=400)
     else:
         return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
@@ -609,9 +641,10 @@ def adminexamquestion_delete(request):
 # 通知界面
 @login_required
 def notice_administrator(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
-    adminnotifications = AdminNotification.objects.all().order_by('-date_posted').distinct()
+    adminnotifications = AdminNotification.objects.filter(administrator=administrator).order_by('-date_posted')
 
     context = {
         'active_page': 'notice',
@@ -624,13 +657,15 @@ def notice_administrator(request):
 # 通知界面：发布通知
 @login_required
 def create_notice(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     if request.method == 'POST':
         title = request.POST.get('title')
         content = request.POST.get('message')
         if title and content:
             adminnotification = AdminNotification.objects.create(
+                administrator=administrator,
                 title=title,
                 content=content,
             )
@@ -675,9 +710,10 @@ def notification_content(request):
 # 教师管理
 @login_required
 def information_administrator(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
-    teachers = Teacher.objects.all()
+    teachers = administrator.teachers.all() if administrator.teachers.exists() else None
 
     context = {
         'active_page': 'teachermanage',
@@ -690,7 +726,8 @@ def information_administrator(request):
 # 教师管理：添加教师
 @login_required
 def add_teacher(request):
-    user_id = request.session.get('user_id')
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     if request.method == 'POST':
         initial_password = request.POST.get('initialPassword')
@@ -700,9 +737,12 @@ def add_teacher(request):
             data = pd.read_excel(file)
             for index, row in data.iterrows():
                 hashed_password = make_password(initial_password)
+                if not isinstance(administrator, Administrator):
+                    administrator = Administrator.objects.get(pk=administrator.pk)
                 Teacher.objects.create(
                     name=row['姓名'],
                     userid=row['教工号'],
+                    course_coordinator=administrator,
                     password=hashed_password,
                 )
             return redirect('administrator_app:information_administrator')
@@ -751,9 +791,8 @@ def reset_password(request):
 # 管理员个人中心
 @login_required
 def profile_administrator(request):
-    user_id = request.session.get('user_id')
-
-    administrator = Administrator.objects.get(userid=request.session.get('user_id'))
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     context = {
         'active_page': 'profile',
@@ -766,9 +805,8 @@ def profile_administrator(request):
 # 管理员个人中心：修改个人信息
 @login_required
 def profile_administrator_edit(request):
-    user_id = request.session.get('user_id')
-
-    administrator = Administrator.objects.get(userid=request.session.get('user_id'))
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     context = {
         'active_page': 'profile',
@@ -790,9 +828,8 @@ def profile_administrator_edit(request):
 # 管理员个人中心-修改密码
 @login_required
 def profile_adminadministrator_password(request):
-    user_id = request.session.get('user_id')
-
-    administrator = Administrator.objects.get(userid=user_id)
+    administrator = Administrator.objects.get(pk=request.user.pk)
+    user_id = administrator.userid
 
     context = {
         'active_page': 'profile',

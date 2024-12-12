@@ -145,20 +145,23 @@
         $('.delete-examquestion').on('click', function () {
             var questionId = $(this).data('examquestion-id');
             var examId = $(this).data('exam-id');
-            $.ajax({
-                url: "{% url 'administrator_app:adminexamquestion_delete' %}",
-                type: 'POST',
-                data: {
-                    'question_id': questionId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    window.location.reload()
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message);
-                }
-            });
+            if (confirm('确定要删除这个考试题吗？')) {
+                $.ajax({
+                    url: "{% url 'administrator_app:adminexamquestion_delete' %}",
+                    type: 'POST',
+                    data: {
+                        'exam_id': examId,
+                        'question_id': questionId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        window.location.reload();
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
         });
     });
 </script>    

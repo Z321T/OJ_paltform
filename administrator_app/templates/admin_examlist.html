@@ -4,8 +4,8 @@
 {% block title %}年级考试列表{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">    
-<style>
+    <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+    <style>
         .class-list h3 {
             margin-top: 0;
         }
@@ -59,150 +59,153 @@
         }
 
         .button-group {
-            position: absolute;
-            right: 3px;
-            bottom: 3px;
             display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            margin-top: 20px;
         }
-</style>    
+    </style>
 {% endblock %}
 
 {% block content %}
     <div class="main-panel">
-    <div class="content-wrapper">
-        <div class="col-md-12 stretch-card">
+        <div class="content-wrapper">
+            <div class="col-md-12 stretch-card">
+                <div class="card">
                     <div class="card">
-                                <div class="card">
-<!-- partial -->
-            <!-- 通知发布窗口 -->
-                <h3>发布考试（请先创建考试题，再填写此页面的内容）</h3>
-                <form id="examFrom" method="post" action="{% url 'administrator_app:admin_examlist' exam.id %}">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        <label for="title">考试标题：</label>
-                        <input type="text" id="title" name="title" placeholder="请输入考试标题">
-                    </div>
-                    <div class="input-group">
-                        <label for="content">考试题描述：</label>
-                        <input id="content" name="content" placeholder="请输入考试题描述">
-                    </div>
-                    <div class="input-group">
-                        <label for="starttime">开始时间：</label>
-                        <input type="datetime-local" id="starttime" name="starttime" placeholder="请输入开始时间">
-                    </div>
-                    <div class="input-group">
-                        <label for="deadline">截止时间：</label>
-                        <input type="datetime-local" id="deadline" name="deadline" placeholder="请输入截止时间">
-                    </div>
-                    <input type="hidden" name="exam_id" value="{{ exam.id }}">
-                    <div class="row">
-                        <div class="col-md-12 stretch-card">
-                            <div class="card">
-                                <div class="card-body">
-                                    <p class="card-title">考试列表</p>
-                                    <div class="table-responsive"
-                                         style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
-                                        <table id="recent-purchases-listing" class="table dataTable no-footer"
-                                               role="grid">
-                                            <thead>
-                                            <tr role="row">
-                                                <th>题目</th>
-                                                <th>操作</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {% with exam=exam %}
-                                                {% for question in exam.questions.all %}
-                                                    <tr role="row"
-                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
-                                                        <td>{{ question.title }}</td>
-                                                        <td>
-                                                            <button class="btn btn-danger btn-delete" onclick="deleteQuestion({{ question.id }})">删除</button>
-                                                        </td>
+                        <!-- partial -->
+                        <!-- 通知发布窗口 -->
+                        <h3>发布考试（请先创建考试题，再填写此页面的内容）</h3>
+                        <form id="examFrom" method="post" action="{% url 'administrator_app:admin_examlist' exam.id %}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <label for="title">考试标题：</label>
+                                <input type="text" id="title" name="title" placeholder="请输入考试标题">
+                            </div>
+                            <div class="input-group">
+                                <label for="content">考试题描述：</label>
+                                <input id="content" name="content" placeholder="请输入考试题描述">
+                            </div>
+                            <div class="input-group">
+                                <label for="starttime">开始时间：</label>
+                                <input type="datetime-local" id="starttime" name="starttime"
+                                       placeholder="请输入开始时间">
+                            </div>
+                            <div class="input-group">
+                                <label for="deadline">截止时间：</label>
+                                <input type="datetime-local" id="deadline" name="deadline" placeholder="请输入截止时间">
+                            </div>
+                            <input type="hidden" name="exam_id" value="{{ exam.id }}">
+                            <div class="row">
+                                <div class="col-md-12 stretch-card">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <p class="card-title">考试列表</p>
+                                            <div class="table-responsive"
+                                                 style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                                <table id="recent-purchases-listing" class="table dataTable no-footer"
+                                                       role="grid">
+                                                    <thead>
+                                                    <tr role="row">
+                                                        <th>题目</th>
+                                                        <th>操作</th>
                                                     </tr>
-                                                {% empty %}
-                                                    <tr>
-                                                        <td colspan="2" style="text-align: center;">没有考试内容</td>
-                                                    </tr>
-                                                {% endfor %}
-                                            {% endwith %}
-                                            </tbody>
-                                        </table>
-                                        <!-- 根据exam.questions.all是否为空，添加隐藏字段到DOM中，供JavaScript检查 -->
-                                        {% if exam.questions.all %}
-                                            <input type="hidden" id="has-questions" value="1">
-                                        {% else %}
-                                            <input type="hidden" id="has-questions" value="0">
-                                        {% endif %}
+                                                    </thead>
+                                                    <tbody>
+                                                    {% with exam=exam %}
+                                                        {% for question in exam.questions.all %}
+                                                            <tr role="row"
+                                                                class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                                <td>{{ question.title }}</td>
+                                                                <td>
+                                                                    <button class="btn btn-danger btn-delete"
+                                                                            onclick="deleteQuestion({{ question.id }})">
+                                                                        删除
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        {% empty %}
+                                                            <tr>
+                                                                <td colspan="2" style="text-align: center;">
+                                                                    没有考试内容
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    {% endwith %}
+                                                    </tbody>
+                                                </table>
+                                                <!-- 根据exam.questions.all是否为空，添加隐藏字段到DOM中，供JavaScript检查 -->
+                                                {% if exam.questions.all %}
+                                                    <input type="hidden" id="has-questions" value="1">
+                                                {% else %}
+                                                    <input type="hidden" id="has-questions" value="0">
+                                                {% endif %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                            <button type="button" class="btn-default" 
+                                    onclick="window.location.href='{% url 'administrator_app:create_adminexam' exam.id %}'">
+                                创建考试题
+                            </button>
+                            <div class="button-group">
+                                <button type="submit" id="submit-button" class="btn-default">发布考试</button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="button-group">
-                        <button type="submit" id="submit-button" class="btn-default">发布考试</button>
-                    </div>
-                </form>
-                <button class="btn-default"
-                        onclick="window.location.href='{% url 'administrator_app:create_adminexam' exam.id %}'">创建考试题
-                </button>
+                </div>
             </div>
-        </div>    
+        </div>
     </div>
-</div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.getElementById('examFrom').onsubmit = function (event) {
-        var title = document.getElementById('title').value.trim();
-        var content = document.getElementById('content').value.trim();
-        var starttime = document.getElementById('starttime').value.trim();
-        var deadline = document.getElementById('deadline').value.trim();
-        var hasQuestions = document.getElementById('has-questions').value === '1'; // 检查隐藏字段的值
+    <script>
+        document.getElementById('submit-button').onsubmit = function (event) {
+            var title = document.getElementById('title').value.trim();
+            var content = document.getElementById('content').value.trim();
+            var starttime = document.getElementById('starttime').value.trim();
+            var deadline = document.getElementById('deadline').value.trim();
+            var hasQuestions = document.getElementById('has-questions').value === '1'; // 检查隐藏字段的值
 
-        var errorMessages = [];
+            var errorMessages = [];
 
-        if (!title) errorMessages.push('“考试标题”为必填项。');
-        if (!content) errorMessages.push('“考试题描述”为必填项。');
-        if (!starttime) errorMessages.push('“开始时间”为必填项。');
-        if (!deadline) errorMessages.push('“截止时间”为必填项。');
-        // 修改为检查隐藏字段以确定表格是否为空
-        if (!hasQuestions) errorMessages.push('“考试列表”不能为空，请添加至少一个考试题目。');
-        // 如果存在错误信息，阻止表单提交，并弹出错误提示
-        if (errorMessages.length > 0) {
-            event.preventDefault(); // 阻止表单提交
-            alert('请填写所有必填信息:\n' + errorMessages.join('\n'));
-        }
-    };
-</script>
-<script>
-    function deleteQuestion(questionId) {
-        if (confirm('确定要删除这个考试题吗？')) {
-            // 使用 AJAX 提交删除请求
-            $.ajax({
-                url: "{% url 'administrator_app:adminexamquestion_delete' %}",
-                type: "POST",
-                data: {
-                    question_id: questionId,  // 发送要删除的题目 ID
-                    csrfmiddlewaretoken: '{{ csrf_token }}'  // CSRF token
-                },
-                success: function (response) {
-                    if (response.status === 'success') {
-                        location.reload();
-                    } else {
-                        alert('删除失败，请重试。');
+            if (!title) errorMessages.push('“考试标题”为必填项。');
+            if (!content) errorMessages.push('“考试题描述”为必填项。');
+            if (!starttime) errorMessages.push('“开始时间”为必填项。');
+            if (!deadline) errorMessages.push('“截止时间”为必填项。');
+            // 修改为检查隐藏字段以确定表格是否为空
+            if (!hasQuestions) errorMessages.push('“考试列表”不能为空，请添加至少一个考试题目。');
+            // 如果存在错误信息，阻止表单提交，并弹出错误提示
+            if (errorMessages.length > 0) {
+                event.preventDefault(); // 阻止表单提交
+                alert('请填写所有必填信息:\n' + errorMessages.join('\n'));
+            }
+        };
+    </script>
+    <script>
+        function deleteQuestion(questionId) {
+            if (confirm('确定要删除这个考试题吗？')) {
+                // 使用 AJAX 提交删除请求
+                $.ajax({
+                    url: "{% url 'administrator_app:adminexamquestion_delete' %}",
+                    type: "POST",
+                    data: {
+                        question_id: questionId,  // 发送要删除的题目 ID
+                        csrfmiddlewaretoken: '{{ csrf_token }}'  // CSRF token
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert('删除失败，请重试。');
+                        }
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message || '删除失败，请重试。');
                     }
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message || '删除失败，请重试。');
-                }
-            });
+                });
+            }
         }
-    }
-</script>
+    </script>
 {% endblock %}

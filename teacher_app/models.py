@@ -1,5 +1,7 @@
 from django.db import models
 
+from consumer.models import CustomUser
+
 
 # Create your models here.
 class Class(models.Model):
@@ -23,13 +25,11 @@ class Notification(models.Model):
         return self.content[:50]
 
 
-class Teacher(models.Model):
+class Teacher(CustomUser):
     name = models.CharField(verbose_name="姓名", max_length=6)
-    userid = models.CharField(verbose_name="教工号", max_length=10)
-    password = models.CharField(verbose_name="密码", max_length=128)
-    email = models.EmailField(verbose_name="邮箱", unique=True, null=True, blank=True)
     phone_num = models.CharField(verbose_name="电话号码", max_length=12, null=True)
-    last_login = models.DateTimeField(verbose_name='登录时间', null=True, blank=True)
+    course_coordinator = models.ForeignKey('administrator_app.Administrator', on_delete=models.CASCADE, null=True, blank=True,
+                                           related_name='teachers', verbose_name="课程负责人")
 
 
 class Exercise(models.Model):
@@ -38,7 +38,7 @@ class Exercise(models.Model):
     published_at = models.DateTimeField(verbose_name="发布时间", auto_now_add=True)
     deadline = models.DateTimeField(verbose_name="截止时间")
 
-    teacher = models.ForeignKey(Teacher, verbose_name="发布教师", on_delete=models.SET_NULL, null=True)
+    teacher = models.ForeignKey(Teacher, verbose_name="发布教师", on_delete=models.CASCADE, null=True)
     classes = models.ManyToManyField(Class, verbose_name="参与练习的班级", blank=True)
 
     def __str__(self):
@@ -73,7 +73,7 @@ class Exam(models.Model):
     starttime = models.DateTimeField(verbose_name="开始时间")
     deadline = models.DateTimeField(verbose_name="截止时间")
 
-    teacher = models.ForeignKey(Teacher, verbose_name="发布教师", on_delete=models.SET_NULL, null=True)
+    teacher = models.ForeignKey(Teacher, verbose_name="发布教师", on_delete=models.CASCADE, null=True)
     classes = models.ManyToManyField(Class, verbose_name="参与考试的班级", blank=True)
 
     def __str__(self):

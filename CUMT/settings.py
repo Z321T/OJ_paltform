@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
-
+import Testingcode_app.apps
+import consumer.apps
 import administrator_app
 import student_app.apps
 import teacher_app.apps
@@ -57,6 +58,8 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'Spark_app.apps.SparkAppConfig',
     "submissions_app.apps.SubmissionsAppConfig",
+    "consumer.apps.ConsumerConfig",
+    "Testingcode_app.apps.TestingcodeAppConfig"
 ]
 
 MIDDLEWARE = [
@@ -69,7 +72,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# 会话引擎设置为数据库
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+# 设置会话的过期时间为两个小时（7200秒）
+SESSION_COOKIE_AGE = 7200
+# 设置为 True 表示当用户关闭浏览器时会话将过期
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 ROOT_URLCONF = 'CUMT.urls'
 
@@ -185,9 +193,7 @@ STATICFILES_FINDERS = [
 
 
 # 用户模型设置
-# AUTH_USER_MODEL = 'student_app.Student'
-# AUTH_USER_MODEL = 'teacher_app.Teacher'
-# AUTH_USER_MODEL = 'administrator_app.Administrator'
+AUTH_USER_MODEL = 'consumer.CustomUser'
 
 
 # 密码加密设置
