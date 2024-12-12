@@ -18,4 +18,4 @@ logs/errors.log
 .idea/
 
 # 忽略每个APP下的migrations目录
-*/migrations/
+**/migrations/
