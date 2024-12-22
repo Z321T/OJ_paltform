@@ -1,0 +1,124 @@
+{% extends 'student_base.html' %}
+{% load static %}
+
+{% block title %}年级考试-考试详情{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row d-flex" id="proBanner">
+                    <div class="col-md-12 grid-margin">
+                        <div class="card bg-gradient-primary border-0">
+                            <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">考试题目</p>
+                            <div class="table-responsive"
+                                 style="max-height: 450px; overflow-y: auto; overflow-x: hidden;">
+                                <div id="exam-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="exam-listing" class="table dataTable no-footer" role="grid">
+                                                <thead>
+                                                <tr role="row">
+                                                    <th class="sorting_asc" tabindex="0" aria-controls="exam-listing"
+                                                        rowspan="1" colspan="1" aria-sort="ascending"
+                                                        aria-label="Name: activate to sort column descending"
+                                                        style="width: 167.95px;">题目
+                                                    </th>
+                                                    <th class="sorting" tabindex="0" aria-controls="exam-listing"
+                                                        rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">开始时间
+                                                    </th>
+                                                    <th class="sorting" tabindex="0" aria-controls="exam-listing"
+                                                        rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">截止时间
+                                                    </th>
+                                                    <th class="sorting" tabindex="0" aria-controls="exam-listing"
+                                                        rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">发布教师
+                                                    </th>
+                                                    <th class="sorting" tabindex="0" aria-controls="exam-listing"
+                                                        rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">操作
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for question in exam.questions.all %}
+                                                    <tr role="row"
+                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                        <td class="sorting_1"
+                                                            id="question{{ question.id }}"> {{ question.title }}
+                                                        </td>
+                                                        <td>{{ exam.starttime }}</td>
+                                                        <td>{{ exam.deadline }}</td>
+                                                        <td>{{ exam.teacher.name }}</td>
+                                                        <td>
+                                                            <button class="button-class doing-question btn-default"
+                                                                    data-question-id="{{ question.id }}">开始作答
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: center;">没有考试题目</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-5"></div>
+                                <div class="col-sm-12 col-md-7">
+                                    <button onclick="window.location.href='{% url 'student_app:exam_student' %}'"
+                                            class="btn-default" style="float: right;">返回
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('.doing-question').on('click', function () {
+            var questionId = $(this).data('question-id');
+            var url = "{% url 'student_app:coding_adminexam' '123' %}".replace('123', questionId);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                success: function (response) {
+                    window.location.href = url;
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'teacher_base.html' %}
+
+{% block title %}作业情况-班级练习{% endblock %}
+
+{% block extra_css %}
+<style>
+        table tbody tr:hover {
+            background-color: #f2f2f2;
+        }
+
+        .card-item.card-title:hover {
+            background-color: #f2f2f2;
+            cursor: pointer;
+
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-md-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body dashboard-tabs p-0">
+                                <div class="tab-content py-0 px-0">
+                                    <!--班级完成情况-->
+                                    <div class="row">
+                                        <div class="col-md-7 grid-margin stretch-card">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <p class="card-title">班级完成情况</p>
+                                                    <div id="cash-deposits-chart-legend"
+                                                         class="d-flex justify-content-center pt-3"></div>
+                                                    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                                                    <div id="cash-deposits-chart"
+                                                         style="width: 600px;height:400px;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--练习考试切换-->
+                                        <div class="col-md-5 grid-margin stretch-card">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <!-- 添加切换按钮 -->
+                                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-type="exercise">学生练习
+                                                        </button>
+                                                        <button type="button" class="btn btn-secondary exam-button"
+                                                                data-type="exam">班级考试
+                                                        </button>
+                                                        <button type="button" class="btn btn-secondary adminexam-button"
+                                                                data-type="adminexam">年级考试
+                                                        </button>
+                                                    </div>
+                                                    <div class="table-responsive"
+                                                         style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                                        <div class="row">
+                                                            <table class="table">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th scope="col">名称</th>
+                                                                    <th scope="col">发布时间</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                {% for question in coursework %}
+                                                                    <tr data-id="{{ question.id }}">
+                                                                        <td>{{ question.title }}</td>
+                                                                        <td>{{ question.published_at }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class=" stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">班级列表</p>
+                            <div class="table-responsive"
+                                 style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                <div class="table-responsive">
+                                    <div class="card-container">
+                                        {% for class in classes %}
+                                            <div class="card class-id" data-class-id="{{ class.id }}">
+                                                <div class="card-item card-title">{{ class.name }}</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <!-- partial -->
+                            </div>
+                            <!-- main-panel ends -->
+                        </div>
+                        <!-- page-body-wrapper ends -->
+                    </div>
+                    <!-- container-scroller -->
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('cash-deposits-chart'));
+    var option = {
+        tooltip: {},
+        legend: {
+            data: ['完成情况']
+        },
+        xAxis: {
+            data: ["班级1", "班级2", "班级3", "班级4", "班级5", "班级6"]
+        },
+        yAxis: {},
+        series: [{
+            name: '完成情况',
+            type: 'bar',
+            data: [0.4, 0.2, 1, 0.3, 0.5, 0.3]
+        }]
+    };
+    myChart.setOption(option);
+</script>
+<script>
+    $(function () {
+        $('.btn-group .btn-secondary[data-type="exercise"]').addClass('active')
+
+        $('.btn-group .btn-secondary.exam-button').click(function () {
+            window.location.href = "{% url 'teacher_app:coursework_exam' %}"
+        });
+        $('.btn-group .btn-secondary.adminexam-button').click(function () {
+            window.location.href = "{% url 'teacher_app:coursework_adminexam' %}"
+        });
+
+        $('table tbody').on('click', 'tr', function () {
+            var id = $(this).data('id');
+            var type = $('.btn-group .btn-secondary.active').data('type');
+            $.ajax({
+                url: "{% url 'teacher_app:coursework_data' %}",
+                type: 'POST',
+                data: {
+                    'id': id,
+                    'type': type,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    updateChart(response.data);
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    })
+
+    // 更新柱状图的函数
+    function updateChart(data) {
+        var myChart = echarts.init(document.getElementById('cash-deposits-chart'));
+        var classNames = data.map(function (item) {
+            return item.class_name;
+        });
+        var completionRates = data.map(function (item) {
+            return item.completion_rate;
+        });
+        var option = {
+            tooltip: {},
+            legend: {
+                data: ['完成情况']
+            },
+            xAxis: {
+                data: classNames
+            },
+            yAxis: {
+                type: 'value',
+                min: 0,
+                max: 1,
+                axisLabel: {
+                    formatter: function (value) {
+                        return (value * 100) + "%";
+                    }
+                }
+            },
+            series: [{
+                name: '完成情况',
+                type: 'bar',
+                data: completionRates,
+                barWidth: '55'
+            }]
+        };
+        myChart.setOption(option);
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("table tbody tr").click(function () {
+            $("table tbody tr").css("background-color", ""); // 添加这行，恢复所有行原本的背景颜色
+            $(this).css("background-color", "#f2f2f2"); // 让点击的那一行变为灰色
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.class-id').on('click', function () {
+            var classId = $(this).data('class-id');
+            window.location.href = "{% url 'teacher_app:coursework_exercise_details' '123' %}".replace('123', classId);
+        });
+    });
+</script>
+{% endblock %}

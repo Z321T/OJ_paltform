@@ -1,0 +1,94 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}教师管理{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+<style>
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+            -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+            -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+            transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        }
+
+        input[type="file"] {
+            height: auto;
+        }
+
+        .btn-default {
+            background-color: #ffffff; 
+            color: #333333; 
+            border: 1px solid #cccccc; 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+            transition: all 0.3s; 
+        }
+
+        .btn-default:hover, .btn-default:focus {
+            border-color: #66afe9; 
+            outline: none; 
+            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6); 
+        }
+
+        .form-control-file {
+            border: none !important;
+            box-shadow: none  !important;
+        }
+
+        .main-panel {
+            background: #fff;
+            padding: 20px;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <form action="{% url 'administrator_app:add_teacher' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="initialPasswordInput">初始化密码:</label>
+                        <input type="password" class="form-control" id="initialPasswordInput" name="initialPassword"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="excelFileInput">上传Excel文件:</label>
+                        <input type="file" class="form-control-file" id="excelFileInput" name="excelFile" required>
+                    </div>
+                    <button type="submit" class="btn btn-default">创建</button>
+                </form>
+            </div>
+        </div>    
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

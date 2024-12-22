@@ -1,0 +1,134 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}查重管理{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">    
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row d-flex" id="proBanner">
+                    <div class="col-md-12 grid-margin">
+                        <div class="card bg-gradient-primary border-0">
+                            <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">GUI题查重管理</p>
+                            <div class="table-responsive"
+                                 style="max-height: 568px; overflow-y: auto; overflow-x: hidden;">
+                                <!-- 添加了 style 属性 -->
+                                <div id="recent-purchases-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6"></div>
+                                        <div class="col-sm-12 col-md-6"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="recent-purchases-listing" class="table dataTable no-footer"
+                                                   role="grid">
+                                                <thead>
+                                                <tr role="row">
+                                                    <th class="sorting_asc" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-sort="ascending"
+                                                        aria-label="Name: activate to sort column descending"
+                                                        style="width: 167.95px;">题目
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">发布时间
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">截止时间
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">操作
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for exercise in programming_exercises %}
+                                                    <tr role="row"
+                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                        <td class="sorting_1"
+                                                            id="exercise{{ exercise.id }}"> {{ exercise.title }}
+                                                        </td>
+                                                        <td>{{ exercise.date_posted }}</td>
+                                                        <td>{{ exercise.deadline }}</td>
+                                                        <td>
+                                                            <button class="button-class update-data btn-default"
+                                                                    data-exercise-id="{{ exercise.id }}">导入数据
+                                                            </button>
+                                                            <button class="button-class delete-data btn-default"
+                                                                    data-exercise-id="{{ exercise.id }}">清除数据
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: center;">暂无题目</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>    
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('.update-data').on('click', function () {
+            var exerciseId = $(this).data('exercise-id');
+            window.location.href = "{% url 'administrator_app:report_administrator'%}" + "?exerciseId=" + exerciseId;
+        });
+    });
+    $(document).ready(function () {
+        $('.delete-data').on('click', function () {
+            var exerciseId = $(this).data('exercise-id');
+            // 弹出确认对话框
+            var confirmation = confirm("你确定要清除这个题目的数据吗？清除之后导入的数据将会被清除！");
+            if (confirmation) {
+                $.ajax({
+                    url: "{% url 'administrator_app:reportdata_delete' %}",
+                    type: 'POST',
+                    data: {
+                        'exerciseId': exerciseId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        alert(response.message);
+                        window.location.reload()
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+                // 用户点击"取消"，不做任何操作
+            }
+        });
+    });
+</script>    
+{% endblock %}

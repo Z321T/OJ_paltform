@@ -1,0 +1,97 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}发布通知{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">    
+<style>
+        .class-list h3 {
+            margin-top: 0;
+        }
+
+        .class-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .class-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd; /* 为列表项添加边界 */
+        }
+
+        /* 应用于不属于.nav-search中.input-group的样式 */
+        .input-group:not(.nav-search .input-group) {
+            margin-bottom: 10px;
+        }
+
+        .input-group:not(.nav-search .input-group) label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .input-group:not(.nav-search .input-group) input,
+        .input-group:not(.nav-search .input-group) textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 3px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        .input-group:not(.nav-search .input-group) textarea {
+            height: 450px;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                     <div class="col-md-12 stretch-card">
+                    <div class="card">
+                                <div class="card">
+                
+                        <!-- 通知发布窗口 -->
+                            <h2>发布通知</h2>
+                            <form id="notificationForm" method="post"
+                                  action="{% url 'administrator_app:create_notice' %}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <label for="title">通知标题:</label>
+                                    <input id="title" name="title" placeholder="请输入通知标题">
+                                </div>
+                                <div class="input-group">
+                                    <label for="message">消息内容:</label>
+                                    <textarea id="message" name="message" placeholder="请输入您的消息"></textarea>
+                                </div>
+                                <button type="submit" class="btn-default submit-button">发送</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>    
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('notificationForm').onsubmit = function (event) {
+
+        var title = document.getElementById('title').value.trim();
+        var message = document.getElementById('message').value.trim();
+
+        var errorMessages = [];
+
+        if (!title) errorMessages.push('“标题”为必填项。');
+        if (!message) errorMessages.push('“内容”为必填项。');
+
+        if (errorMessages.length > 0) {
+            event.preventDefault(); // 阻止表单提交
+            alert('请填写所有必填信息:\n' + errorMessages.join('\n'));
+        }
+    };
+</script>    
+{% endblock %}

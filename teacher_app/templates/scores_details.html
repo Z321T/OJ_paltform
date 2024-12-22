@@ -1,0 +1,206 @@
+{% extends 'teacher_base.html' %}
+{% load static %}
+
+{% block title %}教师主页-分项得分{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row d-flex" id="proBanner">
+                    <div class="col-md-12 grid-margin">
+                        <div class="card bg-gradient-primary border-0">
+                            <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">班级列表</p>
+                            <div class="table-responsive"
+                                 style="max-height: 450px; overflow-y: auto; overflow-x: hidden;">
+                                <!-- 添加了 style 属性 -->
+                                <div id="recent-purchases-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6"></div>
+                                        <div class="col-sm-12 col-md-6"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table class="table dataTable no-footer" role="grid">
+                                                <thead>
+                                                <tr role="row">
+                                                    <th class="sorting_asc" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-sort="ascending"
+                                                        aria-label="Name: activate to sort column descending"
+                                                        style="width: 167.95px;">班级
+                                                    </th>
+                                                    <th class="sorting" tabindex="0" aria-controls="exam-listing"
+                                                        rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">班级人数
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">得分情况
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">相似度分析
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for class in classes %}
+                                                    <tr role="row"
+                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                        <td class="sorting_1"
+                                                            id="class{{ class.id }}"> {{ class.name }}</td>
+                                                        <td>{{ class.students.count }}</td>
+                                                        <td>
+                                                            <button class="button-class class-scores-details btn-default"
+                                                                    data-class-id="{{ class.id }}"
+                                                                    data-programmingexercise-id="{{ programmingexercise_id }}">
+                                                                分项得分
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <button class="button-class class-report-details btn-default"
+                                                                    data-class-id="{{ class.id }}"
+                                                                    data-programmingexercise-id="{{ programmingexercise_id }}">
+                                                                报告相似度
+                                                            </button>
+                                                            <button class="button-class class-code-details btn-default"
+                                                                    data-class-id="{{ class.id }}"
+                                                                    data-programmingexercise-id="{{ programmingexercise_id }}">
+                                                                代码相似度
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: center;">暂无班级</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-wrapper">
+                <div class="col-md-12 stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">学生列表</p>
+                            <div class="table-responsive"
+                                 style="max-height: 450px; overflow-y: auto; overflow-x: hidden;">
+                                <!-- 添加了 style 属性 -->
+                                <div id="recent-purchases-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6"></div>
+                                        <div class="col-sm-12 col-md-6"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table class="table dataTable no-footer" role="grid">
+                                                <thead>
+                                                <tr>
+                                                    <th class="sorting_asc" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-sort="ascending"
+                                                        aria-label="Name: activate to sort column descending"
+                                                        style="width: 167.95px;">姓名
+                                                    </th>
+                                                    <th class="sorting" tabindex="0" aria-controls="exam-listing"
+                                                        rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">学号
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">报告规范性得分
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for student, report_score in student_scores %}
+                                                    <tr role="row"
+                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                        <td class="sorting_1">{{ student.name }}</td>
+                                                        <td>{{ student.userid }}</td>
+                                                        <td>
+                                                            {% if report_score %}
+                                                                {{ report_score.standard_score }}
+                                                            {% else %}
+                                                                未评分
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="6" style="text-align: center;">暂无学生提交</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        // 对查看报告详情的按钮添加事件监听器
+        $('.class-report-details').on('click', function () {
+            var class_id = $(this).data('class-id');
+            var programmingExerciseId = $(this).data('programmingexercise-id');
+            var reportDetailsUrlTemplate = "{% url 'teacher_app:repeat_report_details' programmingexercise_id=0 %}";
+            var detailUrl = reportDetailsUrlTemplate.replace('0', programmingExerciseId);
+            detailUrl += '?class_id=' + encodeURIComponent(class_id);
+            window.location.href = detailUrl;
+        });
+        // 对查看代码详情的按钮添加事件监听器
+        $('.class-code-details').on('click', function () {
+            var class_id = $(this).data('class-id');
+            var programmingExerciseId = $(this).data('programmingexercise-id');
+            var codeDetailsUrlTemplate = "{% url 'teacher_app:repeat_code_details' programmingexercise_id=0 %}";
+            var detailUrl = codeDetailsUrlTemplate.replace('0', programmingExerciseId);
+            detailUrl += '?class_id=' + encodeURIComponent(class_id);
+            window.location.href = detailUrl;
+        });
+        // 对"分项得分"按钮添加事件监听器
+        $('.class-scores-details').on('click', function () {
+            var class_id = $(this).data('class-id');
+            var programmingExerciseId = $(this).data('programmingexercise-id');
+            var scoreDetailsUrlTemplate = "{% url 'teacher_app:scores_details' programmingexercise_id=0%}";
+            var detailUrl = scoreDetailsUrlTemplate.replace('0', programmingExerciseId);
+            detailUrl += '?class_id=' + encodeURIComponent(class_id);
+            window.location.href = detailUrl;
+        });
+    });
+</script>
+{% endblock %}

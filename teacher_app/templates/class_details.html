@@ -1,0 +1,169 @@
+{% extends 'teacher_base.html' %}
+{% load static %}
+
+{% block title %}班级详情{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+<style>
+        .table-container table {
+            width: 100%; /* 表格宽度充满容器 */
+            height: 100%; /* 表格高度充满容器 */
+            border-collapse: collapse; /* 合并表格边框 */
+            overflow: auto;
+
+        }
+
+        /* 为偶数行设置灰色背景 */
+        .table-container tr:nth-child(even) {
+            background-color: #f2f2f2; /* 浅灰色背景 */
+        }
+
+        /* 为奇数行设置白色背景 */
+        .table-container tr:nth-child(odd) {
+            background-color: #ffffff; /* 白色背景 */
+        }
+
+        .table-container tr {
+            height: 30px; /* 设置每一行的固定高度为50px */
+        }
+
+        .table-container th, .table-container td {
+            border: 1px solid #ddd; /* 设置单元格边框 */
+            text-align: left; /* 文本左对齐 */
+            padding: 8px; /* 单元格内边距 */
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="col-md-12 stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">班级详情</p>
+                            <div class="table-responsive"
+                                 style="max-height: 568px; overflow-y: auto; overflow-x: hidden;">
+                                <!-- 添加了 style 属性 -->
+                                <div id="recent-purchases-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6"></div>
+                                        <div class="col-sm-12 col-md-6"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="recent-purchases-listing" class="table dataTable no-footer"
+                                                   role="grid">
+                                                <thead>
+                                                <tr role="row">
+                                                    <th class="sorting_asc" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-sort="ascending"
+                                                        aria-label="Name: activate to sort column descending"
+                                                        style="width: 167.95px;">姓名
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">学号
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">邮箱
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">操作
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for student in students %}
+                                                    <tr role="row"
+                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                    <td class="sorting_1"
+                                                        id="student{{ student.id }}"> {{ student.name }}
+                                                    </td>
+                                                    <td>{{ student.userid }}</td>
+                                                    <td>{{ student.email }}</td>
+                                                    <td>
+                                                        <button class="button-class delete-student btn-default"
+                                                                data-student-id="{{ student.id }}">删除
+                                                        </button>
+                                                        <button class="button-class reset-password btn-default"
+                                                                data-student-id="{{ student.id }}">初始化密码
+                                                        </button>
+                                                    </td>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-5"></div>
+                                <div class="col-sm-12 col-md-7">
+                                    <button onclick="window.location.href='{% url 'teacher_app:class_teacher' %}'"
+                                            class="btn-default" style="float: right;">返回
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('.delete-student').on('click', function () {
+            var studentId = $(this).data('student-id');
+            var confirmation = confirm("确定要删除这个学生吗？删除之后，该学生的所有信息将会被清除！");
+            if (confirmation) {
+                $.ajax({
+                    url: "{% url 'teacher_app:delete_student' %}",
+                    type: 'POST',
+                    data: {
+                        'student_id': studentId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        alert(response.message);
+                        window.location.reload()
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
+        });
+    });
+    $(document).ready(function () {
+        $('.reset-password').on('click', function () {
+            var studentId = $(this).data('student-id');
+            $.ajax({
+                url: "{% url 'teacher_app:reset_password' %}",
+                type: 'POST',
+                data: {
+                    'student_id': studentId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    alert(response.message);
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'teacher_base.html' %}
+{% load static %}
+
+{% block title %}教师主页-报告规范性{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+<style>
+        .title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .center-button {
+            display: flex;
+            justify-content: center;
+        }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row d-flex" id="proBanner">
+                    <div class="col-md-12 grid-margin">
+                        <div class="card bg-gradient-primary border-0">
+                            <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="title-container">
+                                <p class="card-title">报告规范性设置</p>
+                                <div>
+                                    <label for="sumScore">总分：</label>
+                                    <input type="number" id="sumScore" name="totalscore" form="reportForm"
+                                           value="{{ stand_score.totalscore }}" placeholder="100" min="0">
+                                </div>
+                            </div>
+                            <div class="table-responsive"
+                                 style="max-height: 514px; overflow-y: auto; overflow-x: hidden;">
+                                <!-- 添加了 style 属性 -->
+                                <div id="recent-purchases-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6"></div>
+                                        <div class="col-sm-12 col-md-6"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <form id="reportForm" action="{% url 'teacher_app:standard_report' %}"
+                                                  method="post">
+                                                {% csrf_token %}
+                                                <table class="table dataTable no-footer" role="grid">
+                                                    <thead>
+                                                    <tr role="row">
+                                                        <th class="sorting_asc" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-sort="ascending"
+                                                            aria-label="Name: activate to sort column descending"
+                                                            style="width: 167.95px;">评分标准
+                                                        </th>
+
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-label="Price: activate to sort column ascending"
+                                                            style="width: 72.575px;">减分
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>不含目录</td>
+                                                        <td><input type="number" name="contents" form="reportForm"
+                                                                   value="{{ stand_score.contents }}"
+                                                                   placeholder="-20～0" min="-20" max="0"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>首行未缩进0.5英寸</td>
+                                                        <td><input type="number" name="firstrow" form="reportForm"
+                                                                   value="{{ stand_score.firstrow }}"
+                                                                   placeholder="-20～0" min="-20" max="0"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>段落字体大小非12号</td>
+                                                        <td><input type="number" name="fontsize" form="reportForm"
+                                                                   value="{{ stand_score.fontsize }}"
+                                                                   placeholder="-20～0" min="-20" max="0"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>图像未居中对齐</td>
+                                                        <td><input type="number" name="image" form="reportForm"
+                                                                   value="{{ stand_score.image }}" placeholder="-20～0"
+                                                                   min="-20" max="0"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>不含页码</td>
+                                                        <td><input type="number" name="pagenum" form="reportForm"
+                                                                   value="{{ stand_score.pagenum }}" placeholder="-20～0"
+                                                                   min="-20" max="0"></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <div class="center-button">
+                                                    <input type="submit" class="btn-default" value="提交">
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- partial -->
+            </div>
+            <!-- main-panel ends -->
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

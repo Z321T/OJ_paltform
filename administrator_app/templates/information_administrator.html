@@ -1,0 +1,160 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}教师信息管理{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">    
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row d-flex" id="proBanner">
+                        <div class="col-md-12 grid-margin">
+                            <div class="card bg-gradient-primary border-0">
+                                <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-title">教师列表</p>
+                                <div class="table-responsive"
+                                     style="max-height: 428px; overflow-y: auto; overflow-x: hidden;">
+                                    <!-- 添加了 style 属性 -->
+                                    <div id="recent-purchases-listing_wrapper"
+                                         class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12 col-md-6"></div>
+                                            <div class="col-sm-12 col-md-6"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table class="table dataTable no-footer"
+                                                       role="grid">
+                                                    <thead>
+                                                    <tr role="row">
+                                                        <th class="sorting_asc" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-sort="ascending"
+                                                            aria-label="Name: activate to sort column descending"
+                                                            style="width: 167.95px;">教师
+                                                        </th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-label="Office: activate to sort column ascending"
+                                                            style="width: 155.6px;">教工号
+                                                        </th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-label="Office: activate to sort column ascending"
+                                                            style="width: 155.6px;">班级
+                                                        </th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-label="Price: activate to sort column ascending"
+                                                            style="width: 72.575px;">操作
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for teacher in teachers %}
+                                                        <tr role="row"
+                                                            class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                        <td class="sorting_1"
+                                                            id="teacher{{ teacher.id }}"> {{ teacher.name }}</td>
+                                                        <td>{{ teacher.userid }}</td>
+                                                        <td>
+                                                            {% for class in teacher.class_set.all %}
+                                                                {{ class.name }}
+                                                            {% empty %}
+                                                                暂无关联班级
+                                                            {% endfor %}
+                                                        </td>
+                                                        <td>
+                                                            <button class="button-class delete-teacher btn-default"
+                                                                    data-teacher-id="{{ teacher.id }}">删除教师
+                                                            </button>
+                                                            <button class="button-class reset-password btn-default"
+                                                                    data-teacher-id="{{ teacher.id }}">初始化密码
+                                                            </button>
+                                                        </td>
+                                                    {% empty %}
+                                                        <td colspan="4" style="text-align: center;">暂无教师</td>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-5"></div>
+                                <div class="col-sm-12 col-md-7">
+                                    <button onclick="window.location.href='{% url 'administrator_app:add_teacher' %}'"
+                                            class="btn-default" style="float: right;">添加教师
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>    
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('.delete-teacher').on('click', function () {
+            var teacherId = $(this).data('teacher-id');
+            var confirmation = confirm("确定要删除这个教师吗？删除之后，该教师的所有信息将会被清除！");
+            if (confirmation) {
+                $.ajax({
+                    url: "{% url 'administrator_app:delete_teacher' %}",
+                    type: 'POST',
+                    data: {
+                        'teacher_id': teacherId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        alert(response.message);
+                        window.location.reload()
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
+        });
+    });
+    $(document).ready(function () {
+        $('.reset-password').on('click', function () {
+            var teacherId = $(this).data('teacher-id');
+            $.ajax({
+                url: "{% url 'administrator_app:reset_password' %}",
+                type: 'POST',
+                data: {
+                    'teacher_id': teacherId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    alert(response.message);
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>    
+{% endblock %}

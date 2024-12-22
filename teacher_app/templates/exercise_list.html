@@ -1,0 +1,312 @@
+{% extends 'teacher_base.html' %}
+{% load static %}
+
+{% block title %}练习列表{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+<style>
+.recipient-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.class-list {
+    width: 20%;
+    background-color: #f0f0f0;
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+}
+
+.class-list h3 {
+    margin-top: 0;
+}
+
+.class-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.class-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.create-panel {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 80%;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+}
+
+.input-group {
+    margin-bottom: 10px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input-group input,
+.input-group textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.input-group textarea {
+    height: 500px;
+}
+
+.button-group {
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 媒体查询，为大屏幕调整布局 */
+@media (min-width: 1200px) {
+    .container {
+        flex-wrap: wrap;
+    }
+
+    .class-list {
+        width: 25%; /* 增加班级列表的宽度 */
+    }
+
+    .create-panel {
+        width: 75%; /* 相应减少创建面板的宽度 */
+    }
+}
+
+@media (min-width: 1800px) {
+    .class-list {
+        width: 20%; /* 在更大的屏幕上，可以减少班级列表的宽度 */
+    }
+
+    .create-panel {
+        width: 80%; /* 相应增加创建面板的宽度 */
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="container">
+            <!-- 班级列表部分 -->
+            <div class="class-list">
+                <h3>班级列表</h3>
+                <ul>
+                    {% for class in classes %}
+                        <li data-class-id="{{ class.id }}">{{ class.name }}</li>
+                    {% empty %}
+                        <li>暂无班级</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <!-- 练习发布窗口 -->
+            <div class="create-panel">
+                <h3>发布练习（请先创建练习题，再填写此页面的内容）</h3>
+                <form id="exerciseFrom" method="post" action="{% url 'teacher_app:exercise_list' exercise.id %}">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <label for="recipient">接收班级：</label>
+                        <div id="recipient" class="recipient-container"></div>
+                        <input type="hidden" id="recipientIds" name="recipients">
+                    </div>
+                    <div class="input-group">
+                        <label for="title">练习标题：</label>
+                        <input type="text" id="title" name="title" placeholder="请输入练习标题">
+                    </div>
+                    <div class="input-group">
+                        <label for="content">练习题描述：</label>
+                        <input id="content" name="content" placeholder="请输入练习题描述">
+                    </div>
+                    <div class="input-group">
+                        <label for="deadline">开始时间：</label>
+                        <input type="datetime-local" id="starttime" name="starttime" placeholder="请输入开始时间">
+                    </div>
+                    <div class="input-group">
+                        <label for="deadline">截止时间：</label>
+                        <input type="datetime-local" id="deadline" name="deadline" placeholder="请输入截止时间">
+                    </div>
+                    <input type="hidden" name="exercise_id" value="{{ exercise.id }}">
+                    <div class="row">
+                        <div class="col-md-12 stretch-card">
+                            <div class="card">
+                                <div class="card-body">
+                                    <p class="card-title">练习列表</p>
+                                    <div class="table-responsive"
+                                         style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                        <table id="recent-purchases-listing" class="table dataTable no-footer"
+                                               role="grid">
+                                            <thead>
+                                            <tr role="row">
+                                                <th>题目</th>
+                                                <th>操作</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% with exercise=exercise %}
+                                                {% for question in exercise.questions.all %}
+                                                    <tr role="row"
+                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                        <td id="question{{ question.id }}">
+                                                            {{ question.title }}
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-danger btn-delete" onclick="deleteQuestion({{ question.id }})">删除</button>
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="2" style="text-align: center;">没有练习内容</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% endwith %}
+                                            </tbody>
+                                        </table>
+                                        <!-- 根据exercise.questions.all是否为空，添加隐藏字段到DOM中，供JavaScript检查 -->
+                                        {% if exercise.questions.all %}
+                                            <input type="hidden" id="has-questions" value="1">
+                                        {% else %}
+                                            <input type="hidden" id="has-questions" value="0">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" id="submit-button" class="btn-default">发布练习</button>
+                    </div>
+                </form>
+                <button class="btn-default"
+                        onclick="window.location.href='{% url 'teacher_app:create_exercise' exercise.id %}'">
+                    创建练习题
+                </button>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('exerciseFrom').onsubmit = function (event) {
+        // 获取所有的输入值
+        var recipientIds = document.getElementById('recipientIds').value.trim();
+        var title = document.getElementById('title').value.trim();
+        var content = document.getElementById('content').value.trim();
+        var starttime = document.getElementById('starttime').value.trim();
+        var deadline = document.getElementById('deadline').value.trim();
+        var hasQuestions = document.getElementById('has-questions').value === '1'; // 检查隐藏字段的值
+
+        var errorMessages = [];
+
+        if (!recipientIds) errorMessages.push('“接收班级”是必选项。');
+        if (!title) errorMessages.push('“练习标题”为必填项。');
+        if (!content) errorMessages.push('“练习题描述”为必填项。');
+        if (!starttime) errorMessages.push('“开始时间”为必填项。');
+        if (!deadline) errorMessages.push('“截止时间”为必填项。');
+
+        if (!hasQuestions) errorMessages.push('“练习列表”不能为空，请添加至少一个练习题目。');
+
+        if (errorMessages.length > 0) {
+            event.preventDefault(); // 阻止表单提交
+            alert('请填写所有必填信息:\n' + errorMessages.join('\n'));
+        }
+    };
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var classItems = document.querySelectorAll('.class-list ul li');
+        var recipientContainer = document.querySelector('.recipient-container');
+        var recipientIdsInput = document.querySelector('#recipientIds');
+
+        function updateRecipientIds() {
+            var classTags = recipientContainer.querySelectorAll('.class-tag');
+            var ids = Array.from(classTags).map(function (tag) {
+                return tag.dataset.classId;
+            });
+            recipientIdsInput.value = ids.join(',');  // 更新input元素的值
+        }
+
+        classItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                var className = this.textContent;
+                var classId = this.dataset.classId;
+                // 检查是否已经添加了这个班级的卡片
+                var existingTags = recipientContainer.querySelectorAll('.class-tag');
+                var isClassAlreadyAdded = Array.from(existingTags).some(function (tag) {
+                    return tag.dataset.classId === classId;
+                });
+                if (isClassAlreadyAdded) {
+                    return;
+                }
+                // 创建班级卡片
+                var tag = document.createElement('div');
+                tag.className = 'class-tag';
+                tag.dataset.classId = classId;
+                tag.textContent = className;
+                // 创建移除按钮
+                var removeBtn = document.createElement('span');
+                removeBtn.textContent = '❌';
+                removeBtn.className = 'remove-class';
+                removeBtn.onclick = function () {
+                    recipientContainer.removeChild(tag);
+                    updateRecipientIds();
+                };
+                tag.appendChild(removeBtn);
+                recipientContainer.appendChild(tag);
+                updateRecipientIds();
+            });
+        });
+    });
+</script>
+<script>
+    function deleteQuestion(questionId) {
+        if (confirm('确定要删除这个练习题吗？')) {
+            // 使用 AJAX 提交删除请求
+            $.ajax({
+                url: "{% url 'teacher_app:exercisequestion_delete' %}",
+                type: "POST",
+                data: {
+                    question_id: questionId,  // 发送要删除的题目 ID
+                    csrfmiddlewaretoken: '{{ csrf_token }}'  // CSRF token
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('删除失败，请重试。');
+                    }
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message || '删除失败，请重试。');
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

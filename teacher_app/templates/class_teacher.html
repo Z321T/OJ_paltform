@@ -1,0 +1,162 @@
+{% extends 'teacher_base.html' %}
+{% load static %}
+
+{% block title %}班级管理{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
+<style>
+        .table-container table {
+            width: 100%; /* 表格宽度充满容器 */
+            height: 100%; /* 表格高度充满容器 */
+            border-collapse: collapse; /* 合并表格边框 */
+            overflow: auto;
+
+        }
+
+        /* 为偶数行设置灰色背景 */
+        .table-container tr:nth-child(even) {
+            background-color: #f2f2f2; /* 浅灰色背景 */
+        }
+
+        /* 为奇数行设置白色背景 */
+        .table-container tr:nth-child(odd) {
+            background-color: #ffffff; /* 白色背景 */
+        }
+
+        .table-container tr {
+            height: 30px; /* 设置每一行的固定高度为50px */
+        }
+
+        .table-container th, .table-container td {
+            border: 1px solid #ddd; /* 设置单元格边框 */
+            text-align: left; /* 文本左对齐 */
+            padding: 8px; /* 单元格内边距 */
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row d-flex" id="proBanner">
+                    <div class="col-md-12 grid-margin">
+                        <div class="card bg-gradient-primary border-0">
+                            <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">班级列表</p>
+                            <div class="table-responsive"
+                                 style="max-height: 428px; overflow-y: auto; overflow-x: hidden;">
+                                <!-- 添加了 style 属性 -->
+                                <div id="recent-purchases-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="recent-purchases-listing" class="table dataTable no-footer"
+                                                   role="grid">
+                                                <thead>
+                                                <tr role="row">
+                                                    <th class="sorting_asc" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-sort="ascending"
+                                                        aria-label="Name: activate to sort column descending"
+                                                        style="width: 167.95px;">班级
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">班级人数
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">操作
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for class in classes %}
+                                                    <tr role="row"
+                                                        class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                        <td class="sorting_1"
+                                                            id="class{{ class.id }}"> {{ class.name }}</td>
+                                                        <td>{{ class.students.count }}</td>
+                                                        <td>
+                                                            <button class="button-class delete-class btn-default"
+                                                                    data-class-id="{{ class.id }}">删除
+                                                            </button>
+                                                            <button class="button-class class-details btn-default"
+                                                                    data-class-id="{{ class.id }}">详情
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: center;">暂无班级</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-5"></div>
+                                <div class="col-sm-12 col-md-7">
+                                    <button onclick="window.location.href='{% url 'teacher_app:create_class' %}'"
+                                            class="btn-default" style="float: right;">创建班级
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('.delete-class').on('click', function () {
+            var classId = $(this).data('class-id');
+            var confirmation = confirm("确定要删除这个班级吗？删除之后，该班级的所有信息将会被清除！");
+            if (confirmation) {
+                $.ajax({
+                    url: "{% url 'teacher_app:delete_class' %}",
+                    type: 'POST',
+                    data: {
+                        'class_id': classId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        alert(response.message);
+                        window.location.reload()
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.class-details').on('click', function () {
+            var classId = $(this).data('class-id');
+            var url = "{% url 'teacher_app:class_details' '123' %}".replace('123', classId);
+            window.location.href = url;
+        });
+    });
+</script>
+{% endblock %}

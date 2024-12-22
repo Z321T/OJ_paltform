@@ -1,0 +1,251 @@
+{% extends 'teacher_base.html' %}
+
+{% block title %}作业详情-班级练习详情{% endblock %}
+
+{% block extra_css %}
+<style>
+        table tbody tr:hover {
+            background-color: #f2f2f2;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-md-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body dashboard-tabs p-0">
+                                <div class="tab-content py-0 px-0">
+                                    <div class="tab-pane fade show active" id="overview" role="tabpanel"
+                                         aria-labelledby="overview-tab">
+                                        <div class="d-flex flex-wrap justify-content-xl-between">
+                                        </div>
+                                    </div>
+                                    <!--重复提交次数-->
+                                    <div class="row">
+                                        <div class="col-md-7 grid-margin stretch-card">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <p class="card-title">题目完成情况</p>
+                                                    <!-- 图表的容器 -->
+                                                    <div id="zhutu" style="width:600px;height:400px;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--练习考试切换-->
+                                        <div class="col-md-5 grid-margin stretch-card">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <!-- 添加切换按钮 -->
+                                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-type="exercise">学生练习
+                                                        </button>
+                                                        <button type="button" class="btn btn-secondary exam-button"
+                                                                data-type="exam">班级考试
+                                                        </button>
+                                                        <button type="button" class="btn btn-secondary adminexam-button"
+                                                                data-type="adminexam">年级考试
+                                                        </button>
+                                                    </div>
+                                                    <div class="table-responsive"
+                                                         style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                                        <div class="row">
+                                                            <table class="table">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th scope="col">名称</th>
+                                                                    <th scope="col">发布时间</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                {% for question in coursework %}
+                                                                    <tr data-id="{{ question.id }}">
+                                                                        <td>{{ question.title }}</td>
+                                                                        <td>{{ question.published_at }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class=" stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">学生成绩详情</p>
+                            <div class="table-responsive"
+                                 style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                <!-- 添加了 style 属性 -->
+                                <div id="recent-purchases-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6"></div>
+                                        <div class="col-sm-12 col-md-6"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="student-scores-table" class="table dataTable no-footer"
+                                                   role="grid">
+                                                <thead>
+                                                <tr role="row">
+                                                    <th class="sorting_asc" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-sort="ascending"
+                                                        aria-label="Name: activate to sort column descending"
+                                                        style="width: 167.95px;">姓名
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Office: activate to sort column ascending"
+                                                        style="width: 155.6px;">学号
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">得分
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for i in im %}
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="3" style="text-align: center;">选择题目</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('zhutu'));
+    // 指定图表的配置项和数据
+    var option = {
+        tooltip: {},
+        legend: {
+            data: ['完成情况']
+        },
+        xAxis: {
+            data: ['第一题', '第二题', '第三题', '第四题', '第五题', '第六题']
+        },
+        yAxis: {},
+        series: [{
+            name: '完成情况',
+            data: [0.56, 0.24, 1, 0.76, 0.69, 0.34],
+            type: 'bar'
+        }]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+<script>
+    $(function () {
+        $('.btn-group .btn-secondary[data-type="exercise"]').addClass('active')
+
+        $('.btn-group .btn-secondary.exam-button').click(function () {
+            var classId = {{ class_id }};
+            window.location.href = "{% url 'teacher_app:coursework_exam_details' '123' %}".replace('123', classId);
+        });
+        $('.btn-group .btn-secondary.adminexam-button').click(function () {
+            var classId = {{ class_id }};
+            window.location.href = "{% url 'teacher_app:coursework_adminexam_details' '123' %}".replace('123', classId);
+        });
+
+        $('table tbody').on('click', 'tr', function () {
+            var id = $(this).data('id');
+            var classId = {{ class_id }};
+            var type = $('.btn-group .btn-secondary.active').data('type');
+            $.ajax({
+                url: "{% url 'teacher_app:coursework_details_data' %}",
+                type: 'POST',
+                data: {
+                    'id': id,
+                    'class_id': classId,
+                    'type': type,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    var data = response.data;
+                    updateBarChart(data.exercisequestion_data);
+                    var studentScores = data.student_scores_data;
+                    var tbody = $('#student-scores-table tbody');
+                    tbody.empty(); // 清空表格当前内容
+                    studentScores.forEach(function (student) {
+                        var tr = $('<tr></tr>');
+                        tr.append($('<td></td>').text(student.name));
+                        tr.append($('<td></td>').text(student.userid));
+                        tr.append($('<td></td>').text(student.total_score));
+                        tbody.append(tr);
+                    });
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    })
+
+    // 更新柱状图的函数
+    function updateBarChart(data) {
+        var myChart = echarts.init(document.getElementById('zhutu'));
+        var option = {
+            xAxis: {
+                type: 'category',
+                data: data.map(function (item) {
+                    return item.question_title;
+                })
+            },
+            yAxis: {
+                type: 'value',
+                min: 0,
+                max: 1,
+                axisLabel: {
+                    formatter: function (value) {
+                        return (value * 100) + "%";
+                    }
+                }
+            },
+            series: [{
+                data: data.map(function (item) {
+                    return item.completion_rate;
+                }),
+                type: 'bar',
+                barWidth: '55'
+            }]
+        };
+        myChart.setOption(option);
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("table tbody tr").click(function () {
+            $("table tbody tr").css("background-color", ""); // 添加这行，恢复所有行原本的背景颜色
+            $(this).css("background-color", "#f2f2f2"); // 让点击的那一行变为灰色
+        });
+    });
+</script>
+{% endblock %}

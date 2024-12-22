@@ -1,0 +1,215 @@
+{% extends 'teacher_base.html' %}
+{% load static %}
+
+{% block title %}发布通知{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+<style>
+.recipient-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap; /* 允许子元素在必要时换行 */
+    height: 100vh;
+}
+
+.class-list {
+    width: 20%;
+    background-color: #f9f9f9; /* 浅灰色背景 */
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border: 2px solid #d3d3d3; /* 深灰色边框 */
+    border-radius: 10px;
+}
+
+.class-list h3 {
+    margin-top: 0;
+}
+
+.class-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.class-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd; /* 为列表项添加边界 */
+}
+
+.notification-panel {
+    position: relative;
+    width: 80%; /* 占据总宽度的4/5 */
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #f9f9f9; /* 浅灰色背景 */
+    border: 2px solid #d3d3d3; /* 深灰色边框 */
+    border-radius: 10px;
+}
+
+/* 应用于不属于.nav-search中.input-group的样式 */
+.input-group:not(.nav-search .input-group) {
+    margin-bottom: 10px;
+}
+
+.input-group:not(.nav-search .input-group) label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input-group:not(.nav-search .input-group) input,
+.input-group:not(.nav-search .input-group) textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 3px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.input-group:not(.nav-search .input-group) textarea {
+    height: 450px; /* 调整高度以适应更多屏幕 */
+}
+
+.submit-button {
+    float: right;
+}
+
+/* 媒体查询，为大屏幕调整布局 */
+@media (min-width: 1200px) {
+    .class-list {
+        width: 25%; /* 在大屏幕上增加班级列表的宽度 */
+    }
+
+    .notification-panel {
+        width: 75%; /* 相应减少通知面板的宽度 */
+    }
+}
+
+@media (min-width: 1800px) {
+    .class-list {
+        width: 20%; /* 在更大的屏幕上减少班级列表的宽度 */
+    }
+
+    .notification-panel {
+        width: 80%; /* 相应增加通知面板的宽度 */
+    }
+
+    .input-group:not(.nav-search .input-group) textarea {
+        height: 500px; /* 在更大的屏幕上增加文本区域的高度 */
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="container">
+                        <!-- 班级列表部分 -->
+                        <div class="class-list">
+                            <h3>班级列表</h3>
+                            <ul>
+                                {% for class in classes %}
+                                    <li data-class-id="{{ class.id }}">{{ class.name }}</li>
+                                {% empty %}
+                                    <li>暂无班级</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <!-- 通知发布窗口 -->
+                        <div class="notification-panel">
+                            <h2>发布通知</h2>
+                            <form id="notificationForm" method="post" action="{% url 'teacher_app:create_notice' %}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <label for="recipient">收件人:</label>
+                                    <div id="recipient" class="recipient-container"></div>
+                                    <input type="hidden" id="recipientIds" name="recipients">
+                                </div>
+                                <div class="input-group">
+                                    <label for="title">通知标题:</label>
+                                    <input id="title" name="title" placeholder="请输入通知标题" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="message">消息内容:</label>
+                                    <textarea id="message" name="message" placeholder="请输入您的消息"
+                                              required></textarea>
+                                </div>
+                                <button type="submit" class="btn-default submit-button">发送</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('notificationForm').onsubmit = function (e) {
+        var recipientIds = document.getElementById('recipientIds').value;
+        var title = document.getElementById('title').value.trim();
+        var message = document.getElementById('message').value.trim();
+        // 这里检查各个输入值是否为空
+        if (recipientIds === '' || title === '' || message === '') {
+            e.preventDefault(); // 阻止表单提交
+            alert('请确保所有输入框都已填写。'); // 弹出提醒
+        }
+    };
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var classItems = document.querySelectorAll('.class-list ul li');
+        var recipientContainer = document.querySelector('.recipient-container');
+        var recipientIdsInput = document.querySelector('#recipientIds');
+
+        function updateRecipientIds() {
+            var classTags = recipientContainer.querySelectorAll('.class-tag');
+            var ids = Array.from(classTags).map(function (tag) {
+                return tag.dataset.classId;
+            });
+            recipientIdsInput.value = ids.join(',');  // 更新input元素的值
+        }
+
+        classItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                var className = this.textContent;
+                var classId = this.dataset.classId;
+                // 检查是否已经添加了这个班级的卡片
+                var existingTags = recipientContainer.querySelectorAll('.class-tag');
+                var isClassAlreadyAdded = Array.from(existingTags).some(function (tag) {
+                    return tag.dataset.classId === classId;
+                });
+                if (isClassAlreadyAdded) {
+                    return;
+                }
+                // 创建班级卡片
+                var tag = document.createElement('div');
+                tag.className = 'class-tag';
+                tag.dataset.classId = classId;
+                tag.textContent = className;
+                // 创建移除按钮
+                var removeBtn = document.createElement('span');
+                removeBtn.textContent = '❌';
+                removeBtn.className = 'remove-class';
+                removeBtn.onclick = function () {
+                    recipientContainer.removeChild(tag);
+                    updateRecipientIds();
+                };
+                tag.appendChild(removeBtn);
+                recipientContainer.appendChild(tag);
+                updateRecipientIds();
+            });
+        });
+    });
+</script>
+{% endblock %}

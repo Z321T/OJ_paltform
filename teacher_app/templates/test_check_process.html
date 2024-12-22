@@ -1,0 +1,300 @@
+{% extends 'teacher_base.html' %}
+{% load static %}
+
+{% block title %}考试实况{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
+<style>
+        .table-container table {
+            width: 100%; /* 表格宽度充满容器 */
+            height: 100%; /* 表格高度充满容器 */
+            border-collapse: collapse; /* 合并表格边框 */
+            overflow: auto;
+
+        }
+
+        /* 为偶数行设置灰色背景 */
+        .table-container tr:nth-child(even) {
+            background-color: #f2f2f2; /* 浅灰色背景 */
+        }
+
+        /* 为奇数行设置白色背景 */
+        .table-container tr:nth-child(odd) {
+            background-color: #ffffff; /* 白色背景 */
+        }
+
+        .table-container tr {
+            height: 30px; /* 设置每一行的固定高度为50px */
+        }
+
+        .table-container th, .table-container td {
+            border: 1px solid #ddd; /* 设置单元格边框 */
+            text-align: left; /* 文本左对齐 */
+            padding: 8px; /* 单元格内边距 */
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .dropdown {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+        }
+
+        .dropdown-label {
+            margin-right: 20px; /* 标签与下拉框之间的间距 */
+            font-size: 18px !important; /* 增加字体大小 */
+            white-space: nowrap; /* 防止换行 */
+        }
+
+        .dropbtn {
+            background-color: white;
+            color: grey;
+            font-size: 16px !important;
+            border: 2px solid black; /* 添加边框 */
+            cursor: pointer;
+            border-radius: 4px; /* 边框圆角 */
+            min-width: 220px; /* 确保按钮足够宽以显示文本 */
+            text-align: left; /* 文本左对齐 */
+            /* 留出空间显示下拉箭头 */
+            padding: 16px 16px 16px 10px;
+            position: relative; /* 为下拉箭头定位 */
+        }
+
+        .dropbtn:focus,
+        .dropbtn:active,
+        .dropbtn:visited,
+        .dropbtn:disabled,
+        .dropbtn[aria-expanded="false"] {
+            color: black !important; /* 保持字体黑色 */
+        }
+
+        .dropbtn::after {
+            content: "▼";
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            height: 16px;
+        }
+
+        .dropdown:hover .dropbtn {
+            background-color: whitesmoke;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="col-md-12 stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive"
+                                 style="max-height: 568px; overflow-y: auto; overflow-x: hidden;">
+                                <!-- 添加了 style 属性 -->
+                                <div id="recent-purchases-listing_wrapper"
+                                     class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6"></div>
+                                        <div class="col-sm-12 col-md-6"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="container">
+                                                <div class="dropdown">
+                                                    <label for="examType" class="dropdown-label">考试类型：</label>
+                                                    <select id="examType" class="dropbtn">
+                                                        <option value="">请选择考试类型</option>
+                                                        <option value="adminexam" {% if exam_type == 'adminexam' %}selected{% endif %}>年级考试</option>
+                                                        <option value="classexam" {% if exam_type == 'classexam' %}selected{% endif %}>班级考试</option>
+                                                    </select>
+                                                </div>
+                                                <div class="dropdown">
+                                                    <label for="examName" class="dropdown-label">考试名称：</label>
+                                                    <select id="examName" class="dropbtn">
+                                                        <option value="">请选择考试名称</option>
+                                                        <!-- 动态加载选项 -->
+                                                        {% if selected_exam %}
+                                                            <option value="{{ selected_exam.id }}" selected>{{ selected_exam.title }}</option>
+                                                        {% endif %}
+                                                    </select>
+                                                </div>
+                                                <button id="queryButton" class="btn-default" style="float: right;height:40px;">查询</button>
+                                            </div>
+                                            <table id="recent-purchases-listing" class="table dataTable no-footer"
+                                                   role="grid">
+                                                <thead>
+                                                <tr role="row">
+                                                    <th class="sorting_asc" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-sort="ascending"
+                                                        aria-label="提交编号"
+                                                        style="width: 10%;">提交编号
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="学号"
+                                                        style="width: 10%;">学号
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="题目编号"
+                                                        style="width: 10%;">题目编号
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="结果"
+                                                        style="width: 10%;">结果
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="内存"
+                                                        style="width: 10%;">内存
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="耗时"
+                                                        style="width: 10%;">耗时
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="语言"
+                                                        style="width: 10%;">语言
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="代码长度"
+                                                        style="width: 10%;">代码长度
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="IP地址"
+                                                        style="width: 10%;">IP地址
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="提交时间"
+                                                        style="width: 10%;">提交时间
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                    <tbody>
+                                                        {% if not exam_type or not exam_id %}
+                                                            <tr>
+                                                                <td colspan="10" style="text-align: center;">请选择考试类型与考试名称</td>
+                                                            </tr>
+                                                        {% else %}
+                                                            {% for submission in submissions %}
+                                                                <tr role="row" class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                                    <td>{{ submission.submission_id }}</td>
+                                                                    <td>{{ submission.student_id }}</td>
+                                                                    <td>{{ submission.question.id }}</td>
+                                                                    <td>{{ submission.result }}</td>
+                                                                    <td>{{ submission.memory }}</td>
+                                                                    <td>{{ submission.time }}</td>
+                                                                    <td>{{ submission.language }}</td>
+                                                                    <td>{{ submission.code_length }}</td>
+                                                                    <td>{{ submission.ip_address }}</td>
+                                                                    <td>{{ submission.submission_time }}</td>
+                                                                </tr>
+                                                            {% empty %}
+                                                                <tr>
+                                                                    <td colspan="10" style="text-align: center;">没有提交记录</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </tbody>
+                                                </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        var $examType = $('#examType');
+        var $examName = $('#examName');
+        var isExamNameLoaded = false; // 用于判断 examName 是否已加载过
+
+        function loadExamNames(examType, selectedExamId = null) {
+            $examName.empty().append(new Option('加载中...', ''));
+            isExamNameLoaded = true; // 设置 examName 已加载
+
+            $.ajax({
+                url: "{% url 'teacher_app:get_exam_names' %}",
+                type: 'GET',
+                data: {
+                    'exam_type': examType
+                },
+                success: function (response) {
+                    $examName.empty().append(new Option('请选择考试名称', ''));
+                    if (response.exam_names && response.exam_names.length) {
+                        response.exam_names.forEach(function (exam) {
+                            var option = new Option(exam.name, exam.id);
+                            if (exam.id === selectedExamId) {
+                                option.selected = true;
+                            }
+                            $examName.append(option);
+                        });
+                    } else {
+                        $examName.append(new Option('无可用考试', ''));
+                    }
+                },
+                error: function () {
+                    alert('获取考试名称失败，请重试');
+                    $examName.empty().append(new Option('加载失败', ''));
+                }
+            });
+        }
+
+        // 当点击 examName 下拉框时，执行加载考试名称的操作
+        $examName.on('click', function () {
+            var examType = $examType.val();
+            if (examType && !isExamNameLoaded) { // 如果 examType 已选择且 examName 未加载
+                loadExamNames(examType);
+            }
+        });
+
+        $('#queryButton').on('click', function () {
+            var examType = $examType.val();
+            var examId = $examName.val();
+            if (!examType || !examId) {
+                alert('请先选择考试类型和考试名称');
+                return;
+            }
+            window.location.href = "{% url 'teacher_app:test_check_process' %}?exam_type=" + examType + "&exam_id=" + examId;
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var dropbtns = document.querySelectorAll('.dropbtn');
+
+        dropbtns.forEach(function (dropbtn) {
+            dropbtn.addEventListener('change', function () {
+                if (dropbtn.value) {
+                    dropbtn.style.color = 'black'; // 选择后字体颜色为黑色
+                } else {
+                    dropbtn.style.color = 'grey'; // 未选择时字体颜色为灰色
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

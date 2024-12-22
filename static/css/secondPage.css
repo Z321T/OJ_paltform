@@ -1,0 +1,16 @@
+.btn-default {
+            background-color: #ffffff; /* 白色背景 */
+            color: #333333; /* 深色文本 */
+            border: 1px solid #cccccc; /* 浅灰色边框 */
+            padding: 10px 20px; /* 内填充 */
+            font-size: 16px; /* 文本大小 */
+            border-radius: 5px; /* 圆角边框 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 轻微阴影 */
+            transition: all 0.3s; /* 平滑过渡效果 */
+        }
+
+        .btn-default:hover, .btn-default:focus {
+            border-color: #66afe9; /* 悬停/聚焦时的蓝色边框 */
+            outline: none; /* 移除聚焦时的轮廓线 */
+            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6); /* 悬停/聚焦时的阴影效果 */
+        }

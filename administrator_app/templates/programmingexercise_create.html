@@ -1,0 +1,111 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}GUI题目{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/secondPage.css' %}">    
+<style>
+        .container {
+            display: flex;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .create-panel {
+            position: relative;
+            width: 80%; /* 占据总宽度的2/3 */
+            margin-top: -80px;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f9f9f9; /* 浅灰色背景 */
+            border: 2px solid #d3d3d3; /* 深灰色边框 */
+            border-radius: 10px;
+        }
+
+        /* 应用于不属于.nav-search中.input-group的样式 */
+        .input-group:not(.nav-search .input-group) {
+            margin-bottom: 10px;
+        }
+
+        .input-group:not(.nav-search .input-group) label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .input-group:not(.nav-search .input-group) input,
+        .input-group:not(.nav-search .input-group) textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 3px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+
+        }
+
+        .input-group:not(.nav-search .input-group) textarea {
+            height: 400px;
+        }
+        
+        .submit-button {
+            float: right;
+        }
+</style>    
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                     <div class="col-md-12 stretch-card">
+                    <div class="card">
+                                <div class="card">
+                        <!-- 发布窗口 -->
+                            <h2>发布GUI练习题</h2>
+                            <form id="programmingexercise" method="post"
+                                  action="{% url 'administrator_app:programmingexercise_create' %}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <label for="title">题目标题:</label>
+                                    <input id="title" name="title" placeholder="请输入题目标题">
+                                </div>
+                                <div class="input-group">
+                                    <label for="content">题目内容：</label>
+                                    <textarea id="content" name="content" placeholder="请输入题目内容"></textarea>
+                                </div>
+                                <div class="input-group">
+                                    <label for="deadline">截止时间：</label>
+                                    <input type="datetime-local" id="deadline" name="deadline"
+                                           placeholder="请输入截止时间">
+                                </div>
+                                <button type="submit" class="btn-default submit-button">发布题目</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>    
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('programmingexercise').onsubmit = function (event) {
+
+        var title = document.getElementById('title').value.trim();
+        var content = document.getElementById('content').value.trim();
+        var deadline = document.getElementById('deadline').value.trim();
+
+        var errorMessages = [];
+
+        if (!title) errorMessages.push('“题目标题”为必填项。');
+        if (!content) errorMessages.push('“题目内容”为必填项。');
+        if (!deadline) errorMessages.push('“截止时间”为必填项。');
+
+        if (errorMessages.length > 0) {
+            event.preventDefault(); // 阻止表单提交
+            alert('请填写所有必填信息:\n' + errorMessages.join('\n'));
+        }
+    };
+</script>    
+{% endblock %}

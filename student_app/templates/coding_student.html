@@ -1,0 +1,340 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Required meta tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>编程页面</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="{% static 'student_app/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'student_app/css/vendor.bundle.base.css' %}">
+    <!-- endinject -->
+    <!-- plugin css for this page -->
+    <link rel="stylesheet" href="{% static 'student_app/css/dataTables.bootstrap4.css' %}">
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="{% static 'student_app/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'student_app/css/test.css' %}">
+    <!-- endinject -->
+    <link rel="shortcut icon" href="{% static 'student_app/photo/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'student_app/css/coding.css' %}">
+    <link rel="stylesheet" href="{% static 'node_modules/MDI/@mdi/font/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/secondPage.css' %}">
+    <style type="text/css">/* Chart.js */
+    @keyframes chartjs-render-animation {
+        from {
+            opacity: .99
+        }
+        to {
+            opacity: 1
+        }
+    }
+
+    .chartjs-size-monitor-expand > div {
+        position: absolute;
+        width: 1000000px;
+        height: 1000000px;
+        left: 0;
+        top: 0
+    }
+
+    .chartjs-size-monitor-shrink > div {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        left: 0;
+        top: 0
+    }
+
+
+    .container-flex {
+        display: flex;
+        flex: 1;
+    }
+
+    .problem-container, .editor-container {
+        flex: 1;
+        overflow: auto;
+        height: 100vh;
+        padding: 20px;
+        border-width: 0 2px 0 0;
+        box-sizing: border-box;
+        border-radius: 10px;
+    }
+
+    .editor-container {
+        position: relative;
+        display: flex; /* 使用 flex 布局 */
+        flex-direction: column; /* 子元素按列排列 */
+        justify-content: space-between; /* 在垂直方向上分配空间 */
+    }
+
+    #debugger {
+        position: absolute; /* 使用固定定位 */
+        bottom: 0; /* 在视窗的底部 */
+        left: 0; /* 与视窗的左边缘对齐 */
+        right: 2px; /* 与视窗的右边缘对色以确保调试信息可齐，确保它横跨整个屏幕宽度 */
+        background: #fff; /* 添加背景读 */
+        border-top: 1px solid royalblue; /* 调试器上方的边界线 */
+        z-index: 9999; /* 确保它在其他内容之上 */
+        box-sizing: border-box;
+        padding: 10px; /* 适当的内间距 */
+        height: 300px; /* 固定高度 */
+        overflow: auto; /* 内容太多时可以滚动查看 */
+    }
+
+    /* 切换按钮样式 */
+    .toggle-buttons {
+        display: flex;
+        align-items: center;
+        border-top: 1px solid #ccc; /* 上边框 */
+        padding: 1px;
+        border-radius: 10px 10px 10px 10px; /* 圆角矩形样式，上方左右两个角 */
+        background-color: whitesmoke; /* 按钮背景颜色 */
+    }
+
+    /* 单个按钮样式 */
+    .toggle-buttons button {
+        padding: 2px 10px;
+        border: none;
+        cursor: pointer;
+        background-color: transparent;
+        border-right: 1px solid #ccc;
+    }
+
+    /* 按钮激活状态的样式 */
+    .toggle-buttons button:focus {
+        background-color: floralwhite; /* 激活状态背景颜色 */
+    }
+
+    </style>
+</head>
+<!-- 引入Monaco编辑器的静态文件 -->
+<script src="{% static 'node_modules/monaco-editor/min/vs/loader.js' %}"></script>
+
+<body>
+<div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="navbar-brand-wrapper d-flex justify-content-center">
+            <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
+                <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+                    <span class="mdi mdi-sort-variant"></span>
+                </button>
+            </div>
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+            <ul class="navbar-nav mr-lg-4 w-100">
+                <li class="nav-item nav-search d-none d-lg-block w-100">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                <span class="input-group-text" id="search">
+                  <i class="mdi mdi-magnify"></i>
+                </span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Search now" aria-label="search"
+                               aria-describedby="search">
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+            <ul class="nav">
+
+                {% for question in question_set.questions.all %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);"
+                           onclick="redirectToSpecificQuestion({{ question.id }})">
+                            <i class="mdi mdi-dice-1 menu-icon"></i>
+                            <span class="menu-title">{{ question.title }}</span>
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="nav-item">
+                        <span class="nav-link">暂无题目</span>
+                    </li>
+                {% endfor %}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="redirectToList({{ question_set.id }})">
+                        <i class="mdi mdi-keyboard-return menu-icon"></i>
+                        <span class="menu-title">返回</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="container-flex">
+                <!-- Left side (Problem Info and Submission Record) -->
+                <div class="problem-container">
+                    <!-- Toggle buttons -->
+                    <div class="toggle-buttons">
+                        <button id="infoBtn" onclick="showPanel('problem-info')">题目信息</button>
+                        <button id="recordBtn" onclick="showPanel('submission-record')">提交记录</button>
+                    </div>
+                    <!-- Problem Info Panel -->
+                    <div id="problem-info" class="panel">
+                        <!-- 题目信息内容 -->
+                        <p>题目内容: </p>
+                        <p>{{ question.content }}</p>
+                        <p>内存限制: {{ question.memory_limit }} MB</p>
+                        <p>时间限制: {{ question.time_limit }} 秒</p>
+                    </div>
+                    <!-- Submission Record Panel -->
+                    <div id="submission-record" class="panel" style="display: none;">
+                        <!-- 提交记录内容 -->
+                        <p>提交记录</p>
+
+                    </div>
+                </div>
+                <!-- Right side (Editor and Debugger) -->
+                <div class="editor-container" id="editor">
+                    <!-- Monaco编辑器将在这里初始化 -->
+                    <!-- 表单 -->
+                    <form id="codeForm" action="{% url 'Testingcode_app:run-cpp' %}" method="post">
+                        {% csrf_token %}
+                        <textarea id="codeTextArea" style="display: none;"></textarea> <!-- 隐藏 textarea -->
+                        <input type="hidden" name="code" id="hiddenCodeInput">
+                        <!-- 使用之前按钮的样式和位置，但移除了 onclick 属性 -->
+                        <button class="btn-default" id="runCode" type="submit">提交</button>
+                    </form>
+                    <div id="debugger" class="debugger">
+
+                        <!-- 调试信息 -->
+                        <p>运行信息</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- plugins:js -->
+<script type="text/javascript" src="{% static 'student_app/js/vendor.bundle.base.js' %}"></script>
+<!-- endinject -->
+<!-- Plugin js for this page-->
+<script type="text/javascript" src="{% static 'student_app/js/Chart.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/jquery.dataTables.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/dataTables.bootstrap4.js' %}"></script>
+<!-- End plugin js for this page-->
+<!-- inject:js -->
+<script type="text/javascript" src="{% static 'student_app/js/off-canvas.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/hoverable-collapse.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/template.js' %}"></script>
+<!-- endinject -->
+<!-- Custom js for this page-->
+<script type="text/javascript" src="{% static 'student_app/js/dashboard.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/data-table.js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/jquery.dataTables(1).js' %}"></script>
+<script type="text/javascript" src="{% static 'student_app/js/dataTables.bootstrap4(1).js' %}"></script>
+<!-- End custom js for this page-->
+<script src="{% static 'student_app/js/jquery.cookie.js' %}" type="text/javascript"></script>
+<script src="{% static 'student_app/js/homework.js' %}"></script>
+<script src="{% static 'student_app/js/current-homework.js' %}"></script>
+<script src="{% static 'student_app/js/editor_setup.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        // 表单提交事件
+        $('#codeForm').on('submit', function (event) {
+            event.preventDefault(); // 阻止表单的默认提交行为
+            var code = editor.getValue(); // 获取代码编辑器中的内容
+            var types = "{{ types }}";
+            var questionId = {{ question.id }};
+            // AJAX请求
+            $.ajax({
+                url: "{% url 'Testingcode_app:run-cpp' %}",
+                type: 'POST',
+                data: {
+                    'code': code,
+                    'types': types,
+                    'questionId': questionId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    let debuggerContent = '';
+
+                    if (response.status === 'pass')
+                    {
+                         debuggerContent = `<p>所有测试用例通过</p>`;
+                    }
+                    else if (response.status === 'fail')
+                    {
+                        debuggerContent = `<p>部分测试用例未通过</p>
+                           <p>通过的测试用例数量: ${response.passed_tests}</p>
+                           <p>总测试用例数量: ${response.testcases}</p>`;
+                    }
+                    else if (response.status === 'compile error')
+                    {
+                        debuggerContent = `<p>编译错误</p><p>错误信息: ${response.error}</p>`;
+                    }
+                    else if (response.status === 'other error')
+                    {
+                         debuggerContent = `<p>其他错误</p><p>错误信息: ${response.error}</p>`;
+                    }else if (response.status === 'timeout') {
+                                    debuggerContent = `<p>运行超时</p>`;
+                    }
+
+                     // 添加运行时间和内存信息
+                    if (response.execution_time !== undefined && response.max_memory !== undefined) {
+                        debuggerContent += `<p>运行时间: ${response.execution_time} ms</p>
+                                            <p>内存使用: ${response.max_memory} KB</p>`;
+                    }
+
+                    // 更新调试器内容并显示
+                    $('#debugger').empty().append(debuggerContent).show();
+                },
+
+                error: function (response) {
+                    alert(response.responseJSON.message ||'未知错误');
+                }
+            });
+        });
+    });
+</script>
+<script>
+    var editor;  // 定义全局变量以存储编辑器实例
+    require.config({
+        paths: {'vs': '{% static "node_modules/monaco-editor/min/vs" %}'}
+    });
+    require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('editor'), {
+            value: 'cout << "Hello, world!" << endl;',
+            language: 'cpp',
+            theme: 'vs-light'
+        });
+    });
+</script>
+<script>
+    function redirectToSpecificQuestion(questionId) {
+        window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+    }
+</script>
+<script>
+    var types = "{{ types }}";
+
+    function redirectToSpecificQuestion(questionId) {
+        if (types === 'exercise')
+            window.location.href = "{% url 'student_app:coding_exercise' '123' %}".replace('123', questionId);
+        else if (types === 'exam')
+            window.location.href = "{% url 'student_app:coding_exam' '123' %}".replace('123', questionId);
+        else
+            window.location.href = "{% url 'student_app:coding_adminexam' '123' %}".replace('123', questionId);
+    }
+
+    function redirectToList(question_setId) {
+        if (types === 'exercise')
+            window.location.href = "{% url 'student_app:practice_list' '123' %}".replace('123', question_setId);
+        else if (types === 'exam')
+            window.location.href = "{% url 'student_app:teacherexam_list' '123' %}".replace('123', question_setId);
+        else
+            window.location.href = "{% url 'student_app:adminexam_list' '123' %}".replace('123', question_setId);
+    }
+</script>
+</body>
+</html>

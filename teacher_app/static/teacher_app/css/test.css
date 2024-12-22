@@ -1,0 +1,29 @@
+.card-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px; /* 设置矩形之间的间隙 */
+        padding: 20px;
+    }
+
+    .card {
+        background-color: #fff; /* 白色背景 */
+        border-radius: 10px; /* 圆角边框 */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 轻微的阴影 */
+        padding: 20px;
+        display: flex;
+        justify-content: space-between; /* 内容分散对齐 */
+    }
+
+    .card-item {
+        margin: 0 10px; /* 每个项目之间的间距 */
+    }
+
+    .card-title {
+        font-weight: bold; /* 标题加粗 */
+    }
+
+    .table-responsive {
+        max-height: 300px;
+        overflow-y: auto; /* 允许垂直滚动 */
+        overflow-x: hidden; /* 隐藏水平滚动条 */
+    }

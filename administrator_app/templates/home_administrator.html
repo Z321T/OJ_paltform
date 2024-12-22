@@ -1,0 +1,219 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}学情分析-GUI题目{% endblock %}
+
+{% block extra_css %}
+<style>
+        table tbody tr:hover {
+            background-color: #f2f2f2;
+        }
+</style>    
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-md-12 grid-margin">
+                        <div class="d-flex justify-content-between flex-wrap">
+                            <div class="d-flex align-items-end flex-wrap">
+                                <div class="mr-md-3 mr-xl-5">
+                                    <h2>Welcome to C++ Easy</h2>
+                                    <p class="mb-md-0">C++程序设计教学平台</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex" id="proBanner">
+                    <div class="col-md-12 grid-margin">
+                        <div class="card bg-gradient-primary border-0">
+                            <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body dashboard-tabs p-0">
+                                <div class="tab-content py-0 px-0">
+                                    <!--全体学生完成情况-->
+                                    <div class="row">
+                                        <div class="col-md-7 grid-margin stretch-card">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <p class="card-title">全体学生完成情况</p>
+                                                    <div id="cash-deposits-chart-legend"
+                                                         class="d-flex justify-content-center pt-3"></div>
+                                                    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                                                    <div id="finishChart" style="width: 600px;height:400px;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--GUI题目-->
+                                        <div class="col-md-5 grid-margin stretch-card">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <!-- 添加切换按钮 -->
+                                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-type="programmingexercise">GUI题目
+                                                        </button>
+                                                        <button type="button" class="btn btn-secondary exam-button"
+                                                                data-type="exam">年级考试
+                                                        </button>
+                                                    </div>
+                                                    <div class="table-responsive"
+                                                         style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+                                                        <div class="row">
+                                                            <table class="table">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th scope="col">名称</th>
+                                                                    <th scope="col">发布时间</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                {% for question in coursework %}
+                                                                    <tr data-id="{{ question.id }}">
+                                                                        <td>{{ question.title }}</td>
+                                                                        <td>{{ question.date_posted }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- main-panel ends -->
+        </div>    
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 基于准备好的dom，初始化echarts实例
+    var finishChart = echarts.init(document.getElementById('finishChart'));
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            x: 'center'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        legend: {
+            orient: 'vertical',
+            left: 'left',
+            data: ['已完成', '未完成']
+        },
+        series: [
+            {
+                name: '完成情况',
+                type: 'pie',
+                radius: '55%',
+                center: ['50%', '60%'],
+                data: [
+                    {value: 335, name: '已完成'},
+                    {value: 310, name: '未完成'}
+                ],
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        ]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    finishChart.setOption(option);
+</script>
+<script>
+    $(function () {
+        $('.btn-group .btn-secondary[data-type="programmingexercise"]').addClass('active')
+
+        $('.btn-group .btn-secondary.exam-button').click(function () {
+            window.location.href = "{% url 'administrator_app:home_administrator_exam' %}"
+        });
+
+        $('table tbody').on('click', 'tr', function () {
+            var id = $(this).data('id');
+            $.ajax({
+                url: "{% url 'administrator_app:programmingexercise_details_data' %}",
+                type: 'POST',
+                data: {
+                    'id': id,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    var data = response.data;
+                    updatePieChart(data.ratio_data);
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    })
+
+    // 更新饼图的函数
+    function updatePieChart(data) {
+        var myChart = echarts.init(document.getElementById('finishChart'));
+        var option = {
+            title: {
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: ['已完成', '未完成']
+            },
+            series: [
+                {
+                    name: '完成情况',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: [
+                        {value: data[0].completion_rate, name: '已完成'},
+                        {value: 1 - data[0].completion_rate, name: '未完成'}
+                    ],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        myChart.setOption(option);
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("table tbody tr").click(function () {
+            $("table tbody tr").css("background-color", ""); // 添加这行，恢复所有行原本的背景颜色
+            $(this).css("background-color", "#f2f2f2"); // 让点击的那一行变为灰色
+        });
+    });
+</script>    
+{% endblock %}

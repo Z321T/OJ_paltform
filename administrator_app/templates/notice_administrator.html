@@ -1,0 +1,173 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}通知{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/firstPage.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- partial -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row d-flex" id="proBanner">
+                        <div class="col-md-12 grid-margin">
+                            <div class="card bg-gradient-primary border-0">
+                                <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-title">通知列表</p>
+                                <div class="table-responsive"
+                                     style="max-height: 428px; overflow-y: auto; overflow-x: hidden;">
+                                    <!-- 添加了 style 属性 -->
+                                    <div id="recent-purchases-listing_wrapper"
+                                         class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12 col-md-6"></div>
+                                            <div class="col-sm-12 col-md-6"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table class="table dataTable no-footer" role="grid">
+                                                    <thead>
+                                                    <tr role="row">
+                                                        <th class="sorting_asc" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-sort="ascending"
+                                                            aria-label="Name: activate to sort column descending"
+                                                            style="width: 167.95px;">通知
+                                                        </th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-label="Office: activate to sort column ascending"
+                                                            style="width: 155.6px;">发布时间
+                                                        </th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="recent-purchases-listing" rowspan="1"
+                                                            colspan="1"
+                                                            aria-label="Price: activate to sort column ascending"
+                                                            style="width: 72.575px;">操作
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for notification in adminnotifications %}
+                                                        <tr role="row"
+                                                            class="{{ forloop.counter|divisibleby:2|yesno:'even,odd' }}">
+                                                            <td class="sorting_1"
+                                                                id="notification{{ notification.id }}">{{ notification.title }}
+                                                            </td>
+                                                            <td>{{ notification.date_posted }}</td>
+                                                            <td>
+                                                                <button class="button-class delete-notification btn-default"
+                                                                        data-notification-id="{{ notification.id }}">删除
+                                                                </button>
+                                                                <button class="button-class content-notification btn-default"
+                                                                        data-notification-id="{{ notification.id }}">详情
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    {% empty %}
+                                                        <tr>
+                                                            <td colspan="3" style="text-align: center;">暂无通知</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-5"></div>
+                                    <div class="col-sm-12 col-md-7">
+                                        <button onclick="window.location.href='{% url 'administrator_app:create_notice' %}'"
+                                                class="btn-default" style="float: right;">发布通知
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <!-- Modal -->
+        <div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="notificationModalLabel">通知</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="notificationModalContent">
+                        <!-- 通知内容将在这里显示 -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('.delete-notification').on('click', function () {
+            var notificationId = $(this).data('notification-id');
+            if (confirm('确定要删除这个通知吗？')) {
+                $.ajax({
+                    url: "{% url 'administrator_app:delete_notice' %}",
+                    type: 'POST',
+                    data: {
+                        'notification_id': notificationId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        window.location.reload()
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message);
+                    }
+                });
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.content-notification').on('click', function () {
+            var notificationId = $(this).data('notification-id');
+            $.ajax({
+                url: "{% url 'administrator_app:notification_content' %}",
+                type: 'POST',
+                data: {
+                    'notification_id': notificationId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    // 更新模态框的内容
+                    $('#notificationModalLabel').text(response.title);
+                    $('#notificationModalContent').text(response.content);
+                    // 显示模态框
+                    $('#notificationModal').modal('show');
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

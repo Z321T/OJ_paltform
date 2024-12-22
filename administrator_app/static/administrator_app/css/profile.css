@@ -1,0 +1,76 @@
+body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-card {
+        background-color: #fff;
+        margin: 50px auto;
+        border-radius: 15px; /* 圆润的边角 */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        position: relative;
+
+        width: 80%;
+        max-width: 700px;
+    }
+
+
+    .profile-image {
+        background-color: #e7e7e7;
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 5px solid #fff; /* 白色边框 */
+        margin-right: 20px;
+    }
+
+    .profile-image img {
+        width: 70%;
+        border-radius: 50%; /* 圆形图片 */
+    }
+
+    .profile-info {
+        flex-grow: 1;
+    }
+
+    .profile-info label {
+        display: block;
+        margin-bottom: .5rem;
+        color: #6f42c1;
+    }
+
+    .profile-info input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 10px; /* 圆润的输入框 */
+    }
+
+    .button-container {
+        text-align: center;
+        width: 100%;
+    }
+
+    .button {
+        background-color: #6f42c1;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px; /* 圆润的按钮 */
+        cursor: pointer;
+    }
+
+    .button:hover {
+        background-color: #5a3791;
+    }
+
+    /* 其他样式保持不变 */

@@ -1,0 +1,179 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登录</title>
+
+    <!--bootstrap的css文件-->
+    <link rel="stylesheet" href="{% static 'login/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'login/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'login/css/bubble_background.css' %}">
+</head>
+<body>
+<div class="d-flex justify-content-center align-items-center login-container">
+    <form class="login-form text-center">
+        <h1 class="mb-5 font-weight-linght">登录</h1>
+        <div class="form-group">
+            <input type="text" class="form-control rounded-pill form-control-lg" id="username" placeholder="账号">
+        </div>
+        <div class="form-group">
+            <input type="password" class="form-control rounded-pill form-control-lg" id="password" placeholder="密码">
+        </div>
+        <div class="forgot-link form-group d-flex justify-content-between align-items-center">
+
+
+        </div>
+        <button type="button" onclick="performLogin()" class="btn mt-5 rounded-pill btn-lg btn-custom btn-block">登录
+        </button>
+    </form>
+    <canvas id="canvas"></canvas>
+</div>
+<!-- Password Error Modal -->
+<div class="modal fade" id="passwordErrorModal" tabindex="-1" role="dialog" aria-labelledby="passwordErrorModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordErrorModalLabel">密码错误</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                请输入正确的密码。
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Empty Password Modal -->
+<div class="modal fade" id="emptyPasswordModal" tabindex="-1" role="dialog" aria-labelledby="emptyPasswordModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emptyPasswordModalLabel">密码不能为空</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                请输入密码。
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Empty username Modal -->
+<div class="modal fade" id="emptyusernameModal" tabindex="-1" role="dialog" aria-labelledby="emptyusernameModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emptyusernameModalLabel">账号不能为空</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                请输入账号。
+            </div>
+        </div>
+    </div>
+</div>
+<!-- username Error Modal -->
+<div class="modal fade" id="usernameErrorModal" tabindex="-1" role="dialog" aria-labelledby="usernameErrorModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="usernameErrorModalLabel">账号错误</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                请输入正确的账号。
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'login/js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'login/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'login/js/ForgetPassword.js' %}"></script>
+<script>
+    function performLogin() {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+
+        console.log('Sending data to backend:', {username: username, password: password});
+
+        if (username.trim() === "") {
+            // 账号为空，显示账号为空的模态框
+            $('#emptyusernameModal').modal('show');
+             // 不执行后续的AJAX请求
+        } else if (password.trim() === "") {
+            $('#emptyPasswordModal').modal('show');
+             // 不执行后续的AJAX请求
+        } else {
+            $.ajax({
+                url: '',  // 后端处理登录的API端点
+                method: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')  // 使用 getCookie 函数获取 CSRF token
+                    {#'X-CSRFToken': '{{ csrf_token }}'  // 使用 Django 上下文中的 CSRF token#}
+                },
+
+                data: JSON.stringify({username: username, password: password}),
+                success: function (response) {
+                    // 处理后端响应
+                    if (response.status === 'success') {
+                        alert('登录成功');
+                        // 成功登录后,重定向到下一个页面
+                        if (response.message.includes('student'))
+                            window.location.href = '/student/home/';
+                        else if (response.message.includes('teacher'))
+                            window.location.href = '/teacher/home/';
+                        else if (response.message.includes('administrator'))
+                            window.location.href = '/administrator/home/';
+
+                    } else {
+                        alert(response.message);
+                        // 检查特定的错误条件
+                        if (response.message.includes('Userid is incorrect')) {
+                            // 显示学号错误模态框
+                            $('#usernameErrorModal').modal('show');
+                        } else if (response.message.includes('Password is incorrect')) {
+                            // 显示密码错误模态框
+                            $('#passwordErrorModal').modal('show');
+                        }
+                    }
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // 判断cookie是否以指定的name开头
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+</body>
+</html>
