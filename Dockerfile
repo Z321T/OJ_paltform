@@ -34,7 +34,7 @@ CMD ["bash"]
 #COPY requirements.txt .
 #COPY ./administrator_app ./administrator_app
 #COPY ./BERT_app ./BERT_app
-#COPY ./CUMT ./CUMT
+#COPY ./OJ_platform ./OJ_platform
 #COPY ./django_celery ./django_celery
 #COPY ./login ./login
 #COPY ./node_modules ./node_modules
