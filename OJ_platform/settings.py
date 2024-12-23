@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 注册
+    'django_q',
     'student_app.apps.StudentConfig',
     'teacher_app.apps.TeacherAppConfig',
     'administrator_app.apps.AdministratorAppConfig',
@@ -120,7 +121,7 @@ CACHES = {
 DATABASES = {
       'default': {
           'ENGINE': 'django.db.backends.mysql',
-          'NAME': 'cumt_software_cup',
+          'NAME': 'oj_platform',
           'USER': 'root',
           'PASSWORD': 'root',
           'HOST': '127.0.0.1',
@@ -128,6 +129,19 @@ DATABASES = {
       }
   }
 
+# django-q的数据库配置
+Q_CLUSTER = {
+    'name': 'DjangoQ',
+    'workers': 5,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    'django_orm': True,  # 使用 Django ORM 来保存任务
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
