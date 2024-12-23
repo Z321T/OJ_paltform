@@ -198,7 +198,7 @@
                 <div class="editor-container" id="editor">
                     <!-- Monaco编辑器将在这里初始化 -->
                     <!-- 表单 -->
-                    <form id="codeForm" action="{% url 'Testingcode_app:run-cpp' %}" method="post">
+                    <form id="codeForm" action="{% url 'Testingcode_app:run_code' %}" method="post">
                         {% csrf_token %}
                         <textarea id="codeTextArea" style="display: none;"></textarea> <!-- 隐藏 textarea -->
                         <input type="hidden" name="code" id="hiddenCodeInput">
@@ -240,62 +240,79 @@
 <script src="{% static 'student_app/js/editor_setup.js' %}"></script>
 <script>
     $(document).ready(function () {
-        // 表单提交事件
-        $('#codeForm').on('submit', function (event) {
-            event.preventDefault(); // 阻止表单的默认提交行为
-            var code = editor.getValue(); // 获取代码编辑器中的内容
-            var types = "{{ types }}";
-            var questionId = {{ question.id }};
-            // AJAX请求
-            $.ajax({
-                url: "{% url 'Testingcode_app:run-cpp' %}",
-                type: 'POST',
-                data: {
-                    'code': code,
-                    'types': types,
-                    'questionId': questionId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    let debuggerContent = '';
-
-                    if (response.status === 'pass')
-                    {
-                         debuggerContent = `<p>所有测试用例通过</p>`;
+    // 表单提交事件
+    $('#codeForm').on('submit', function (event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+        var code = editor.getValue(); // 获取代码编辑器中的内容
+        var types = "{{ types }}";
+        var questionId = {{ question.id }};
+        // AJAX请求
+        $.ajax({
+            url: "{% url 'Testingcode_app:run_code' %}",
+            type: 'POST',
+            data: {
+                'code': code,
+                'types': types,
+                'questionId': questionId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    var taskId = response.task_id;
+                    if (taskId) {
+                        pollForResult(taskId);
+                    } else {
+                        alert('任务创建失败，请稍后重试');
                     }
-                    else if (response.status === 'fail')
-                    {
-                        debuggerContent = `<p>部分测试用例未通过</p>
-                           <p>通过的测试用例数量: ${response.passed_tests}</p>
-                           <p>总测试用例数量: ${response.testcases}</p>`;
-                    }
-                    else if (response.status === 'compile error')
-                    {
-                        debuggerContent = `<p>编译错误</p><p>错误信息: ${response.error}</p>`;
-                    }
-                    else if (response.status === 'other error')
-                    {
-                         debuggerContent = `<p>其他错误</p><p>错误信息: ${response.error}</p>`;
-                    }else if (response.status === 'timeout') {
-                                    debuggerContent = `<p>运行超时</p>`;
-                    }
-
-                     // 添加运行时间和内存信息
-                    if (response.execution_time !== undefined && response.max_memory !== undefined) {
-                        debuggerContent += `<p>运行时间: ${response.execution_time} ms</p>
-                                            <p>内存使用: ${response.max_memory} KB</p>`;
-                    }
-
-                    // 更新调试器内容并显示
-                    $('#debugger').empty().append(debuggerContent).show();
-                },
-
-                error: function (response) {
-                    alert(response.responseJSON.message ||'未知错误');
+                } else {
+                    alert(response.message);
                 }
-            });
+            },
+            error: function (response) {
+                alert(response.responseJSON.message || '未知错误');
+            }
         });
     });
+
+    function pollForResult(taskId) {
+        $.ajax({
+            url: "{% url 'Testingcode_app:get_result' %}",
+            type: 'GET',
+            data: {
+                'task_id': taskId
+            },
+            success: function (response) {
+                let debuggerContent = '';
+
+                if (response.status === 'pass') {
+                    debuggerContent = `<p>所有测试用例通过</p>`;
+                } else if (response.status === 'fail') {
+                    debuggerContent = `<p>部分测试用例未通过</p>
+                        <p>通过的测试用例数量: ${response.passed_tests}</p>
+                        <p>总测试用例数量: ${response.testcases}</p>`;
+                } else if (response.status === 'compile error') {
+                    debuggerContent = `<p>编译错误</p><p>错误信息: ${response.error}</p>`;
+                } else if (response.status === 'other error') {
+                    debuggerContent = `<p>其他错误</p><p>错误信息: ${response.error}</p>`;
+                } else if (response.status === 'timeout') {
+                        debuggerContent = `<p>运行超时</p>`;
+                }
+
+                // 添加运行时间和内存信息
+                if (response.execution_time !== undefined && response.max_memory !== undefined) {
+                    debuggerContent += `<p>运行时间: ${response.execution_time} ms</p>
+                                        <p>内存使用: ${response.max_memory} KB</p>`;
+                }
+
+                // 更新调试器内容并显示
+                $('#debugger').empty().append(debuggerContent).show();
+            },
+            error: function (response) {
+                alert(response.responseJSON.message || '未知错误');
+            }
+        });
+    }
+});
 </script>
 <script>
     var editor;  // 定义全局变量以存储编辑器实例

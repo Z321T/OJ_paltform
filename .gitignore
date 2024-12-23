@@ -19,3 +19,20 @@ logs/errors.log
 
 # 忽略每个APP下的migrations目录
 **/migrations/
+
+# Django 特定文件
+db.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.env
+
+# 静态文件
+staticfiles/
+media/
+
+# 本地配置文件
+local_settings.py
