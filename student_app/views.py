@@ -24,34 +24,30 @@ def home_student(request):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
     # 获取学生所在班级的通知
-    class_assigned = student.class_assigned
-    notifications = Notification.objects.filter(recipients=class_assigned).order_by('-date_posted')
+    notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     # 获取GUI编程题目
-    teacher = class_assigned.teacher
-    course_coordinator = teacher.course_coordinator
-    programing_exercises = ProgrammingExercise.objects.filter(posted_by=course_coordinator).order_by('-date_posted')
-
+    teacher = student.class_assigned.teacher
+    programing_exercises = ProgrammingExercise.objects.filter(posted_by=teacher.course_coordinator).order_by('-date_posted')
+    # 前端模版渲染内容
     context = {
         'active_page': 'home',
         'user_id': user_id,
         'notifications': notifications,
         'programing_exercises': programing_exercises,
     }
-
     return render(request, 'home_student.html', context)
-
 
 # 学生主页：提交报告
 @login_required
 def report_student(request, programmingexercise_id):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
-
+    # 获取课程负责人发布的GUI编程题目
     programming_exercise = get_object_or_404(ProgrammingExercise, id=programmingexercise_id)
-
+    # GET请求时发送渲染内容，并获取学生所在班级的通知
     if request.method == 'GET':
         notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
-
+        # 前端模版渲染内容
         context = {
             'active_page': 'home',
             'user_id': user_id,
@@ -59,17 +55,14 @@ def report_student(request, programmingexercise_id):
             'programming_exercise': programming_exercise,
         }
         return render(request, 'report_student.html', context)
-
     # 检查截止时间
     if timezone.now() > programming_exercise.deadline:
         return JsonResponse({'status': 'error', 'message': '截止时间已到，不能提交报告'}, status=400)
-
+    # POST请求时处理提交的报告
     if request.method == 'POST':
         reportstandards = ReportScore.objects.filter(teacher=student.class_assigned.teacher)
         if reportstandards:
-            # word_file = request.FILES['wordFile']
             word_file = request.FILES.get('wordFile')
-
             if word_file:
                 try:
                     # 读取文件内容并使用BytesIO创建一个类似文件的对象
@@ -87,7 +80,6 @@ def report_student(request, programmingexercise_id):
                     score_report(student, document, programmingexercise_id)
                 except Exception as e:
                     return JsonResponse({'status': 'error', 'message': f'处理Word文件时出错: {str(e)}'}, status=400)
-
             # 读取TXT文件内容
             code_file = request.FILES.get('txtFile')
             if code_file:
@@ -102,23 +94,19 @@ def report_student(request, programmingexercise_id):
                     os.unlink(temp_file.name)
                 except Exception as e:
                     return JsonResponse({'status': 'error', 'message': f'处理TXT文件时出错: {str(e)}'}, status=400)
-
             return JsonResponse({'status': 'success', 'message': '提交成功'}, status=200)
-
         else:
             return JsonResponse({'status': 'error', 'message': '教师未设置报告规范性评分标准'}, status=400)
-
 
 # 我的练习
 @login_required
 def practice_student(request):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
-
-    class_assigned = student.class_assigned
-    notifications = Notification.objects.filter(recipients=class_assigned).order_by('-date_posted')
-    exercises = Exercise.objects.filter(classes=class_assigned).order_by('-published_at')
-
+    # 获取学生所在班级的通知、班级的练习题目
+    notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
+    exercises = Exercise.objects.filter(classes=student.class_assigned).order_by('-published_at')
+    # 前端模版渲染内容
     context = {
         'active_page': 'practice',
         'user_id': user_id,
@@ -127,17 +115,16 @@ def practice_student(request):
     }
     return render(request, 'practice_student.html', context)
 
-
 # 我的练习：练习详情
 @login_required
 def practice_list(request, exercise_id):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
-
+    # 获取学生所在班级的通知
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     if request.method == 'GET':
         exercise = Exercise.objects.get(id=exercise_id)
-
+        # 前端模版渲染内容
         context = {
             'active_page': 'practice',
             'user_id': user_id,
@@ -146,17 +133,16 @@ def practice_list(request, exercise_id):
         }
         return render(request, 'practice_list.html', context)
 
-
 # 我的考试
 @login_required
 def exam_student(request):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
-    class_assigned = student.class_assigned
-    notifications = Notification.objects.filter(recipients=class_assigned).order_by('-date_posted')
-    th_exams = Exam.objects.filter(classes=class_assigned).order_by('-starttime')
-    admin_exams = AdminExam.objects.filter(classes=class_assigned).order_by('-starttime')
-
+    # 获取学生所在班级的通知、教师发布的班级考试th_exams、课程负责人发布的年级考试admin_exams
+    notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
+    th_exams = Exam.objects.filter(classes=student.class_assigned).order_by('-starttime')
+    admin_exams = AdminExam.objects.filter(classes=student.class_assigned).order_by('-starttime')
+    # 前端模版渲染内容
     context = {
         'active_page': 'exam',
         'user_id': user_id,
@@ -166,17 +152,16 @@ def exam_student(request):
     }
     return render(request, 'exam_student.html', context)
 
-
 # 我的考试：教师考试详情
 @login_required
 def teacherexam_list(request, exam_id):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
-
+    # 获取学生所在班级的通知
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     if request.method == 'GET':
         exam = Exam.objects.get(id=exam_id)
-
+        # 前端模版渲染内容
         context = {
             'active_page': 'exam',
             'user_id': user_id,
@@ -185,17 +170,16 @@ def teacherexam_list(request, exam_id):
         }
         return render(request, 'teacherexam_list.html', context)
 
-
 # 我的考试：管理员考试详情
 @login_required
 def adminexam_list(request, exam_id):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
-
+    # 获取学生所在班级的通知
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     if request.method == 'GET':
         exam = AdminExam.objects.get(id=exam_id)
-
+        # 前端模版渲染内容
         context = {
             'active_page': 'exam',
             'user_id': user_id,
@@ -204,15 +188,14 @@ def adminexam_list(request, exam_id):
         }
         return render(request, 'adminexam_list.html', context)
 
-
-# 学情分析
+# 学情分析-班级练习
 @login_required
 def analyse_exercise(request):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     exercises = Exercise.objects.filter(classes=student.class_assigned).order_by('-published_at')
-
+    # 前端模版渲染内容
     context = {
         'active_page': 'analyse',
         'user_id': user_id,
@@ -221,14 +204,14 @@ def analyse_exercise(request):
     }
     return render(request, 'analyse_exercise.html', context)
 
-
+# 学情分析-班级考试
 @login_required
 def analyse_exam(request):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
     exams = Exam.objects.filter(classes=student.class_assigned).order_by('-starttime')
-
+    # 前端模版渲染内容
     context = {
         'active_page': 'analyse',
         'user_id': user_id,
@@ -237,7 +220,7 @@ def analyse_exam(request):
     }
     return render(request, 'analyse_exam.html', context)
 
-
+# 学情分析-获取数据
 @login_required
 def analyse_data(request):
     student = Student.objects.get(pk=request.user.pk)
@@ -245,7 +228,7 @@ def analyse_data(request):
     if request.method == 'POST':
         data_type = request.POST.get('type')
         item_id = request.POST.get('id')
-
+        # 获取练习的平均得分和题目得分
         if data_type == 'exercise':
             # 计算每个练习的平均得分
             exercises = Exercise.objects.filter(classes=class_assigned)
@@ -338,23 +321,20 @@ def analyse_data(request):
         else:
             return JsonResponse({'status': 'error', 'message': 'Invalid data type'}, status=400)
 
-
 # 学生个人中心
 @login_required
 def profile_student(request):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
-
+    # 前端模版渲染内容
     context = {
         'active_page': 'profile',
         'user_id': user_id,
         'notifications': notifications,
         'student': student,
     }
-
     return render(request, 'profile_student.html', context)
-
 
 # 学生个人中心-编辑
 @login_required
@@ -362,22 +342,20 @@ def profile_student_edit(request):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
-
+    # 前端模版渲染内容
     context = {
         'active_page': 'profile',
         'user_id': user_id,
         'notifications': notifications,
         'student': student,
     }
-
+    # POST请求时处理提交的个人信息修改
     if request.method == 'POST':
         email = request.POST.get('email')
         student.email = email
         student.save()
         return redirect('student_app:profile_student')
-
     return render(request, 'profile_student_edit.html', context)
-
 
 # 学生个人中心-修改密码
 @login_required
@@ -385,19 +363,19 @@ def profile_student_password(request):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
-
+    # 前端模版渲染内容
     context = {
         'active_page': 'profile',
         'user_id': user_id,
         'notifications': notifications,
         'student': student,
     }
-
+    # POST请求时处理提交的密码修改
     if request.method == 'POST':
         old_password = request.POST.get('old_password')
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
-
+        # 检查旧密码是否正确
         if check_password(old_password, student.password):
             if new_password == confirm_password:
                 student.password = make_password(new_password)
@@ -409,11 +387,9 @@ def profile_student_password(request):
             return JsonResponse({'status': 'error', 'message': '旧密码错误'}, status=400)
     return render(request, 'password_student_edit.html', context)
 
-
 # 通知内容
 @login_required
 def notification_content(request):
-
     if request.method == 'POST':
         notification_id = request.POST.get('notification_id')
         notification = Notification.objects.get(id=notification_id)
@@ -422,64 +398,55 @@ def notification_content(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
-# 答题界面
+# 答题界面-班级练习
 @login_required
 def coding_exercise(request, exercisequestion_id):
-
     if request.method == 'GET':
         question = get_object_or_404(ExerciseQuestion, id=exercisequestion_id)
         question_set = question.exercise
-
         # 检查截止时间
         if timezone.now() > question_set.deadline:
             return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'}, status=400)
-
         types = 'exercise'
         return render(request, 'coding_student.html',
                       {'question_set': question_set, 'question': question, 'types': types})
     return render(request, 'coding_student.html')
 
-
+# 答题界面-班级考试
 @login_required
 def coding_exam(request, examquestion_id):
-
     if request.method == 'GET':
         question = get_object_or_404(ExamQuestion, id=examquestion_id)
         question_set = question.exam
-
         # 检查开始、截止时间
         if timezone.now() < question_set.starttime:
             return JsonResponse({'status': 'error', 'message': '考试尚未开始，不能作答'}, status=400)
         elif timezone.now() > question_set.deadline:
             return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'}, status=400)
-
         types = 'exam'
         return render(request, 'coding_student.html',
                       {'question_set': question_set, 'question': question, 'types': types})
     return render(request, 'coding_student.html')
 
-
+# 答题界面-年级考试
 @login_required
 def coding_adminexam(request, examquestion_id):
     student = Student.objects.get(pk=request.user.pk)
     user_id = student.userid
     notifications = Notification.objects.filter(recipients=student.class_assigned).order_by('-date_posted')
-
+    # 前端模版渲染内容
     context = {
         'user_id': user_id,
         'notifications': notifications,
     }
-
     if request.method == 'GET':
         question = get_object_or_404(AdminExamQuestion, id=examquestion_id)
         question_set = question.exam
-
         # 检查开始、截止时间
         if timezone.now() < question_set.starttime:
             return JsonResponse({'status': 'error', 'message': '考试尚未开始，不能作答'}, status=400)
         elif timezone.now() > question_set.deadline:
             return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'}, status=400)
-
         types = 'adminexam'
         context = {
             'user_id': user_id,
@@ -489,6 +456,5 @@ def coding_adminexam(request, examquestion_id):
             'types': types,
         }
         return render(request, 'coding_student.html', context)
-
     return render(request, 'coding_student.html', context)
 

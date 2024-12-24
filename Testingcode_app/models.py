@@ -115,7 +115,7 @@ class TestResult(models.Model):
     question_type = models.CharField(verbose_name="题目类型", max_length=255, null=True, blank=True)
     question_id = models.CharField(verbose_name="题目id", max_length=255, null=True, blank=True)
 
-    status = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=20, null=True, blank=True) # pass, fail, timeout, compile error, other error
     type = models.CharField(max_length=20, null=True, blank=True)
     error = models.TextField(null=True, blank=True)
     passed_tests = models.IntegerField(null=True, blank=True)
