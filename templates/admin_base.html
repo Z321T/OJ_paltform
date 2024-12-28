@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="{% static 'administrator_app/photo/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'node_modules/MDI/@mdi/font/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'student_app/css/test.css' %}">
-    <style type="text/css">/* Chart.js */
+    <style>
         @keyframes chartjs-render-animation {
             from {
                 opacity: .99
@@ -54,6 +54,50 @@
                 max-width: 950px; /* 设置模态框的最大宽度 */
                 height: 1000px; /* 设置模态框的高度 */
         }
+
+        #chatHistory {
+        height: 400px;
+        width: 930px;
+        overflow-y: scroll;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat {
+        margin-bottom: 10px;
+    }
+
+    .chat p {
+        margin: 0;
+    }
+
+    .chat strong {
+        font-weight: bold;
+    }
+
+    .chat ul, .chat ol {
+        margin-left: 20px;
+        margin-bottom: 15px;
+    }
+
+    .chat li {
+        margin-bottom: 5px;
+    }
+
+    .chat code {
+        background-color: #f5f5f5;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+
+    .chat pre {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+    }
     </style>
     {% block extra_css %}
     <!-- Additional CSS can be added by child templates -->
@@ -183,7 +227,7 @@
     <div class="modal-dialog modal-custom" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="aiModalLabel">讯飞星火小助手</h5>
+                <h5 class="modal-title" id="aiModalLabel">Coding小助手</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -216,6 +260,7 @@
     </div>
 </div>
 <!-- plugins:js -->
+<script src="{% static 'js/marked.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'administrator_app/js/vendor.bundle.base.js' %}"></script>
 <!-- endinject -->
 <!-- Plugin js for this page-->
@@ -271,45 +316,57 @@
 </script>
 <script>
     $(document).ready(function () {
+        // 提交问题表单
         $('#aiForm').on('submit', function (e) {
             e.preventDefault();
             var question = $('#question').val();
+            if (!question) return;
 
             // 创建一个新的<div>元素来显示用户的问题
             var userChat = $('<div class="chat"><p><strong>我:</strong> ' + question + '</p></div>');
-            // 添加到对话历史区域
             $('#chatHistory').append(userChat);
 
-            $.ajax({
-                url: "{% url 'Spark_app:chat' %}",
-                type: 'POST',
-                data: {
-                    'question': question,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function (response) {
-                    // 创建一个新的<div>元素来显示AI的回答
-                    var aiChat = $('<div class="chat"><p><strong>讯飞星火:</strong></p></div>');
-                    aiChat.append($(response.response));
-                    // 添加到对话历史区域
-                    $('#chatHistory').append(aiChat);
+            // 清空输入框
+            $('#question').val('');
 
-                    // 清空输入框
-                    $('#question').val('');
+            // 为每次 AI 的回答生成一个唯一的 ID
+            var aiResponseId = 'aiResponse_' + Date.now();
 
-                    // 滚动到对话历史区域的底部，以便最新的对话可见
-                    $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
-                },
-                error: function (response) {
-                    $('#aiResponse').text('出错了，请重试。');
-                }
-            });
+            // 创建一个新的<div>元素来显示AI的回答
+            var aiChat = $('<div class="chat"><p><strong>DeepSeek:</strong> </p><div id="' + aiResponseId + '"></div></div>');
+            $('#chatHistory').append(aiChat);
+
+            // 创建 EventSource 连接
+            var eventSource = new EventSource(`/AIchat/chat/?question=${encodeURIComponent(question)}&csrfmiddlewaretoken={{ csrf_token }}`);
+
+            var assistantResponse = ""; // 用于存储完整的 AI 回答
+            eventSource.onmessage = function (event) {
+                var data = JSON.parse(event.data);
+                var response = data.response;
+
+                // 将每次接收到的内容追加到 assistantResponse 中
+                assistantResponse += response;
+
+                // 将内容直接显示在回答区域（不进行 Markdown 渲染）
+                $('#' + aiResponseId).text(assistantResponse);
+
+                // 滚动到底部
+                $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+            };
+
+            eventSource.onerror = function () {
+                // 流式响应结束时，将完整的回答内容进行 Markdown 渲染
+                var htmlResponse = marked.parse(assistantResponse);
+                $('#' + aiResponseId).html(htmlResponse);
+
+                eventSource.close(); // 关闭连接
+            };
         });
 
-        // 为清空按钮添加点击事件
+        // 清空对话历史
         $('#clearChat').on('click', function () {
             $.ajax({
-                url: "{% url 'Spark_app:clear_chat' %}",
+                url: "{% url 'AIChat_app:clear_chat' %}",
                 type: 'POST',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
@@ -322,7 +379,6 @@
                 }
             });
         });
-
     });
 </script>
 {% block extra_js %}

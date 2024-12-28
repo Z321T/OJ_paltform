@@ -19,7 +19,7 @@ import student_app.apps
 import teacher_app.apps
 import BERT_app.apps
 import login.apps
-import Spark_app.apps
+import AIChat_app.apps
 import submissions_app.apps
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -51,13 +51,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 注册
-    'django_q',
+    # 'django_q',
+    'corsheaders',
     'student_app.apps.StudentConfig',
     'teacher_app.apps.TeacherAppConfig',
     'administrator_app.apps.AdministratorAppConfig',
     'BERT_app.apps.ScoreAppConfig',
     'login.apps.LoginConfig',
-    'Spark_app.apps.SparkAppConfig',
+    'AIChat_app.apps.SparkAppConfig',
     "submissions_app.apps.SubmissionsAppConfig",
     "consumer.apps.ConsumerConfig",
     "Testingcode_app.apps.TestingcodeAppConfig"
@@ -71,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 # 会话引擎设置为数据库
@@ -81,6 +83,9 @@ SESSION_COOKIE_AGE = 7200
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 ROOT_URLCONF = 'OJ_platform.urls'
+
+CORS_ORIGIN_ALLOW_ALL = True  # 允许所有域名跨域访问
+
 
 TEMPLATES = [
     {
@@ -107,16 +112,16 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
+#
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
+#     }
+# }
 
 DATABASES = {
       'default': {
@@ -129,19 +134,19 @@ DATABASES = {
       }
   }
 
-# django-q的数据库配置
-Q_CLUSTER = {
-    'name': 'DjangoQ',
-    'workers': 5,
-    'recycle': 500,
-    'timeout': 60,
-    'compress': True,
-    'save_limit': 250,
-    'queue_limit': 500,
-    'cpu_affinity': 1,
-    'label': 'Django Q',
-    'django_orm': True,  # 使用 Django ORM 来保存任务
-}
+# # django-q的数据库配置
+# Q_CLUSTER = {
+#     'name': 'DjangoQ',
+#     'workers': 5,
+#     'recycle': 500,
+#     'timeout': 60,
+#     'compress': True,
+#     'save_limit': 250,
+#     'queue_limit': 500,
+#     'cpu_affinity': 1,
+#     'label': 'Django Q',
+#     'django_orm': 'default',  # Use Django ORM as the broker
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

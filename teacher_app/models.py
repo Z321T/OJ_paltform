@@ -52,6 +52,7 @@ class ExerciseQuestion(models.Model):
     content = models.TextField(verbose_name="题目内容")
     memory_limit = models.IntegerField(verbose_name="内存限制", default=0)
     time_limit = models.IntegerField(verbose_name="时间限制", default=0)
+    score = models.IntegerField(verbose_name="分数", default=10)
 
     def __str__(self):
         return f"{self.exercise.title} - {self.content}"
@@ -72,7 +73,6 @@ class Exam(models.Model):
     content = models.TextField(verbose_name="考试描述")
     starttime = models.DateTimeField(verbose_name="开始时间")
     deadline = models.DateTimeField(verbose_name="截止时间")
-
     teacher = models.ForeignKey(Teacher, verbose_name="发布教师", on_delete=models.CASCADE, null=True)
     classes = models.ManyToManyField(Class, verbose_name="参与考试的班级", blank=True)
 
@@ -87,6 +87,7 @@ class ExamQuestion(models.Model):
     content = models.TextField(verbose_name="题目内容")
     memory_limit = models.IntegerField(verbose_name="内存限制", default=0)
     time_limit = models.IntegerField(verbose_name="时间限制", default=0)
+    score = models.IntegerField(verbose_name="分数", default=10)
 
     def __str__(self):
         return f"{self.exam.title} - {self.content}"

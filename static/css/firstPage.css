@@ -7,7 +7,7 @@
     cursor: pointer;
     margin-top: 1rem; /* 与输入框保持一致的间距 */
     display: block; /* 使按钮成为块级元素，以便margin-left生效 */
-    width: 20px; /* 固定按钮宽度，您可以根据需要调整这个值 */
+    width: auto; /* 固定按钮宽度，您可以根据需要调整这个值 */
 }
 
 .btn-default:hover {
