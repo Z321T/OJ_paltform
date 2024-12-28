@@ -15,7 +15,7 @@ from teacher_app.models import Notification, Exercise, Exam, ExerciseQuestion, E
 from BERT_app.views import (analyze_programming_report,
                             score_report, analyze_programming_code)
 from login.views import login_required
-from Testingcode_app.models import (Score)
+from Testingcode_app.models import (Scores)
 
 
 # 学生主页
@@ -228,7 +228,7 @@ def analyse_data(request):
     if request.method == 'POST':
         data_type = request.POST.get('type')
         item_id = request.POST.get('id')
-        # 获取练习的平均得分和题目得分
+        # 获取练习的平均得分和具体的题目得分
         if data_type == 'exercise':
             # 计算每个练习的平均得分
             exercises = Exercise.objects.filter(classes=class_assigned)
@@ -237,43 +237,43 @@ def analyse_data(request):
                 question_count = ex.questions.count()  # 使用 related_name 获取相关的练习题数量
                 ex_questions = ExerciseQuestion.objects.filter(exercise=ex)
                 # 计算这次练习的所有题目的总得分
-                total_score = Score.objects.filter(
+                total_score = Scores.objects.filter(
                     student=student,
-                    exercise=ex,
-                    exercise_question__in=ex_questions
+                    question_type='exercise',
+                    type_id=ex.id,
+                    question_id__in=ex_questions.values_list('id', flat=True)
                 ).aggregate(total_score=Sum('score'))['total_score']
-
+                # 如果没有找到得分，则为该练习设置得分为0
                 if total_score is None:
                     total_score = 0
                 avg_score = total_score / question_count  # 计算平均得分 (总得分 / 题目数量)
-
+                # 将平均得分添加到列表中
                 exercise_avg_scores.append({
                     'exercise_title': ex.title,
                     'avg_score': avg_score
                 })
-
-            # 获取每个练习题的得分
+            # 获取每个练习包含的各个题目的得分
             exercise = get_object_or_404(Exercise, id=item_id)
             questions = ExerciseQuestion.objects.filter(exercise=exercise)
             question_scores = []
             for question in questions:
                 try:
-                    score_obj = Score.objects.get(student=student, exercise=exercise, exercise_question=question)
+                    score_obj = Scores.objects.get(student=student, question_type='exercise', type_id=exercise.id, question_id=question.id)
                     score = float(score_obj.score)
-                except Score.DoesNotExist:  # 如果没有找到得分，则为该题目设置得分为0
+                except Scores.DoesNotExist:  # 如果没有找到得分，则为该题目设置得分为0
                     score = 0.0
-
+                # 将题目得分添加到列表中
                 question_scores.append({
                     'question_title': question.title,
                     'scores': score
                 })
-
+            # 返回数据
             context = {
                 'avg_scores': exercise_avg_scores,
                 'question_scores': question_scores,
             }
             return JsonResponse({'data': context}, status=200)
-
+        # 获取考试的平均得分和具体的题目得分
         elif data_type == 'exam':
             # 计算每个考试的平均得分
             exam = Exam.objects.filter(classes=class_assigned)
@@ -281,45 +281,44 @@ def analyse_data(request):
             for ex in exam:
                 question_count = ex.questions.count()
                 ex_questions = ExamQuestion.objects.filter(exam=ex)
-                total_score = Score.objects.filter(
+                total_score = Scores.objects.filter(
                     student=student,
-                    exam=ex,
-                    exam_question__in=ex_questions
+                    question_type='exam',
+                    type_id=ex.id,
+                    question_id__in=ex_questions.values_list('id', flat=True)
                 ).aggregate(total_score=Sum('score'))['total_score']
-
+                # 如果没有找到得分，则为该考试设置得分为0
                 if total_score is None:
                     total_score = 0
                 avg_score = total_score / question_count
-
+                # 将平均得分添加到列表中
                 exam_avg_scores.append({
                     'exam_title': ex.title,
                     'avg_score': avg_score
                 })
-
             # 获取每个考试题的得分
             exam = get_object_or_404(Exam, id=item_id)
             questions = ExamQuestion.objects.filter(exam=exam)
             question_scores = []
             for question in questions:
                 try:
-                    score_obj = Score.objects.get(student=student, exam=exam, exam_question=question)
+                    score_obj = Scores.objects.get(student=student, question_type='exam', type_id=exam.id, question_id=question.id)
                     score = float(score_obj.score)
-                except Score.DoesNotExist:
+                except Scores.DoesNotExist:
                     score = 0.0
-
+                # 将题目得分添加到列表中
                 question_scores.append({
                     'question_title': question.title,
                     'scores': score
                 })
-
+            # 返回数据
             context = {
                 'avg_scores': exam_avg_scores,
                 'question_scores': question_scores,
             }
             return JsonResponse({'data': context}, status=200)
-
         else:
-            return JsonResponse({'status': 'error', 'message': 'Invalid data type'}, status=400)
+            return JsonResponse({'status': 'error', 'message': '不存在的题目类型！查询数据出现错误！'}, status=400)
 
 # 学生个人中心
 @login_required

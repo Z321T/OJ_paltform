@@ -49,6 +49,11 @@
                                                     <th class="sorting" tabindex="0"
                                                         aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
                                                         aria-label="Price: activate to sort column ascending"
+                                                        style="width: 72.575px;">题目分值
+                                                    </th>
+                                                    <th class="sorting" tabindex="0"
+                                                        aria-controls="recent-purchases-listing" rowspan="1" colspan="1"
+                                                        aria-label="Price: activate to sort column ascending"
                                                         style="width: 72.575px;">测试用例
                                                     </th>
                                                     <th class="sorting" tabindex="0"
@@ -67,6 +72,7 @@
                                                         </td>
                                                         <td>{{ question.memory_limit }}</td>
                                                         <td>{{ question.time_limit }}</td>
+                                                        <td>{{ question.score }}</td>
                                                         <td>
                                                             <button class="button-class view-test-case btn-default"
                                                                     data-question-id="{{ question.id }}">查看
@@ -85,7 +91,7 @@
                                                     </tr>
                                                 {% empty %}
                                                     <tr>
-                                                        <td colspan="5" style="text-align: center;">没有练习内容</td>
+                                                        <td colspan="6" style="text-align: center;">没有练习内容</td>
                                                     </tr>
                                                 {% endfor %}
                                                 </tbody>

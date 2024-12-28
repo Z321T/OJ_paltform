@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import chat, clear_chat
 
-app_name = 'Spark_app'
+app_name = 'AIChat_app'
 
 urlpatterns = [
     path('chat/', chat, name='chat'),
