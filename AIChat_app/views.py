@@ -23,7 +23,7 @@ def chat(request):
 
         # 从 session 中获取对话历史，如果不存在则初始化
         text = request.session.get('text', [
-            {"role": "system", "content": "你现在是一个代码学习助手，你会分步骤回答问题；接下来请用代码学习助手的口吻和用户对话。"}
+            {"role": "system", "content": "你是一个代码学习助手，专注于分步骤回答用户的问题。不要在回答中重复自我介绍。"}
         ])
 
         # 添加用户输入到对话历史
@@ -50,6 +50,10 @@ def chat(request):
                     content = chunk.choices[0].delta.content
                     assistant_response += content
                     yield f"data: {json.dumps({'response': content})}\n\n"
+
+            # 过滤掉重复的系统提示内容
+            if "你是一个代码学习助手，专注于分步骤回答用户的问题。" in assistant_response:
+                assistant_response = assistant_response.replace("你是一个代码学习助手，专注于分步骤回答用户的问题。", "").strip()
 
             # 将助手回复添加到对话历史
             text.append({"role": "assistant", "content": assistant_response})
