@@ -1,5 +1,24 @@
-# 虚拟环境
+# 虚拟环境 - 通用规则
 venv/
+env/
+.venv/
+venv*/
+env*/
+.venv*/
+
+# Python 虚拟环境 - Windows 特定
+Scripts/
+Include/
+Lib/
+pyvenv.cfg
+
+# Python 虚拟环境 - Mac 特定
+bin/
+include/
+lib/
+lib64/
+pip-selfcheck.json
+pyvenv.cfg
 
 # Python 缓存和编译文件
 __pycache__/
