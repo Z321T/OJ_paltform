@@ -123,6 +123,7 @@ CSRF_TRUSTED_ORIGINS = [
 #     }
 # }
 
+# 数据库配置
 DATABASES = {
       'default': {
           'ENGINE': 'django.db.backends.mysql',
@@ -133,6 +134,7 @@ DATABASES = {
           'PORT': 3306,
       }
   }
+
 
 # # django-q的数据库配置
 # Q_CLUSTER = {
