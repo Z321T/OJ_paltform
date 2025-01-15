@@ -1,4 +1,5 @@
 {% extends 'teacher_base.html' %}
+{% load static %}
 
 {% block title %}创建班级{% endblock %}
 
@@ -39,20 +40,20 @@
         }
 
         .btn-default {
-            background-color: #ffffff; /* White background */
-            color: #333333; /* Dark text */
-            border: 1px solid #cccccc; /* Light gray border */
-            padding: 10px 20px; /* Padding inside the button */
-            font-size: 16px; /* Text size */
-            border-radius: 5px; /* Rounded corners */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Slight shadow for depth */
-            transition: all 0.3s; /* Smooth transition for hover effects */
+            background-color: #ffffff;
+            color: #333333;
+            border: 1px solid #cccccc;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
         }
 
         .btn-default:hover, .btn-default:focus {
-            border-color: #66afe9; /* Blue border on hover/focus */
-            outline: none; /* Remove outline on focus */
-            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6); /* More pronounced shadow on hover/focus */
+            border-color: #66afe9;
+            outline: none;
+            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
         }
 
         .form-control-file {
@@ -73,12 +74,22 @@
             <div class="content-wrapper">
                 <form action="{% url 'teacher_app:create_class' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <div>
+                        <h4>示例表格样式（请按照此表格的示例样式来创建班级表）</h4>
+                    </div>
+                    <div>
+                        <ul>
+                            <li>
+                                <a href="{% static 'documents/创建班级示例表格.xlsx' %}" download>下载 创建班级示例表格.xlsx</a>
+                            </li>
+                        </ul>
+                    </div>
                     <div class="form-group">
                         <label for="classNameInput">班级名称:</label>
                         <input type="text" class="form-control" id="classNameInput" name="className" required>
                     </div>
                     <div class="form-group">
-                        <label for="initialPasswordInput">初始化密码:</label>
+                        <label for="initialPasswordInput">初始密码:</label>
                         <input type="password" class="form-control" id="initialPasswordInput" name="initialPassword"
                                required>
                     </div>

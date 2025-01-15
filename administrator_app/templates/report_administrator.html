@@ -66,6 +66,18 @@
             background: #fff;
             padding: 20px;
         }
+
+        .loading-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
 </style>    
 {% endblock %}
 
@@ -75,29 +87,25 @@
             <div class="content-wrapper">
                  <div class="col-md-12 stretch-card">
                     <div class="card">
-                                <div class="card">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="hidden" name="programmingexercise_id" value="{{ programming_exercise.id }}">
-                    <div class="form-group">
-                        <label for="tips">注意事项：</label>
-                        <input type="text" class="form-control" id="textInput" name="textInput"
-                               value="目前支持的代码语言：Python、Java、JavaScript、PHP、Ruby、Go，使用其他语言会影响代码重复度的计算，谨慎使用"
-                               readonly/>
-                    </div>
-                    <div class="form-group">
-                        <label for="excelFileInput">上传GUI报告文件（Word文件）:</label>
-                        <input type="file" class="form-control-file" id="wordFileInput" name="wordFile"
-                               accept=".doc,.docx" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="excelFileInput">上传GUI代码文件（将所有源代码放入文本文档，以.txt格式提交）:</label>
-                        <input type="file" class="form-control-file" id="txtFileInput" name="txtFile" accept=".txt"
-                               required>
-                    </div>
-                    <button type="submit" class="btn btn-default">提交</button>
-                </form>
-                                </div>
+                        <div class="card">
+                            <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="programmingexercise_id" value="{{ programming_exercise.id }}">
+                            <div class="form-group">
+                                <label for="tips">注意事项：</label>
+                                    <input type="text" class="form-control" id="textInput" name="textInput" value="请将所有文件打包成一个压缩文件（.zip）后上传，文件名为学号" readonly/>
+                            </div>
+                            <div class="form-group">
+                                <label for="reportZipFileInput">上传GUI报告的压缩文件（.zip），报告的格式应为Word文档:</label>
+                                <input type="file" class="form-control-file" id="reportZipFileInput" name="reportZipFile" accept=".zip" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="codeZipFileInput">上传GUI代码的压缩文件（.zip），代码文件的格式应为txt文件:</label>
+                                <input type="file" class="form-control-file" id="codeZipFileInput" name="codeZipFile" accept=".zip" required>
+                            </div>
+                            <button type="submit" class="btn btn-default">提交</button>
+                            </form>
+                        </div>
                     </div>
                  </div>
             </div>
@@ -110,6 +118,9 @@
         $("form").on('submit', function (event) {
             event.preventDefault();
             var form_data = new FormData(this);
+            // 加载提示信息
+            var loadingMessage = $('<div class="loading-message">处理时间可能会较长，请耐心等待...</div>');
+            $('body').append(loadingMessage);
             $.ajax({
                 url: '{% url 'administrator_app:report_administrator' %}',
                 type: 'POST',
@@ -121,7 +132,11 @@
                     window.location.href = "{% url 'administrator_app:problems_administrator' %}";
                 },
                 error: function (response) {
-                    alert(response.responseJSON.message);
+                    var errorMessage = response.responseJSON ? response.responseJSON.message : '发生未知错误';
+                    alert(errorMessage);
+                },
+                complete: function () {
+                    loadingMessage.remove();
                 }
             });
         });
