@@ -39,7 +39,7 @@ def chat(request):
         # 使用 DeepSeek API 进行流式对话
         def generate():
             response_stream = client.chat.completions.create(
-                model="deepseek-chat",
+                model="deepseek-coder",
                 messages=text,
                 stream=True  # 启用流式传输
             )

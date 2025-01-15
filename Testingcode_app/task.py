@@ -169,7 +169,8 @@ def test_code(student_id, code, types, question_id, ip_address):
     # 清理临时文件
     for file in [source_file,executable_file]:
         try:
-            os.remove(file)
+            if os.path.exists(file):
+                os.remove(file)
         except OSError:
             pass
 

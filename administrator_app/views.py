@@ -2,6 +2,7 @@ import os
 import tempfile
 import docx
 import pandas as pd
+import zipfile
 from io import BytesIO
 from datetime import datetime, timedelta
 
@@ -290,31 +291,77 @@ def report_administrator(request):
     programmingexercise_id = request.GET.get('exerciseId')
     # 尝试获取POST请求，读取上传的Word文档和TXT文件，分析报告特征和代码特征，若成功则返回成功信息，否则返回错误信息
     if request.method == 'POST':
-        student = None
-        word_file = request.FILES['wordFile']
-        if word_file:
-            # 读取文件内容并使用BytesIO创建一个类似文件的对象
-            word_file_bytes = BytesIO(word_file.read())
-            # 使用BytesIO对象创建docx文档对象
-            document = docx.Document(word_file_bytes)
-            full_text = []
-            for paragraph in document.paragraphs:
-                full_text.append(paragraph.text)
-            # 获得纯文本代码，去除了图片
-            report = '\n'.join(full_text)
-            # 分析报告特征
-            analyze_programming_report(student, report, programmingexercise_id)
-        # 读取TXT文件内容
-        code_file = request.FILES.get('txtFile')
-        if code_file:
-            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".txt")
-            temp_file.write(code_file.read())
-            temp_file.close()
-            # 分析代码特征
-            code = open(temp_file.name, encoding='utf-8').read()
-            analyze_programming_code(student, code, programmingexercise_id)
-            os.unlink(temp_file.name)
-        return JsonResponse({'status': 'success', 'message': '提交成功'}, status=200)
+        try:
+            student = None
+            report_zip_file = request.FILES['reportZipFile']
+            code_zip_file = request.FILES['codeZipFile']
+            # 处理报告的压缩文件
+            if report_zip_file:
+                try:
+                    with zipfile.ZipFile(report_zip_file, 'r') as zip_ref:
+                        for file_info in zip_ref.infolist():
+                            if file_info.filename.endswith('.doc') or file_info.filename.endswith('.docx'):
+                                with zip_ref.open(file_info) as word_file:
+                                    word_file_bytes = BytesIO(word_file.read())
+                                    document = docx.Document(word_file_bytes)
+                                    full_text = [paragraph.text for paragraph in document.paragraphs]
+                                    report = '\n'.join(full_text)
+                                    analyze_programming_report(student, report, programmingexercise_id)
+                            else:
+                                return JsonResponse({'status': 'error', 'message': '报告压缩包中包含非Word文件'},
+                                                    status=400)
+                except zipfile.BadZipFile:
+                    return JsonResponse({'status': 'error', 'message': '报告压缩包文件损坏或格式错误'}, status=400)
+                except Exception as e:
+                    return JsonResponse({'status': 'error', 'message': f'处理报告文件时发生错误: {str(e)}'}, status=500)
+
+            # 处理代码的压缩文件
+            if code_zip_file:
+                try:
+                    with zipfile.ZipFile(code_zip_file, 'r') as zip_ref:
+                        for file_info in zip_ref.infolist():
+                            if file_info.filename.endswith('.txt'):
+                                with zip_ref.open(file_info) as code_file:
+                                    code = code_file.read().decode('utf-8')
+                                    analyze_programming_code(student, code, programmingexercise_id)
+                            else:
+                                return JsonResponse({'status': 'error', 'message': '代码压缩包中包含非TXT文件'},
+                                                    status=400)
+                except zipfile.BadZipFile:
+                    return JsonResponse({'status': 'error', 'message': '代码压缩包文件损坏或格式错误'}, status=400)
+                except Exception as e:
+                    return JsonResponse({'status': 'error', 'message': f'处理代码文件时发生错误: {str(e)}'}, status=500)
+
+            return JsonResponse({'status': 'success', 'message': '处理成功'}, status=200)
+
+        except KeyError as e:
+            return JsonResponse({'status': 'error', 'message': f'缺少文件: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': f'发生未知错误: {str(e)}'}, status=500)
+        # word_file = request.FILES['wordFile']
+        # if word_file:
+        #     # 读取文件内容并使用BytesIO创建一个类似文件的对象
+        #     word_file_bytes = BytesIO(word_file.read())
+        #     # 使用BytesIO对象创建docx文档对象
+        #     document = docx.Document(word_file_bytes)
+        #     full_text = []
+        #     for paragraph in document.paragraphs:
+        #         full_text.append(paragraph.text)
+        #     # 获得纯文本代码，去除了图片
+        #     report = '\n'.join(full_text)
+        #     # 分析报告特征
+        #     analyze_programming_report(student, report, programmingexercise_id)
+        # # 读取TXT文件内容
+        # code_file = request.FILES.get('txtFile')
+        # if code_file:
+        #     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".txt")
+        #     temp_file.write(code_file.read())
+        #     temp_file.close()
+        #     # 分析代码特征
+        #     code = open(temp_file.name, encoding='utf-8').read()
+        #     analyze_programming_code(student, code, programmingexercise_id)
+        #     os.unlink(temp_file.name)
+        # return JsonResponse({'status': 'success', 'message': '提交成功'}, status=200)
     # 渲染页面
     context = {
         'active_page': 'problemsmanage',

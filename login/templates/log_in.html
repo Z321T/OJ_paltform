@@ -5,105 +5,81 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>登录</title>
-
     <!--bootstrap的css文件-->
     <link rel="stylesheet" href="{% static 'login/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'login/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'login/css/bubble_background.css' %}">
 </head>
 <body>
-<div class="d-flex justify-content-center align-items-center login-container">
-    <form class="login-form text-center">
-        <h1 class="mb-5 font-weight-linght">登录</h1>
-        <div class="form-group">
-            <input type="text" class="form-control rounded-pill form-control-lg" id="username" placeholder="账号">
-        </div>
-        <div class="form-group">
-            <input type="password" class="form-control rounded-pill form-control-lg" id="password" placeholder="密码">
-        </div>
-        <div class="forgot-link form-group d-flex justify-content-between align-items-center">
-
-
-        </div>
-        <button type="button" onclick="performLogin()" class="btn mt-5 rounded-pill btn-lg btn-custom btn-block">登录
-        </button>
-    </form>
+<div class="min-vh-100 d-flex flex-column justify-content-center">  <!-- 确保占满整个页面高度并居中 -->
+    <div class="text-center">
+        <h1 class="display-4 font-weight-bold" style="margin-bottom: 40px;">C++程序设计实践平台</h1>
+    </div>
+    <div class="d-flex justify-content-center align-items-center">
+        <form class="login-form text-center">
+            <h1 class="mb-4 font-weight-light">登 录</h1>  <!-- 调整 mb-4 -->
+            <div class="form-group">
+                <input type="text" class="form-control rounded-pill form-control-lg" id="username" placeholder="账号">
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control rounded-pill form-control-lg" id="password" placeholder="密码">
+            </div>
+            <button type="button" onclick="performLogin()" class="btn mt-4 rounded-pill btn-lg btn-custom btn-block">登录</button>  <!-- 调整 mt-4 -->
+        </form>
+    </div>
     <canvas id="canvas"></canvas>
 </div>
-<!-- Password Error Modal -->
-<div class="modal fade" id="passwordErrorModal" tabindex="-1" role="dialog" aria-labelledby="passwordErrorModalLabel"
-     aria-hidden="true">
+
+<!-- Modals -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="passwordErrorModalLabel">密码错误</h5>
+                <h5 class="modal-title" id="errorModalLabel"></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                请输入正确的密码。
-            </div>
+            <div class="modal-body" id="errorModalBody"></div>
         </div>
     </div>
 </div>
 
-<!-- Empty Password Modal -->
-<div class="modal fade" id="emptyPasswordModal" tabindex="-1" role="dialog" aria-labelledby="emptyPasswordModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="emptyPasswordModalLabel">密码不能为空</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                请输入密码。
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Empty username Modal -->
-<div class="modal fade" id="emptyusernameModal" tabindex="-1" role="dialog" aria-labelledby="emptyusernameModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="emptyusernameModalLabel">账号不能为空</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                请输入账号。
-            </div>
-        </div>
-    </div>
-</div>
-<!-- username Error Modal -->
-<div class="modal fade" id="usernameErrorModal" tabindex="-1" role="dialog" aria-labelledby="usernameErrorModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="usernameErrorModalLabel">账号错误</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                请输入正确的账号。
-            </div>
-        </div>
-    </div>
-</div>
 <script src="{% static 'login/js/jquery-3.7.1.min.js' %}"></script>
 <script src="{% static 'login/js/bootstrap.bundle.min.js' %}"></script>
-<script src="{% static 'login/js/ForgetPassword.js' %}"></script>
 <script>
+    function showConfirmationModal() {
+        console.log('showConfirmationModal');
+        $('#confirmationModal').modal('show');  // 使用 Bootstrap 方法显示 Modal
+    }
+
+    function hideConfirmationModal() {
+        $('#confirmationModal').modal('hide');  // 使用 Bootstrap 方法隐藏 Modal
+    }
+
+    function submitRequest() {
+        var studentID = document.getElementById("studentID").value;
+        //前端将学号传给后端
+        $.ajax({
+            url: '/api/forgot-password',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ studentId: studentID }),
+            //后端返回密码重置成功success
+            success: function (response) {
+                if (response.status === 'success') {
+                    hideConfirmationModal();
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+
+        alert('您的请求已提交管理员确认');
+        hideConfirmationModal();  // 隐藏 Modal
+    }
+
     function performLogin() {
         var username = document.getElementById("username").value;
         var password = document.getElementById("password").value;
@@ -111,12 +87,9 @@
         console.log('Sending data to backend:', {username: username, password: password});
 
         if (username.trim() === "") {
-            // 账号为空，显示账号为空的模态框
-            $('#emptyusernameModal').modal('show');
-             // 不执行后续的AJAX请求
+            showErrorModal('账号不能为空', '请输入账号。');
         } else if (password.trim() === "") {
-            $('#emptyPasswordModal').modal('show');
-             // 不执行后续的AJAX请求
+            showErrorModal('密码不能为空', '请输入密码。');
         } else {
             $.ajax({
                 url: '',  // 后端处理登录的API端点
@@ -124,9 +97,7 @@
                 contentType: 'application/json',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')  // 使用 getCookie 函数获取 CSRF token
-                    {#'X-CSRFToken': '{{ csrf_token }}'  // 使用 Django 上下文中的 CSRF token#}
                 },
-
                 data: JSON.stringify({username: username, password: password}),
                 success: function (response) {
                     // 处理后端响应
@@ -139,16 +110,12 @@
                             window.location.href = '/teacher/home/';
                         else if (response.message.includes('administrator'))
                             window.location.href = '/administrator/home/';
-
                     } else {
-                        alert(response.message);
                         // 检查特定的错误条件
                         if (response.message.includes('Userid is incorrect')) {
-                            // 显示学号错误模态框
-                            $('#usernameErrorModal').modal('show');
+                            showErrorModal('账号错误', '请输入正确的账号。');
                         } else if (response.message.includes('Password is incorrect')) {
-                            // 显示密码错误模态框
-                            $('#passwordErrorModal').modal('show');
+                            showErrorModal('密码错误', '请输入正确的密码。');
                         }
                     }
                 },
@@ -157,6 +124,12 @@
                 }
             });
         }
+    }
+
+    function showErrorModal(title, message) {
+        $('#errorModalLabel').text(title);
+        $('#errorModalBody').text(message);
+        $('#errorModal').modal('show');
     }
 
     function getCookie(name) {

@@ -55,3 +55,6 @@ media/
 
 # 本地配置文件
 local_settings.py
+
+# 代码测试临时文件
+Testingcode_app/temp_files/*
