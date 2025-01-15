@@ -1,4 +1,4 @@
-# Software_cup
+# OJ平台
 Django项目
 软件包如下：
 Package            Version
