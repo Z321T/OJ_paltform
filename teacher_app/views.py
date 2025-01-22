@@ -1033,7 +1033,7 @@ def exam_delete(request):
     else:
         return JsonResponse({'status': 'error', 'message': '无效的请求方法'}, status=400)
 
-# 题库管理：练习列表-获取练习题测试用例
+# 题库管理：考试列表-获取考试题测试用例
 @login_required
 def get_exam_cases(request, question_id):
     # 确保该题目存在

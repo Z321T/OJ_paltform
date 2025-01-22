@@ -1,5 +1,4 @@
 import os
-import re
 import subprocess
 import timeit
 import uuid
