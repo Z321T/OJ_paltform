@@ -403,8 +403,11 @@ def coding_exercise(request, exercisequestion_id):
     if request.method == 'GET':
         question = get_object_or_404(ExerciseQuestion, id=exercisequestion_id)
         question_set = question.exercise
-        # 检查截止时间
-        if timezone.now() > question_set.deadline:
+
+        # 检查开始、截止时间
+        if timezone.now() < question_set.published_at:
+            return JsonResponse({'status': 'error', 'message': '练习尚未开始，不能作答'}, status=400)
+        elif timezone.now() > question_set.deadline:
             return JsonResponse({'status': 'error', 'message': '截止时间已到，不能作答'}, status=400)
         types = 'exercise'
         return render(request, 'coding_student.html',

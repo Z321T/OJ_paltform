@@ -29,7 +29,7 @@ urlpatterns = [
     # 教师使用界面
     path('teacher/', include('teacher_app.urls')),
 
-    # 超级管理员使用界面
+    # 课程负责人使用界面
     path('administrator/', include('administrator_app.urls')),
 
     # 代码查重

@@ -1,5 +1,3 @@
-import os
-import tempfile
 import docx
 import pandas as pd
 import zipfile
